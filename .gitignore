@@ -1,0 +1,14 @@
+# chroot build directory
+/chroots/
+# downloaded packages
+/packages/
+# package sources
+/sources/
+# generated configs
+/configs/
+# docker context dir (empty)
+/docker/
+
+# FIXME remove
+/tmp/
+/scripts/
