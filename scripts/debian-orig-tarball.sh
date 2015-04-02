@@ -43,9 +43,13 @@ source_tarball_download() {
 source_tarball_unpack() {
     msg "    Unpacking source tarball"
     debug "      Tarball path: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
-    debug "      Source dir: $BUILD_DIR"
-    rm -rf $BUILD_DIR; mkdir -p $BUILD_DIR
-    tar xCf $BUILD_DIR $SOURCE_PKG_DIR/$DEBIAN_TARBALL --strip-components=1
+    debug "      Build dir: $BUILD_DIR"
+    debug "      Linking original tarball to build dir"
+    mkdir -p $BUILD_DIR
+    ln -f $SOURCE_PKG_DIR/$DEBIAN_TARBALL $BUILD_DIR
+    debug "      Unpacking tarball into $BUILD_SRC_DIR"
+    rm -rf $BUILD_SRC_DIR; mkdir -p $BUILD_SRC_DIR
+    tar xCf $BUILD_SRC_DIR $SOURCE_PKG_DIR/$DEBIAN_TARBALL --strip-components=1
 }
 
 

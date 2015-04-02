@@ -25,10 +25,10 @@ debianization_git_tree_unpack() {
     if test -n "$GIT_URL"; then
 	msg "    Copying debianization from git tree"
 	debug "      Debzn git dir: $DEBZN_GIT_DIR"
-	debug "      Dest dir: $BUILD_DIR/debian"
-	mkdir -p $BUILD_DIR/debian
+	debug "      Dest dir: $BUILD_SRC_DIR/debian"
+	mkdir -p $BUILD_SRC_DIR/debian
 	git --git-dir=$DEBZN_GIT_DIR/.git archive --prefix=./ HEAD | \
-	    tar xCf $BUILD_DIR/debian -
+	    tar xCf $BUILD_SRC_DIR/debian -
     else
 	debug "    (No GIT_URL defined; not unpacking debianization from git)"
     fi

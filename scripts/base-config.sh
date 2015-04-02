@@ -25,8 +25,11 @@ SOURCE_PKG_DIR=$BUILD_BASE_DIR
 # Where debianization git sources live
 DEBZN_GIT_DIR=$BUILD_BASE_DIR/debzn-git
 
+# Build directory for a distro codename
+BUILD_DIR=$BUILD_BASE_DIR/$CODENAME
+
 # Where sources are built
-BUILD_DIR=$BUILD_BASE_DIR/tree
+BUILD_SRC_DIR=$BUILD_DIR/tree
 
 # Where the Apt package repo is built
 REPO_DIR=repo

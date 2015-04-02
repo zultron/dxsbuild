@@ -57,14 +57,13 @@ sbuild_shell() {
 }
 
 sbuild_build_package() {
-    debug "      Source package dir: $SOURCE_PKG_DIR"
+    debug "      Build dir: $BUILD_DIR"
     debug "      Source package .dsc file: $DSC_FILE"
 
     sbuild_chroot_init
 
-    set -x
     (
-	cd $SOURCE_PKG_DIR
+	cd $BUILD_DIR
 	sbuild \
 	    --host=$BUILD_ARCH --build=$SBUILD_CHROOT_ARCH \
 	    -d $CODENAME $BUILD_INDEP $SBUILD_DEBUG \

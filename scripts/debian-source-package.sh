@@ -26,9 +26,9 @@ configure_package_wrapper() {
 
 source_package_build_from_tree() {
     msg "    Building source package"
-    debug "      Debianized source tree: $BUILD_DIR"
+    debug "      Debianized source tree: $BUILD_SRC_DIR"
     (
-	cd $BUILD_DIR
+	cd $BUILD_SRC_DIR
 	dpkg-source -b .
     )
 }
@@ -36,9 +36,8 @@ source_package_build_from_tree() {
 ########################################
 # Source package clean up
 source_package_cleanup() {
-    msg "    Cleaning up source package"
-    debug "      Removing source tree $BUILD_DIR"
-    rm -rf $BUILD_DIR
+    msg "    Cleaning up source tree $BUILD_SRC_DIR"
+    rm -rf $BUILD_SRC_DIR
 }
 
 ########################################

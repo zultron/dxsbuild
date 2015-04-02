@@ -42,7 +42,7 @@ deb_repo_build() {
     debug "    Adding source package '$DSC_FILE'"
     ${REPREPRO} -C main \
 	includedsc ${CODENAME} \
-	$BUILD_BASE_DIR/${DSC_FILE}
+	$BUILD_DIR/${DSC_FILE}
 
     # remove src pkg
 	    # ${REPREPRO} -T dsc \
@@ -53,7 +53,7 @@ deb_repo_build() {
 	    # 	$$(if $$(filter-out $$(ARCH),$$(BUILD_INDEP_ARCH)),-A $$(ARCH)) \
 	    # 	remove ${CODENAME} $$(call REPREPRO_PKGS,$(1),$$(ARCH))
 
-    for CHANGES in $BUILD_BASE_DIR/*.changes; do
+    for CHANGES in $BUILD_DIR/*.changes; do
 	debug "    Adding changes file '$CHANGES'"
 	${REPREPRO} -C main \
 	    include ${CODENAME} \
