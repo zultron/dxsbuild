@@ -4,6 +4,12 @@ debug "    Sourcing debian-orig-tarball.sh"
 
 source_tarball_init() {
     case "$DEBIAN_PACKAGE_COMP" in
+	gz)
+	    DPKG_BUILD_ARGS=-Zgzip
+	    ;;
+	xz)
+	    DPKG_BUILD_ARGS=-Zxz
+	    ;;
 	# Default to bz2
 	bz2|*)
 	    DPKG_BUILD_ARGS=-Zbzip2
