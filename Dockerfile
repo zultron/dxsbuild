@@ -18,6 +18,14 @@ RUN	apt-get install -y --no-install-recommends xdeb sbuild pdebuild-cross
 # Init key
 RUN	sbuild-update --keygen
 
+# Install git
+RUN	apt-get install -y --no-install-recommends \
+	    git ca-certificates openssh-client
+
+# Install reprepro
+RUN	apt-get install -y --no-install-recommends \
+	    reprepro
+
 # Sbuild chroot configs
 RUN	rmdir /etc/schroot/chroot.d && \
 	    ln -s /srv/configs/chroot.d /etc/schroot/chroot.d

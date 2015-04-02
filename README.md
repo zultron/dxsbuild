@@ -1,24 +1,41 @@
-# Do it
+# Getting started
 
-Build the Docker container:
+Build the Docker container image:
 
-    ./build.sh docker_build
-
-Run a shell in the Docker container:
-
-    ./build.sh
+    ./build.sh -i
 
 Set up the chroot:
 
-    ./build.sh chroot_setup jessie
+    # Machine arch chroot (good for cross-compiling ARM)
+    ./build.sh -r jessie
+	# Foreign arch chroot (needed for build amd64, host i386)
+	./build.sh -ra i386 jessie
 
 Build a package:
 
-    ./build.sh build_package jessie armhf xenomai_2.6.4.dsc
+    # Machine arch build
+	./build.sh -b jessie xenomai
+    # Cross-build for ARM
+    ./build.sh -ba armhf jessie xenomai
+
+Update apt repo:
+
+    # Add xenomai packages to apt pkg repo
+    ./build.sh -R jessie xenomai
+	# List jessie packages
+    ./build.sh -L jessie
+
+Run a shell in the Docker container:
+
+    ./build.sh -c
 
 Get a shell in the sbuild chroot:
 
-	./build.sh sbuild_shell jessie
+    # Machine arch chroot
+	./build.sh -s jessie
+	# Foreign arch chroot
+	./build.sh -sa i386 jessie
+
 
 # Sources
 
@@ -27,3 +44,11 @@ Get a shell in the sbuild chroot:
 [Wookey's configuration]:
 https://wiki.linaro.org/Platform/DevPlatform/CrossCompile/UsingMultiArch
 
+
+# TODO
+
+- Add suffix to pkg release
+- Fix xenomai pkg release
+- Run build as normal user, or give normal user file ownership
+- Detect things like version and release from source package
+- Put sbuild logs somewhere

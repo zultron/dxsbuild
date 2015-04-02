@@ -2,13 +2,11 @@
 /chroots/
 # downloaded packages
 /packages/
-# package sources
-/sources/
+# package build directory
+/build/
 # generated configs
 /configs/
 # docker context dir (empty)
 /docker/
-
-# FIXME remove
-/tmp/
-/scripts/
+# apt package repository
+/repo/
