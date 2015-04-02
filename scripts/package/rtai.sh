@@ -6,12 +6,5 @@ RELEASE=1
 TARBALL_URL=https://github.com/ShabbyX/RTAI/archive/${GIT_REV}.tar.gz
 GIT_URL=https://github.com/zultron/rtai-deb.git
 GIT_REPO=rtai-deb
-
-BINARY_PACKAGES="
-    rtai-source_${VERSION}-${RELEASE}_*.deb
-    librtai-dev_${VERSION}-${RELEASE}_*.deb
-    librtai1_${VERSION}-${RELEASE}_*.deb
-    rtai_${VERSION}-${RELEASE}_*.deb
-    python-rtai_${VERSION}-${RELEASE}_all.deb
-    rtai-doc_${VERSION}-${RELEASE}_all.deb
-"
+DEBIAN_PACKAGE_FORMAT='3.0 (quilt)'
+DEBIAN_PACKAGE_COMP=gz
