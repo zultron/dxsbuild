@@ -19,6 +19,7 @@ sbuild_chroot_init() {
     CHROOT_DIR=$SBUILD_CHROOT_DIR/$CODENAME-$SBUILD_CHROOT_ARCH
     debug "      Sbuild chroot dir: $CHROOT_DIR"
 
+    # Extra debugging for sbuild
     if $DDEBUG; then
 	SBUILD_DEBUG=-D
     fi
@@ -54,11 +55,27 @@ sbuild_chroot_setup() {
     repo_add_apt_source local file://$BASE_DIR/$REPO_DIR/$CODENAME
 }
 
-sbuild_shell() {
-    msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
-
+sbuild_configure_package() {
     sbuild_chroot_init
-    sbuild-shell $SBUILD_CHROOT
+
+    # FIXME run with union-type=aufs in schroot.conf
+
+    debug "      Installing extra packages in schroot:"
+    debug "        $EXTRA_BUILD_PACKAGES"
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+	apt-get update
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+	apt-get install --no-install-recommends -y \
+	$EXTRA_BUILD_PACKAGES
+
+    debug "      Running configure function in schroot"
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+	./build.sh -C $CODENAME $PACKAGE
+
+    debug "      Uninstalling extra packages"
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+	apt-get purge -y --auto-remove \
+	$EXTRA_BUILD_PACKAGES
 }
 
 sbuild_build_package() {
@@ -75,5 +92,12 @@ sbuild_build_package() {
 	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
 	    $DSC_FILE
     )
+}
+
+sbuild_shell() {
+    msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
+
+    sbuild_chroot_init
+    sbuild-shell $SBUILD_CHROOT
 }
 

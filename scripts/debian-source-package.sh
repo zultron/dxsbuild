@@ -14,8 +14,8 @@ debug "    Sourcing debian-source-package.sh"
 configure_package_wrapper() {
     # Some packages may define a configuration step
     if declare -f configure_package >/dev/null; then
-	msg "    Configuring package"
-	configure_package
+	msg "    Configuring source package"
+	sbuild_configure_package
     else
 	debug "    (No configure_package function defined)"
     fi

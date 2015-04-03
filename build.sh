@@ -12,6 +12,10 @@ case $MODE in
 	docker_run
 	;;
 
+    CONFIGURE_PKG)  # -C:  (Internal use)  Pre-build configure script
+	configure_package
+	;;
+
     ##### Functions run inside Docker container #####
     *) # If not yet in Docker, re-run function inside Docker
 	if ! $IN_DOCKER; then

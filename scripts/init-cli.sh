@@ -50,7 +50,7 @@ NEEDED_ARGS=0
 ARG_LIST=""
 BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 FORCE_INDEP=false
-while getopts icrsLSbRfa:d ARG; do
+while getopts icrsLSbRCfa:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE ;;
@@ -61,6 +61,7 @@ while getopts icrsLSbRfa:d ARG; do
 	S) MODE=BUILD_SOURCE_PACKAGE; NEEDED_ARGS=2 ;;
 	b) MODE=BUILD_PACKAGE; NEEDED_ARGS=2 ;;
 	R) MODE=BUILD_APT_REPO; NEEDED_ARGS=2 ;;
+	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2 ;;
 	f) FORCE_INDEP=true ;;
 	a) BUILD_ARCH=$OPTARG ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;
