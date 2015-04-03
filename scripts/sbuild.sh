@@ -32,6 +32,7 @@ sbuild_chroot_setup() {
     COMPONENTS=main${DISTRO_COMPONENTS:+,$DISTRO_COMPONENTS}
     debug "      Components:  $COMPONENTS"
     debug "      Distro mirror:  $DISTRO_MIRROR"
+    mkdir -p $CONFIG_DIR/chroot.d
     sbuild-createchroot \
 	--components=$COMPONENTS \
 	--arch=$SBUILD_CHROOT_ARCH \
