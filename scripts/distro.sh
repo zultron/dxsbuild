@@ -2,15 +2,17 @@ debug "    Sourcing distro.sh"
 
 repo_add_apt_key() {
     KEY=$1
+    KEYRING=$CHROOT_DIR/etc/apt/trusted.gpg.d/sbuild-extra.gpg
     debug "    Adding apt key '$KEY'"
     case $KEY in
 	http://*|https://*)
 	    # Install key from URL
-	    wget -O - -q $KEY | apt-key add -
+	    wget -O - -q $KEY | \
+		apt-key --keyring $KEYRING add -
 	    ;;
 	[0-9A-F][0-9A-F][0-9A-F][0-9A-F]*)
 	    # Install key from key server
-	    apt-key --keyring $CHROOT_DIR/etc/apt/trusted.gpg.d/sbuild-extra.gpg \
+	    apt-key --keyring $KEYRING \
 		adv --keyserver $GPG_KEY_SERVER --recv-key $KEY
 	    ;;
 	*)

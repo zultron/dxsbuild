@@ -1,9 +1,9 @@
 #								-*-conf-*-
 # Origin, Label, Description are copied into the Release file
-Origin: Dovetail Automata
+Origin: dbuild
 Label: Machinekit
 Description: Machinekit dependency packages for @CODENAME@,
- courtesy of Dovetail Automata LLC
+  built in dbuild
 # copied into Release files; stable, testing or unstable
 #
 # (the Debian kernel packaging wants anything besides testing or
@@ -11,10 +11,9 @@ Description: Machinekit dependency packages for @CODENAME@,
 Suite: stable
 # distribution; dists/<codename> & in Release files (auto-configured)
 Codename: @CODENAME@
-# What's this for?
-#Version: 3.0
+# List of package architectures in repo
 Architectures: amd64 i386 armhf source
 # List of distribution components
 Components: main
-# When we are ready...
-#SignWith: 
+# Sbuild signing key
+SignWith: @SIGNING_KEY@

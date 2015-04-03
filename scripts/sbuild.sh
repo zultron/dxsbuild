@@ -36,9 +36,10 @@ sbuild_chroot_setup() {
 	--arch=$SBUILD_CHROOT_ARCH \
 	$CODENAME $CHROOT_DIR $DISTRO_MIRROR
 
-    # Fix config file name
+    # Fix config file name and add options
     mv $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
 	$CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+    echo setup.fstab=default/fstab >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 
     # Add local sbuild chroot users
     # FIXME
@@ -47,6 +48,10 @@ sbuild_chroot_setup() {
     # Remove default apt sources and configure new
     > $CHROOT_DIR/etc/apt/sources.list
     distro_configure_repos
+    # Set up local repo
+    deb_repo_init  # Set up variables
+    deb_repo_setup
+    repo_add_apt_source local file://$BASE_DIR/$REPO_DIR/$CODENAME
 }
 
 sbuild_shell() {

@@ -30,6 +30,16 @@ RUN	apt-get install -y --no-install-recommends \
 RUN	rmdir /etc/schroot/chroot.d && \
 	    ln -s /srv/configs/chroot.d /etc/schroot/chroot.d
 
+# Make local apt package repository available to chroots
+RUN	echo "/srv		/srv		none	rw,bind		0	0" \
+	    >> /etc/schroot/default/fstab
+
+# Install Debian signing keys
+# Fixes "W: Cannot check Release signature; keyring file not available
+#     /usr/share/keyrings/debian-archive-keyring.gpg"
+RUN	apt-get install -y --no-install-recommends \
+	    debian-archive-keyring
+
 # The chroots directory will be mounted here
 WORKDIR	/srv
 

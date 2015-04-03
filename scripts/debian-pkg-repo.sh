@@ -3,9 +3,22 @@ debug "    Sourcing debian-pkg-repo.sh"
 deb_repo_init() {
     REPO_DIR_ABS=$(readlink -f $REPO_DIR)
     debug "      Apt repo dir: $REPO_DIR_ABS"
+    GNUPGHOME=$CONFIG_DIR/gpg
+    debug "      GPG key dir: $GNUPGHOME"
+    if ! test -f $GNUPGHOME/trustdb.gpg; then
+	debug "    Setting up GPG package signing keys"
+	mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
+	GNUPGHOME=$GNUPGHOME gpg --import \
+	    /var/lib/sbuild/apt-keys/sbuild-key.sec
+    fi
+    SIGNING_KEY=$(GNUPGHOME=$GNUPGHOME gpg --fingerprint 'Sbuild Signer' | \
+	awk '/Key fingerprint/ { print $12 $13; }')
+    debug "      GPG package signing key fingerprint:  $SIGNING_KEY"
+
     REPREPRO="reprepro -VV -b ${REPO_DIR_ABS} \
         --confdir +b/conf-${CODENAME} --dbdir +b/db-${CODENAME} \
-	--outdir +b/${CODENAME} --distdir +b/dists"
+	--outdir +b/${CODENAME} \
+	--gnupghome $GNUPGHOME"
 }
 
 deb_repo_setup() {
@@ -13,12 +26,12 @@ deb_repo_setup() {
 	msg "Initializing Debian Apt package repository"
 	deb_repo_init
 
-	mkdir -p ${REPO_DIR_ABS}/conf-${CODENAME}
-	
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
+	mkdir -p ${REPO_DIR_ABS}/conf-${CODENAME}
 	sed < $SCRIPTS_DIR/ppa-distributions.tmpl \
 	    > ${REPO_DIR_ABS}/conf-${CODENAME}/distributions \
-	    -e "s/@CODENAME@/${CODENAME}/g"
+	    -e "s/@CODENAME@/${CODENAME}/g" \
+	    -e "s/@SIGNING_KEY@/${SIGNING_KEY}/g"
 
 	debug "    Initializing repository files"
 	${REPREPRO} export ${CODENAME}
@@ -26,12 +39,9 @@ deb_repo_setup() {
 }
 
 deb_repo_build() {
-    set -x #FIXME
-    # init Debian repo, if applicable
-    deb_repo_setup
-
     msg "Updating Debian Apt package repository"
     deb_repo_init	# repo config
+    deb_repo_setup	# set up repo, if needed
     binary_package_init	# source pkg config
 
     # add source pkg
