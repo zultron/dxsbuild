@@ -37,18 +37,23 @@ Get a shell in the sbuild chroot:
 	./build.sh -sa i386 jessie
 
 
-# Sources
-
-[Wookey's configuration]
-
-[Wookey's configuration]:
-https://wiki.linaro.org/Platform/DevPlatform/CrossCompile/UsingMultiArch
-
-
 # TODO
 
+- Persist signing key in schroot config
+- Refactor options:  separate Docker, sbuild, dpkg and apt functions
+- Don't recreate source pkg every time
+- Add more packages
+- make -j42
+- Do package configure and other steps with aufs (on tmpfs)
+  - https://wiki.debian.org/sbuild#Using_aufs_on_tmpfs_with_sbuild
+  - http://christian.hofstaedtler.name/blog/2011/05/schroot-and-aufs.html
+- Figure out what to do about merged pool directory
 - Add suffix to pkg release
-- Fix xenomai pkg release
 - Run build as normal user, or give normal user file ownership
 - Detect things like version and release from source package
 - Put sbuild logs somewhere
+- Add ccache
+  - https://wiki.debian.org/sbuild#Using_.22ccache.22_with_sbuild
+- Add lintian, piuparts, adt-run, etc.
+- Can bindmounts be done better?  https://wiki.debian.org/sbuild#Bind_mounts
+- Add local config override file
