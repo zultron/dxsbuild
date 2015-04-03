@@ -61,3 +61,6 @@ PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
 # TCL default version; override in distro config
 TCL_VER=8.6
+
+# Build script name
+DBUILD=$(basename $0)

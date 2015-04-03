@@ -2,39 +2,39 @@
 
 Build the Docker container image:
 
-    ./build.sh -i
+    ./dbuild -i
 
 Set up the chroot:
 
     # Machine arch chroot (good for cross-compiling ARM)
-    ./build.sh -r jessie
+    ./dbuild -r jessie
 	# Foreign arch chroot (needed for build amd64, host i386)
-	./build.sh -ra i386 jessie
+	./dbuild -ra i386 jessie
 
 Build a package:
 
     # Machine arch build
-	./build.sh -b jessie xenomai
+	./dbuild -b jessie xenomai
     # Cross-build for ARM
-    ./build.sh -ba armhf jessie xenomai
+    ./dbuild -ba armhf jessie xenomai
 
 Update apt repo:
 
     # Add xenomai packages to apt pkg repo
-    ./build.sh -R jessie xenomai
+    ./dbuild -R jessie xenomai
 	# List jessie packages
-    ./build.sh -L jessie
+    ./dbuild -L jessie
 
 Run a shell in the Docker container:
 
-    ./build.sh -c
+    ./dbuild -c
 
 Get a shell in the sbuild chroot:
 
     # Machine arch chroot
-	./build.sh -s jessie
+	./dbuild -s jessie
 	# Foreign arch chroot
-	./build.sh -sa i386 jessie
+	./dbuild -sa i386 jessie
 
 
 # TODO

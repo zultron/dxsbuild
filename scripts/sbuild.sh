@@ -70,7 +70,7 @@ sbuild_configure_package() {
 
     debug "      Running configure function in schroot"
     schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
-	./build.sh -C $CODENAME $PACKAGE
+	./$DBUILD -C $CODENAME $PACKAGE
 
     debug "      Uninstalling extra packages"
     schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
