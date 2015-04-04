@@ -25,9 +25,8 @@ source_tarball_init() {
 	    DEBIAN_TARBALL=${PACKAGE}_${VERSION}.tar.${DEBIAN_PACKAGE_COMP}
 	    ;;
 	*)
-	    msg "Package ${PACKAGE}:" \
+	    error "Package ${PACKAGE}:" \
 		"Unknown package format '${DEBIAN_PACKAGE_FORMAT}'"
-	    exit 1
 	    ;;
     esac
 }
@@ -36,6 +35,8 @@ source_tarball_download() {
     if test -n "$TARBALL_URL"; then
 	if test ! -f $SOURCE_PKG_DIR/$DEBIAN_TARBALL; then
 	    msg "    Downloading source tarball"
+	    debug "      Source: $TARBALL_URL"
+	    debug "      Dest: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
 	    mkdir -p $SOURCE_PKG_DIR
 	    wget $TARBALL_URL -O $SOURCE_PKG_DIR/$DEBIAN_TARBALL
 	else
@@ -50,7 +51,7 @@ source_tarball_unpack() {
     msg "    Unpacking source tarball"
     debug "      Tarball path: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
     debug "      Build dir: $BUILD_DIR"
-    debug "      Linking original tarball to build dir"
+    debug "      Linking original tarball to $BUILD_DIR"
     mkdir -p $BUILD_DIR
     ln -f $SOURCE_PKG_DIR/$DEBIAN_TARBALL $BUILD_DIR
     debug "      Unpacking tarball into $BUILD_SRC_DIR"
