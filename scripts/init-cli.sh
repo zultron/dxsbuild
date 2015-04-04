@@ -41,6 +41,9 @@ mode() {
     return 0
 }
 
+# When not IN_DOCKER, don't do anything distro-specific
+test -n "$IN_DOCKER" || IN_DOCKER=false
+
 # Process command line opts
 MODE=NONE
 DOCKER_SUPERUSER="-u `id -u`"
@@ -48,7 +51,7 @@ DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
 ARG_LIST=""
-BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
+! $IN_DOCKER || BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 FORCE_INDEP=false
 while getopts icrsLSbRCfa:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
@@ -94,7 +97,6 @@ test $NUM_ARGS -lt 2 -o -f $PACKAGE_CONFIG_DIR/${PACKAGE:-bogus}.sh || \
 
 # Set variables
 DOCKER_CONTAINER=$CODENAME-$PACKAGE
-test -n "$IN_DOCKER" || IN_DOCKER=false
 
 # Debug info
 debug "Mode: $MODE"
