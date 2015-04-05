@@ -89,7 +89,7 @@ sbuild_build_package() {
 	cd $BUILD_DIR
 	sbuild \
 	    --host=$BUILD_ARCH --build=$SBUILD_CHROOT_ARCH \
-	    -d $CODENAME $BUILD_INDEP $SBUILD_DEBUG \
+	    -d $CODENAME $BUILD_INDEP $SBUILD_DEBUG $NUM_JOBS \
 	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
 	    $DSC_FILE
     )

@@ -24,11 +24,12 @@ usage() {
     msg "        -r:		Create sbuild chroot"
     msg "        -s:		Spawn interactive shell in sbuild chroot"
     msg "        -L:		List apt package repository contents"
-    msg "    $0 -S | -b | -R [-f] [-d] CODENAME PACKAGE"
+    msg "    $0 -S | -b [-j n] | -R [-f] [-d] CODENAME PACKAGE"
     msg "        -S:		Build source package"
     msg "        -b:		Run package build (build source pkg if needed)"
     msg "        -R:		Build apt package repository"
     msg "        -f:		Force indep package build when build != host"
+    msg "        -j n:		(-b only) Number of parallel jobs"
     msg "    Global options:"
     msg "        -a ARCH:	Set build arch"
     msg "        -d:	Print verbose debug output"
@@ -53,7 +54,8 @@ NEEDED_ARGS=0
 ARG_LIST=""
 ! $IN_DOCKER || BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 FORCE_INDEP=false
-while getopts icrsLSbRCfa:d ARG; do
+NUM_JOBS=""
+while getopts icrsLSbRCfj:a:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE ;;
@@ -66,6 +68,7 @@ while getopts icrsLSbRCfa:d ARG; do
 	R) MODE=BUILD_APT_REPO; NEEDED_ARGS=2 ;;
 	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2 ;;
 	f) FORCE_INDEP=true ;;
+	j) NUM_JOBS="-j $OPTARG" ;;
 	a) BUILD_ARCH=$OPTARG ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;
         *) usage
