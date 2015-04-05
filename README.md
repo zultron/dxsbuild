@@ -13,6 +13,8 @@ Set up the chroot:
 
 Build a package:
 
+    # Source package build
+    ./dbuild -S jessie xenomai
     # Machine arch build
     ./dbuild -b jessie xenomai
     # Cross-build for ARM

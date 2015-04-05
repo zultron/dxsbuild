@@ -33,10 +33,9 @@ case $MODE in
 	sbuild_shell
 	;;
 
-    BUILD_SOURCE_PACKAGE|BUILD_PACKAGE) # -S|-b CODENAME ARCH PACKAGE:
-	                                #     Build source package
+    BUILD_SOURCE_PACKAGE) # -S CODENAME ARCH PACKAGE:  Build source package
 	source_package_build
-	;;&
+	;;
 
     BUILD_PACKAGE) # -b CODENAME PACKAGE:  Build package in sbuild chroot
 	# Build binary packages
