@@ -42,8 +42,6 @@ Get a shell in the sbuild chroot:
 - Persist signing key in schroot config
 - Refactor options:  separate Docker, sbuild, dpkg and apt functions
 - Don't recreate source pkg every time
-- Add more packages
-- make -j42
 - Do package configure and other steps with aufs (on tmpfs)
   - https://wiki.debian.org/sbuild#Using_aufs_on_tmpfs_with_sbuild
   - http://christian.hofstaedtler.name/blog/2011/05/schroot-and-aufs.html
