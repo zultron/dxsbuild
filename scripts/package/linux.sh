@@ -21,14 +21,11 @@ test "${DISABLED_FEATURESETS/rtai/}" != "$DISABLED_FEATURESETS" || \
 EXTRA_BUILD_PACKAGES+=" rtai-source"
 
 configure_package() {
-    (
-	cd $BUILD_SRC_DIR
-	for featureset in $DISABLED_FEATURESETS; do
-	    debug "      Disabling featureset $featureset"
-	    sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
-	done
-	debug "      Running configure script"
-	debian/rules debian/control NOFAIL=true
-	debian/rules clean
-    )
+    for featureset in $DISABLED_FEATURESETS; do
+	debug "      Disabling featureset $featureset"
+	sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
+    done
+    debug "      Running configure script"
+    debian/rules debian/control NOFAIL=true
+    debian/rules clean
 }
