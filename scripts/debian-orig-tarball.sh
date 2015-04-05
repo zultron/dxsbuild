@@ -48,6 +48,11 @@ source_tarball_download() {
 }
 
 source_tarball_unpack() {
+    if test -z "$TARBALL_URL"; then
+	debug "    (No TARBALL_URL defined; not unpacking source tarball)"
+	return
+    fi
+
     msg "    Unpacking source tarball"
     debug "      Tarball path: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
     debug "      Build dir: $BUILD_DIR"
