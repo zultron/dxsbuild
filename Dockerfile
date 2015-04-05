@@ -35,6 +35,9 @@ RUN	echo "/srv\t\t/srv\t\tnone\trw,bind\t\t0\t0" \
 # - signing key
 RUN	sbuild-update --keygen
 
+# - aufs on tmpfs config
+ADD	schroot-04tmpfs /etc/schroot/setup.d/04tmpfs
+
 ############################
 # Start in the dbuild directory
 WORKDIR	/srv

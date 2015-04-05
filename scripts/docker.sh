@@ -1,13 +1,13 @@
 debug "    Sourcing docker.sh"
 
 docker_build() {
+    msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
     mkdir -p docker
-    (
-	cd docker
-	msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
-	cat ../Dockerfile | docker build -t $DOCKER_IMAGE -
-    )
-    rmdir docker
+    set -x
+    cp $SCRIPTS_DIR/schroot-04tmpfs docker
+    cp Dockerfile docker
+    docker build -t $DOCKER_IMAGE docker
+    rm -rf docker
 }
 
 docker_run() {

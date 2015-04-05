@@ -1,0 +1,20 @@
+#!/bin/sh -e
+#
+# aufs on tmpfs config
+# https://wiki.debian.org/sbuild#Using_aufs_on_tmpfs_with_sbuild
+#
+# Copied into /etc/schroot/setup.d/04tmpfs
+
+. "$SETUP_DATA_DIR/common-data"
+. "$SETUP_DATA_DIR/common-functions"
+. "$SETUP_DATA_DIR/common-config"
+
+
+case $STAGE in
+    setup-start|setup-recover)
+	mount -t tmpfs overlay /var/lib/schroot/union/overlay
+	;;
+    setup-stop)
+	mount -t tmpfs overlay /var/lib/schroot/union/overlay
+	;;
+esac
