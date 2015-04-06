@@ -52,6 +52,7 @@ GPG_KEY_SERVER=hkp://keys.gnupg.net
 
 # Generated config directory
 CONFIG_DIR=$BASE_DIR/configs
+GNUPGHOME=$CONFIG_DIR/gpg
 
 # Scripts and configs directories
 SCRIPTS_DIR=scripts

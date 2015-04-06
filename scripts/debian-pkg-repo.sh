@@ -3,7 +3,6 @@ debug "    Sourcing debian-pkg-repo.sh"
 deb_repo_init() {
     REPO_DIR_ABS=$(readlink -f $REPO_DIR)
     debug "      Apt repo dir: $REPO_DIR_ABS"
-    GNUPGHOME=$CONFIG_DIR/gpg
     debug "      GPG key dir: $GNUPGHOME"
     if ! test -f $GNUPGHOME/trustdb.gpg; then
 	debug "    Setting up GPG package signing keys"

@@ -25,6 +25,28 @@ sbuild_chroot_init() {
     fi
 }
 
+sbuild_chroot_install_keys() {
+    if test -f /var/lib/sbuild/apt-keys/sbuild-key.sec; then
+	if test -f $GNUPGHOME/sbuild-key.sec; then
+	    debug "      (sbuild package keys installed; doing nothing)"
+	else
+	    debug "      Copying signing keys from chroot into $GNUPGHOME"
+	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
+	    cp /var/lib/sbuild/apt-keys/sbuild-key.* $GNUPGHOME
+	fi
+    else
+	if ! test -f $GNUPGHOME/sbuild-key.sec; then
+	    debug "      Generating new sbuild keys"
+	    sbuild-update --keygen
+	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
+	    cp /var/lib/sbuild/apt-keys/sbuild-key.* $GNUPGHOME
+	else
+	    debug "      Copying signing keys from $GNUPGHOME into chroot"
+	    cp $GNUPGHOME/sbuild-key.* /var/lib/sbuild/apt-keys
+	fi
+    fi
+}
+
 sbuild_chroot_setup() {
     msg "Creating sbuild chroot, distro $CODENAME, arch $HOST_ARCH"
     sbuild_chroot_init
@@ -46,6 +68,9 @@ sbuild_chroot_setup() {
     # Add local sbuild chroot users
     # FIXME
     #sbuild-adduser 1000
+
+    debug "    Setting up signing keys"
+    sbuild_chroot_install_keys
 
     # Remove default apt sources and configure new
     > $CHROOT_DIR/etc/apt/sources.list

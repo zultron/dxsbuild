@@ -33,9 +33,6 @@ RUN	rmdir /etc/schroot/chroot.d && \
 # - bind mounts
 RUN	echo "/srv\t\t/srv\t\tnone\trw,bind\t\t0\t0" \
 	    >> /etc/schroot/default/fstab
-# - signing key
-RUN	sbuild-update --keygen
-
 # - aufs on tmpfs config
 ADD	schroot-04tmpfs /etc/schroot/setup.d/04tmpfs
 
