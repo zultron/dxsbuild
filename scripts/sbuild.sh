@@ -3,7 +3,7 @@ debug "    Sourcing sbuild.sh"
 sbuild_chroot_init() {
     # By default, only build arch-indep packages on build arch
     BUILD_INDEP="--no-arch-all"
-    if dpkg-architecture -e$BUILD_ARCH || $FORCE_INDEP; then
+    if dpkg-architecture -e$HOST_ARCH || $FORCE_INDEP; then
 	BUILD_INDEP="--arch-all"
     fi
 
@@ -113,7 +113,7 @@ sbuild_build_package() {
     (
 	cd $BUILD_DIR
 	sbuild \
-	    --host=$BUILD_ARCH --build=$SBUILD_CHROOT_ARCH \
+	    --host=$HOST_ARCH --build=$SBUILD_CHROOT_ARCH \
 	    -d $CODENAME $BUILD_INDEP $SBUILD_DEBUG $NUM_JOBS \
 	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
 	    $DSC_FILE

@@ -52,7 +52,7 @@ DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
 ARG_LIST=""
-! $IN_DOCKER || BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
+! $IN_DOCKER || HOST_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 FORCE_INDEP=false
 NUM_JOBS=""
 while getopts icrsLSbRCfj:a:d ARG; do
@@ -69,7 +69,7 @@ while getopts icrsLSbRCfj:a:d ARG; do
 	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2 ;;
 	f) FORCE_INDEP=true ;;
 	j) NUM_JOBS="-j $OPTARG" ;;
-	a) BUILD_ARCH=$OPTARG ;;
+	a) HOST_ARCH=$OPTARG ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;
         *) usage
     esac
