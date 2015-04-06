@@ -7,11 +7,18 @@ sbuild_chroot_init() {
 	BUILD_INDEP="--arch-all"
     fi
 
-    # sbuild-chroot:  use the build-arch chroot by default
-    SBUILD_CHROOT_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
-    if dpkg-architecture -eamd64 && test $BUILD_ARCH = i386; then
-	# ...but amd64-cross-i586 needs its own sbuild chroot
-	SBUILD_CHROOT_ARCH=i386
+    # Detect foreign architecture
+    # FIXME:  This only takes care of amd64-cross-armhf
+    FOREIGN=false
+    if ! dpkg-architecture -earmhf && test $HOST_ARCH = armhf; then
+	FOREIGN=true
+	debug "      Detected foreign arch:  $BUILD_ARCH != $HOST_ARCH"
+    fi
+
+    if test $MODE = BUILD_SBUILD_CHROOT -o -n "$NATIVE_BUILD_ONLY"; then
+	SBUILD_CHROOT_ARCH=$HOST_ARCH
+    else
+	SBUILD_CHROOT_ARCH=$BUILD_ARCH
     fi
     debug "      Sbuild chroot arch: $SBUILD_CHROOT_ARCH"
     SBUILD_CHROOT=$CODENAME-$SBUILD_CHROOT_ARCH-sbuild
@@ -33,49 +40,59 @@ sbuild_chroot_install_keys() {
 	if test -f $GNUPGHOME/sbuild-key.sec; then
 	    debug "      (sbuild package keys installed; doing nothing)"
 	else
-	    debug "      Copying signing keys from chroot into $GNUPGHOME"
+	    debug "    Copying signing keys from chroot into $GNUPGHOME"
 	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
 	    cp /var/lib/sbuild/apt-keys/sbuild-key.* $GNUPGHOME
 	fi
     else
 	if ! test -f $GNUPGHOME/sbuild-key.sec; then
-	    debug "      Generating new sbuild keys"
+	    debug "    Generating new sbuild keys"
 	    sbuild-update --keygen
 	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
 	    cp /var/lib/sbuild/apt-keys/sbuild-key.* $GNUPGHOME
 	else
-	    debug "      Copying signing keys from $GNUPGHOME into chroot"
+	    debug "    Copying signing keys from $GNUPGHOME into chroot"
 	    cp $GNUPGHOME/sbuild-key.* /var/lib/sbuild/apt-keys
 	fi
     fi
 }
 
 sbuild_chroot_setup() {
-    msg "Creating sbuild chroot, distro $CODENAME, arch $HOST_ARCH"
+    msg "Creating sbuild chroot, distro $CODENAME, arch $SBUILD_CHROOT_ARCH"
     sbuild_chroot_init
+
+    local MIRROR=$DISTRO_MIRROR
+    # If e.g. $DISTRO_MIRROR_armhf defined, use it
+    eval local MIRROR_ARCH=\${DISTRO_MIRROR_${HOST_ARCH}}
+    test -z "$MIRROR_ARCH" || MIRROR=$MIRROR_ARCH
 
     COMPONENTS=main${DISTRO_COMPONENTS:+,$DISTRO_COMPONENTS}
     debug "      Components:  $COMPONENTS"
-    debug "      Distro mirror:  $DISTRO_MIRROR"
+    debug "      Distro mirror:  $MIRROR"
     mkdir -p $CONFIG_DIR/chroot.d
+    if $FOREIGN && test $BUILD_ARCH=armhf; then
+	debug "    Pre-seeding chroot with qemu-arm-static binary"
+	mkdir -p $CHROOT_DIR/usr/bin
+	cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
+    fi
+    debug "    Running sbuild-createchroot"
     sbuild-createchroot $SBUILD_VERBOSE \
-	--components=$COMPONENTS \
-	--arch=$SBUILD_CHROOT_ARCH \
-	$CODENAME $CHROOT_DIR $DISTRO_MIRROR
+    	--components=$COMPONENTS \
+    	--arch=$SBUILD_CHROOT_ARCH \
+    	$CODENAME $CHROOT_DIR $MIRROR
 
-    # Fix config file name and add options
-    mv $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
+    debug "    Updating config files"
+    test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
+	mv $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
 	$CONFIG_DIR/chroot.d/$SBUILD_CHROOT
-    echo setup.fstab=default/fstab >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+    grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
+	echo setup.fstab=default/fstab >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 
     # Add local sbuild chroot users
     # FIXME
     #sbuild-adduser 1000
 
-    debug "    Setting up signing keys"
-    sbuild_chroot_install_keys
-
-    # Remove default apt sources and configure new
+    debug "    Configuring apt sources"
     > $CHROOT_DIR/etc/apt/sources.list
     distro_configure_repos
     # Set up local repo
@@ -112,7 +129,9 @@ sbuild_build_package() {
     debug "      Source package .dsc file: $DSC_FILE"
 
     sbuild_chroot_init
+    sbuild_chroot_install_keys
 
+    debug "    Running sbuild"
     (
 	cd $BUILD_DIR
 	sbuild \

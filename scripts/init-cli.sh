@@ -52,7 +52,11 @@ DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
 ARG_LIST=""
-! $IN_DOCKER || HOST_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
+if $IN_DOCKER; then  # dpkg-architecture is distro-specific
+    HOST_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
+    BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
+fi
+
 FORCE_INDEP=false
 NUM_JOBS=""
 while getopts icrsLSbRCfj:a:d ARG; do

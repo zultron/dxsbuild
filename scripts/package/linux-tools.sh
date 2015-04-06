@@ -6,6 +6,7 @@ TARBALL_URL=http://www.kernel.org/pub/linux/kernel/v3.0/linux-${VERSION}.tar.xz
 GIT_URL=https://github.com/zultron/linux-tools-deb.git
 DEBIAN_PACKAGE_FORMAT='3.0 (quilt)'
 DEBIAN_PACKAGE_COMP=xz
+NATIVE_BUILD_ONLY=true  # libperl-dev:armhf wants to install perl
 
 EXTRA_BUILD_PACKAGES="python debhelper"
 

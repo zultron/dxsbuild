@@ -24,6 +24,8 @@ RUN	apt-get install -y reprepro
 #     Fixes "W: Cannot check Release signature; keyring file not available
 #                /usr/share/keyrings/debian-archive-keyring.gpg"
 RUN	apt-get install -y debian-archive-keyring
+# - qemu
+RUN	apt-get install -y qemu-user-static binfmt-support
 
 ############################
 # Sbuild configuration:
@@ -35,6 +37,12 @@ RUN	echo "/srv\t\t/srv\t\tnone\trw,bind\t\t0\t0" \
 	    >> /etc/schroot/default/fstab
 # - aufs on tmpfs config
 ADD	schroot-04tmpfs /etc/schroot/setup.d/04tmpfs
+
+############################
+# Monkey patches
+#
+# Fix `sbuild-createchroot --foreign` flag
+RUN	sed -i /usr/sbin/sbuild-createchroot -e '/set_conf..FOREIGN/ s/0/1/'
 
 ############################
 # Start in the dbuild directory

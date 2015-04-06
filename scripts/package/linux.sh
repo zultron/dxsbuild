@@ -6,6 +6,7 @@ TARBALL_URL=http://www.kernel.org/pub/linux/kernel/v3.0/linux-${VERSION}.tar.xz
 GIT_URL=https://github.com/zultron/linux-ipipe-deb.git
 DEBIAN_PACKAGE_FORMAT='3.0 (quilt)'
 DEBIAN_PACKAGE_COMP=xz
+NATIVE_BUILD_ONLY=true  # Build-Depends: gcc-4.9
 
 FEATURESETS="xenomai rtai"
 DISABLED_FEATURESETS=""  # Set to 'xenomai' or 'rtai' to skip build
