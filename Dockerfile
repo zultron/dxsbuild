@@ -1,3 +1,4 @@
+#							-*-conf-*-
 FROM ubuntu:trusty
 MAINTAINER John Morris <john@zultron.com>
 
