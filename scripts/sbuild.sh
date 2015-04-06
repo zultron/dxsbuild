@@ -19,7 +19,10 @@ sbuild_chroot_init() {
     CHROOT_DIR=$SBUILD_CHROOT_DIR/$CODENAME-$SBUILD_CHROOT_ARCH
     debug "      Sbuild chroot dir: $CHROOT_DIR"
 
-    # Extra debugging for sbuild
+    # sbuild verbosity
+    if $DEBUG; then
+	SBUILD_VERBOSE=--verbose
+    fi
     if $DDEBUG; then
 	SBUILD_DEBUG=-D
     fi
@@ -55,7 +58,7 @@ sbuild_chroot_setup() {
     debug "      Components:  $COMPONENTS"
     debug "      Distro mirror:  $DISTRO_MIRROR"
     mkdir -p $CONFIG_DIR/chroot.d
-    sbuild-createchroot \
+    sbuild-createchroot $SBUILD_VERBOSE \
 	--components=$COMPONENTS \
 	--arch=$SBUILD_CHROOT_ARCH \
 	$CODENAME $CHROOT_DIR $DISTRO_MIRROR
@@ -88,18 +91,18 @@ sbuild_configure_package() {
 
     debug "      Installing extra packages in schroot:"
     debug "        $EXTRA_BUILD_PACKAGES"
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	apt-get update
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	apt-get install --no-install-recommends -y \
 	$EXTRA_BUILD_PACKAGES
 
     debug "      Running configure function in schroot"
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	./$DBUILD -C $CODENAME $PACKAGE
 
     debug "      Uninstalling extra packages"
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild -- \
+    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	apt-get purge -y --auto-remove \
 	$EXTRA_BUILD_PACKAGES
 }
@@ -114,7 +117,7 @@ sbuild_build_package() {
 	cd $BUILD_DIR
 	sbuild \
 	    --host=$HOST_ARCH --build=$SBUILD_CHROOT_ARCH \
-	    -d $CODENAME $BUILD_INDEP $SBUILD_DEBUG $NUM_JOBS \
+	    -d $CODENAME $BUILD_INDEP $SBUILD_VERBOSE $SBUILD_DEBUG $NUM_JOBS \
 	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
 	    $DSC_FILE
     )
