@@ -30,7 +30,7 @@ repo_add_apt_source() {
     if test -n "$ARCHES"; then
 	APT_SOURCE+="[arch=$ARCHES] "
     fi
-    APT_SOURCE+="$URL $CODENAME main${COMPONENTS:- $COMPONENTS}"
+    APT_SOURCE+="$URL $CODENAME main${COMPONENTS:+ $COMPONENTS}"
     echo "$APT_SOURCE" > $CHROOT_DIR/etc/apt/sources.list.d/$NAME.list
 }
 
