@@ -31,7 +31,7 @@ repo_add_apt_source() {
 	APT_SOURCE+="[arch=$ARCHES] "
     fi
     APT_SOURCE+="$URL $CODENAME main${COMPONENTS:+ $COMPONENTS}"
-    echo "$APT_SOURCE" > $CHROOT_DIR/etc/apt/sources.list.d/$NAME.list
+    echo "$APT_SOURCE" >> $CHROOT_DIR/etc/apt/sources.list.d/$NAME.list
 }
 
 repo_configure_dovetail_automata() {
