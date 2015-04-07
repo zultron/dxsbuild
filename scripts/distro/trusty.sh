@@ -21,7 +21,7 @@ distro_configure_repos() {
     # Ubuntu distro
     repo_add_apt_source ubuntu $DISTRO_MIRROR amd64,i386 \
 	$DISTRO_COMPONENTS
-    repo_add_apt_source ubuntu http://ports.ubuntu.com/ubuntu-ports armhf \
+    repo_add_apt_source ubuntu $DISTRO_MIRROR_armhf armhf \
 	$DISTRO_COMPONENTS
 
     # Dovetail Automata; enable to pull deps not built locally
