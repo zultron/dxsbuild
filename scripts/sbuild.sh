@@ -132,6 +132,11 @@ sbuild_build_package() {
     sbuild_chroot_init
     sbuild_chroot_install_keys
 
+    if test -n "$SBUILD_RESOLVER"; then
+	SBUILD_DEP_RESOLVER="--build-dep-resolver=$SBUILD_RESOLVER"
+	debug "      Sbuild dependency resolver:  $SBUILD_RESOLVER"
+    fi
+
     debug "    Running sbuild"
     (
 	cd $BUILD_DIR
@@ -139,6 +144,7 @@ sbuild_build_package() {
 	    --host=$HOST_ARCH --build=$SBUILD_CHROOT_ARCH \
 	    -d $CODENAME $BUILD_INDEP $SBUILD_VERBOSE $SBUILD_DEBUG $NUM_JOBS \
 	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
+	    $SBUILD_DEP_RESOLVER \
 	    $DSC_FILE
     )
 }
