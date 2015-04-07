@@ -38,8 +38,12 @@ usage() {
 }
 
 mode() {
-    test $MODE = "$1" -o \( -z "$1" -a $MODE != NONE \) || return 1
-    return 0
+    test $MODE != NONE || return 1  # MODE == NONE:  error
+    test -n "$*" || return 0  # no args && MODE != NONE:  success
+    for m in $*; do
+	test $MODE != $m || return 0  # MODE == cmdline arg:  success
+    done
+    return 1  # MODE != cmdline arg:  error
 }
 
 # When not IN_DOCKER, don't do anything distro-specific

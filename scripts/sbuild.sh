@@ -15,7 +15,8 @@ sbuild_chroot_init() {
 	debug "      Detected foreign arch:  $BUILD_ARCH != $HOST_ARCH"
     fi
 
-    if test $MODE = BUILD_SBUILD_CHROOT -o -n "$NATIVE_BUILD_ONLY"; then
+    if mode BUILD_SBUILD_CHROOT SBUILD_SHELL || \
+	test -n "$NATIVE_BUILD_ONLY"; then
 	SBUILD_CHROOT_ARCH=$HOST_ARCH
     else
 	SBUILD_CHROOT_ARCH=$BUILD_ARCH
