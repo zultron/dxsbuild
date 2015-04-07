@@ -23,6 +23,10 @@ test "${DISABLED_FEATURESETS/rtai/}" != "$DISABLED_FEATURESETS" || \
 EXTRA_BUILD_PACKAGES+=" rtai-source"
 
 configure_package() {
+    if test $CODENAME = trusty; then
+	debug "    Setting gcc to 'gcc-4.8'"
+	sed -ie '/^compiler:/ s/gcc-.*/gcc-4.8/' debian/config/defines
+    fi
     for featureset in $DISABLED_FEATURESETS; do
 	debug "      Disabling featureset $featureset"
 	sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
