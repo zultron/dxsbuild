@@ -6,3 +6,4 @@ GIT_URL=https://github.com/zultron/rtai-deb.git
 GIT_REPO=rtai-deb
 DEBIAN_PACKAGE_FORMAT='3.0 (quilt)'
 DEBIAN_PACKAGE_COMP=gz
+EXCLUDE_ARCHES=armhf

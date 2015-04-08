@@ -201,9 +201,25 @@ fi
 
 # Sanity checks
 
-# Be sure package is valid for distro
-PACKAGES=" $PACKAGES "
-if test $NUM_ARGS -gt 2 -a "$PACKAGES" = "${PACKAGES/ $PACKAGE /}"; then
-    echo "Package '$PACKAGE' not valid for codename '$CODENAME'" >&2
-    exit 1
+if test -n "$PACKAGE"; then
+    if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO; then
+        # Be sure package is valid for distro
+	DISTRO_PKG_OK=false
+	for p in $PACKAGES; do
+	    if test $p = $PACKAGE; then
+		DISTRO_PKG_OK=true
+		break
+	    fi
+	done
+	$DISTRO_PKG_OK || error "Package $PACKAGE excluded from distro $CODENAME"
+    fi
+
+    if mode BUILD_PACKAGE BUILD_APT_REPO; then
+        # Be sure package is valid for arch
+	for a in $EXCLUDE_ARCHES; do
+	    if test $a = $HOST_ARCH; then
+		error "Package $PACKAGE excluded from arch $HOST_ARCH"
+	    fi
+	done
+    fi
 fi

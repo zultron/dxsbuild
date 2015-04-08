@@ -2,8 +2,6 @@
 PACKAGES="xenomai rtai linux linux-tools linux-latest"
 # ZeroMQ packages
 PACKAGES+=" czmq"
-# Misc
-PACKAGES+=" libwebsockets jansson python-pyftpdlib"
 # Zultron Debian package repo
 PACKAGES+=" dovetail-automata-keyring"
 
