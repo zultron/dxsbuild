@@ -29,9 +29,6 @@ RUN	apt-get install -y qemu-user-static binfmt-support
 
 ############################
 # Sbuild configuration:
-# - chroot configs
-RUN	rmdir /etc/schroot/chroot.d && \
-	    ln -s /srv/configs/chroot.d /etc/schroot/chroot.d
 # - bind mounts
 RUN	echo "/srv\t\t/srv\t\tnone\trw,bind\t\t0\t0" \
 	    >> /etc/schroot/default/fstab

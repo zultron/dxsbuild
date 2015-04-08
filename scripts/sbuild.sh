@@ -44,8 +44,8 @@ sbuild_chroot_install_keys() {
 	else
 	    debug "    Saving signing keys from sbuild into $GNUPGHOME"
 	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
-	    run cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
+	    run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
+	    run_user cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
 	fi
     else
 	if ! test -f $GNUPGHOME/sbuild-key.sec; then
@@ -53,19 +53,25 @@ sbuild_chroot_install_keys() {
 	    run sbuild-update --keygen
 	    debug "    Saving signing keys from sbuild into $GNUPGHOME"
 	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
-	    run cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
+	    run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
+	    run_user cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
 	else
 	    debug "    Copying signing keys from $GNUPGHOME into sbuild"
 	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    run cp $GNUPGHOME/sbuild-key.* $SBUILD_KEY_DIR
+	    run install -o user -g sbuild $GNUPGHOME/sbuild-key.* $SBUILD_KEY_DIR
 	fi
     fi
     debug "      Sbuild keyring contents:"
-    apt-key --keyring $SBUILD_KEY_DIR/sbuild-key.pub list | \
-	while read line; do
-	    debug "        $line"
-    done
+    run_debug apt-key --keyring $SBUILD_KEY_DIR/sbuild-key.pub list
+}
+
+sbuild_install_config() {
+    if test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
+	debug "    Copying schroot config $SBUILD_CHROOT"
+	cp $CONFIG_DIR/chroot.d/$SBUILD_CHROOT /etc/schroot/chroot.d
+    else
+	debug "      (Config $SBUILD_CHROOT does not exist)"
+    fi
 }
 
 sbuild_chroot_setup() {
@@ -80,7 +86,7 @@ sbuild_chroot_setup() {
     COMPONENTS=main${DISTRO_COMPONENTS:+,$DISTRO_COMPONENTS}
     debug "      Components:  $COMPONENTS"
     debug "      Distro mirror:  $MIRROR"
-    mkdir -p $CONFIG_DIR/chroot.d
+    sbuild_install_config
     if $FOREIGN && test $BUILD_ARCH=armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
 	mkdir -p $CHROOT_DIR/usr/bin
@@ -93,12 +99,14 @@ sbuild_chroot_setup() {
     	$CODENAME $CHROOT_DIR $MIRROR
 
     debug "    Updating config files"
-    test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
-	mv $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
+    run_user mkdir -p $CONFIG_DIR/chroot.d
+    ! test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT-* || \
+	run_user cp $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
 	$CONFIG_DIR/chroot.d/$SBUILD_CHROOT
-    debug "    Updating chroot fstab"
+    debug "    Updating chroot fstab setting"
     grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
-	echo setup.fstab=default/fstab >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+	run_user bash -c "echo setup.fstab=default/fstab \
+	    >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT"
 
     # Add local sbuild chroot users
     # FIXME
@@ -115,23 +123,24 @@ sbuild_chroot_setup() {
 
 sbuild_configure_package() {
     sbuild_chroot_init
+    sbuild_install_config
 
     # FIXME run with union-type=aufs in schroot.conf
 
     debug "      Installing extra packages in schroot:"
     debug "        $EXTRA_BUILD_PACKAGES"
-    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get update
-    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get install --no-install-recommends -y \
 	$EXTRA_BUILD_PACKAGES
 
     debug "      Running configure function in schroot"
-    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	./$DBUILD -C $(! $DEBUG || echo -d) $CODENAME $PACKAGE
 
     debug "      Uninstalling extra packages"
-    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get purge -y --auto-remove \
 	$EXTRA_BUILD_PACKAGES
 }
@@ -144,14 +153,15 @@ sbuild_build_package() {
 
     sbuild_chroot_init
     sbuild_chroot_install_keys
+    sbuild_install_config
 
     debug "    Running sbuild"
     (
 	cd $BUILD_DIR
-	run sbuild \
+	run_user sbuild \
 	    --host=$HOST_ARCH --build=$SBUILD_CHROOT_ARCH \
 	    -d $CODENAME $BUILD_INDEP $SBUILD_VERBOSE $SBUILD_DEBUG $NUM_JOBS \
-	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
+	    -c $SBUILD_CHROOT \
 	    ${SBUILD_RESOLVER:+--build-dep-resolver=$SBUILD_RESOLVER} \
 	    $DSC_FILE
     )
@@ -161,6 +171,7 @@ sbuild_shell() {
     msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
 
     sbuild_chroot_init
-    run sbuild-shell $SBUILD_CHROOT
+    sbuild_install_config
+    run_user sbuild-shell $SBUILD_CHROOT
 }
 

@@ -29,6 +29,15 @@ run() {
     "$@"
 }
 
+run_user() {
+    ! $DEBUG || debug "      Command (as 'user'):  $@"
+    su -c "$*" user
+}
+
+run_debug() {
+    "$@" | while read l; do debug "        $l"; done
+}
+
 wrap_up() {
     RES=$1
     if $IN_SCHROOT; then
@@ -59,6 +68,7 @@ usage() {
     msg "        -j n:		(-b only) Number of parallel jobs"
     msg "    Global options:"
     msg "        -a ARCH:	Set build arch"
+    msg "        -u UID:	Run as user ID UID (default $DOCKER_UID)"
     msg "        -d:	Print verbose debug output"
     msg "        -dd:	Print extra verbose debug output"
     exit 1
@@ -78,7 +88,7 @@ test -n "$IN_DOCKER" || IN_DOCKER=false
 
 # Process command line opts
 MODE=NONE
-DOCKER_SUPERUSER="-u `id -u`"
+test -n "$DOCKER_UID" || DOCKER_UID=$(id -u); SET_DOCKER_UID=true
 DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
@@ -91,7 +101,7 @@ RERUN_IN_DOCKER=true
 IN_SCHROOT=false
 FORCE_INDEP=false
 NUM_JOBS=""
-while getopts icrsLSbRCfj:a:d ARG; do
+while getopts icrsLSbRCfj:a:u:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
@@ -106,13 +116,17 @@ while getopts icrsLSbRCfj:a:d ARG; do
 	f) FORCE_INDEP=true ;;
 	j) NUM_JOBS="-j $OPTARG" ;;
 	a) HOST_ARCH=$OPTARG ;;
+	u) DOCKER_UID=$OPTARG; SET_DOCKER_UID=false ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;
         *) usage
     esac
 done
 shift $((OPTIND-1))
 
-# Save arg state before mangling
+# User
+! $SET_DOCKER_UID || ARG_LIST+=" -u $DOCKER_UID"
+
+# Save non-option args before mangling
 NUM_ARGS=$#
 ARG_LIST+=" $*"
 
@@ -131,6 +145,7 @@ if ! $IN_DOCKER && ! $IN_SCHROOT; then
     debug "Running '$0 $ARG_LIST' at $(date)"
     debug "      Mode: $MODE"
     debug "      ([_] = top level script; [S] = in schroot; [D] = in Docker)"
+    debug "      Running with user ID $DOCKER_UID"
 fi
 
 # If needed, re-run command in Docker container
@@ -174,6 +189,11 @@ fi
 
 # Debug
 ! $DDEBUG || set -x
+
+# Set up user in Docker
+if $IN_DOCKER && ! $IN_SCHROOT; then
+    docker_set_user
+fi
 
 
 # Sanity checks

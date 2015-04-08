@@ -29,7 +29,8 @@ source_package_build_from_tree() {
     debug "      Debianized source tree: $BUILD_SRC_DIR"
     (
 	cd $BUILD_SRC_DIR
-	run dpkg-source -b --format="${DEBIAN_PACKAGE_FORMAT:-3.0 (quilt)}" .
+	run_user dpkg-source -b \
+	    --format="'${DEBIAN_PACKAGE_FORMAT:-3.0 (quilt)}'" .
     )
 }
 
@@ -37,7 +38,7 @@ source_package_build_from_tree() {
 # Source package clean up
 source_package_cleanup() {
     msg "    Cleaning up source tree $BUILD_SRC_DIR"
-    rm -rf $BUILD_SRC_DIR
+    run_user rm -rf $BUILD_SRC_DIR
 }
 
 ########################################

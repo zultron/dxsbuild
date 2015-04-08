@@ -38,7 +38,7 @@ source_tarball_download() {
 	    debug "      Source: $TARBALL_URL"
 	    debug "      Dest: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
 	    mkdir -p $SOURCE_PKG_DIR
-	    wget $TARBALL_URL -O $SOURCE_PKG_DIR/$DEBIAN_TARBALL
+	    run_user wget $TARBALL_URL -O $SOURCE_PKG_DIR/$DEBIAN_TARBALL
 	else
 	    debug "      (Source tarball exists; not downloading)"
 	fi
@@ -57,11 +57,12 @@ source_tarball_unpack() {
     debug "      Tarball path: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
     debug "      Build dir: $BUILD_DIR"
     debug "      Linking original tarball to $BUILD_DIR"
-    mkdir -p $BUILD_DIR
-    ln -f $SOURCE_PKG_DIR/$DEBIAN_TARBALL $BUILD_DIR
+    run_user mkdir -p $BUILD_DIR
+    run_user ln -f $SOURCE_PKG_DIR/$DEBIAN_TARBALL $BUILD_DIR
     debug "      Unpacking tarball into $BUILD_SRC_DIR"
-    rm -rf $BUILD_SRC_DIR; mkdir -p $BUILD_SRC_DIR
-    tar xCf $BUILD_SRC_DIR $SOURCE_PKG_DIR/$DEBIAN_TARBALL --strip-components=1
+    run_user rm -rf $BUILD_SRC_DIR; mkdir -p $BUILD_SRC_DIR
+    run_user tar xCf $BUILD_SRC_DIR $SOURCE_PKG_DIR/$DEBIAN_TARBALL \
+	--strip-components=1
 }
 
 
