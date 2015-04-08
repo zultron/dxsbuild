@@ -1,17 +1,44 @@
 # Print info messages
+st() {
+    if $IN_SCHROOT; then
+	echo -n '[S]'
+    elif $IN_DOCKER; then
+	echo -n '[D]'
+    else
+	echo -n '[_]'
+    fi
+}
+
 msg() {
-    echo -e "INFO:	$@" >&2
+    echo -e "$(st)INFO : $@" >&2
 }
 
 debug() {
     if $DEBUG; then
-	echo -e "DEBUG:	$@" >&2
+	echo -e "$(st)DEBUG: $@" >&2
     fi
 }
 
 error() {
-    echo -e "ERROR:	$@" >&2
-    exit 1
+    echo -e "$(st)ERROR: $@" >&2
+    wrap_up 1
+}
+
+run() {
+    ! $DEBUG || debug "      Command:  $@"
+    "$@"
+}
+
+wrap_up() {
+    RES=$1
+    if $IN_SCHROOT; then
+	debug "    Exiting ($RES) schroot"
+    elif $IN_DOCKER; then
+	debug "    Exiting ($RES) Docker container"
+    else
+	debug "Finished with exit status $RES at $(date)"
+    fi
+    exit $RES
 }
 
 usage() {
@@ -60,21 +87,22 @@ if $IN_DOCKER; then  # dpkg-architecture is distro-specific
     HOST_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
     BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 fi
-
+RERUN_IN_DOCKER=true
+IN_SCHROOT=false
 FORCE_INDEP=false
 NUM_JOBS=""
 while getopts icrsLSbRCfj:a:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
     case $ARG in
-	i) MODE=BUILD_DOCKER_IMAGE ;;
-	c) MODE=DOCKER_SHELL ;;
+	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
+	c) MODE=DOCKER_SHELL; RERUN_IN_DOCKER=false ;;
 	r) MODE=BUILD_SBUILD_CHROOT; NEEDED_ARGS=1 ;;
 	s) MODE=SBUILD_SHELL; NEEDED_ARGS=1 ;;
 	L) MODE=LIST_APT_REPO; NEEDED_ARGS=1 ;;
 	S) MODE=BUILD_SOURCE_PACKAGE; NEEDED_ARGS=2 ;;
 	b) MODE=BUILD_PACKAGE; NEEDED_ARGS=2 ;;
 	R) MODE=BUILD_APT_REPO; NEEDED_ARGS=2 ;;
-	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2 ;;
+	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2; IN_SCHROOT=true; IN_DOCKER=true ;;
 	f) FORCE_INDEP=true ;;
 	j) NUM_JOBS="-j $OPTARG" ;;
 	a) HOST_ARCH=$OPTARG ;;
@@ -98,6 +126,21 @@ mode && test $NEEDED_ARGS = $NUM_ARGS || usage
 # Init variables
 . scripts/base-config.sh
 
+# Debug info
+if ! $IN_DOCKER && ! $IN_SCHROOT; then
+    debug "Running '$0 $ARG_LIST' at $(date)"
+    debug "      Mode: $MODE"
+    debug "      ([_] = top level script; [S] = in schroot; [D] = in Docker)"
+fi
+
+# If needed, re-run command in Docker container
+if ! $IN_DOCKER && $RERUN_IN_DOCKER; then
+    . $SCRIPTS_DIR/docker.sh
+    debug "    Re-running command in Docker container"
+    docker_run $0 $ARG_LIST
+    wrap_up $?
+fi
+
 # Check codename
 test $NUM_ARGS -lt 1 -o -f $DISTRO_CONFIG_DIR/${CODENAME:-bogus}.sh || \
     usage "Codename '$CODENAME' not valid"
@@ -109,25 +152,24 @@ test $NUM_ARGS -lt 2 -o -f $PACKAGE_CONFIG_DIR/${PACKAGE:-bogus}.sh || \
 # Set variables
 DOCKER_CONTAINER=$CODENAME-$PACKAGE
 
-# Debug info
-debug "Mode: $MODE"
-
-# Source configs
-if test -n "$CODENAME"; then
-    . $DISTRO_CONFIG_DIR/$CODENAME.sh
-fi
-if test -n "$PACKAGE"; then
-. $PACKAGE_CONFIG_DIR/$PACKAGE.sh
-fi
-
 # Source scripts
-debug "Sourcing include scripts:"
+debug "Sourcing include scripts"
 . $SCRIPTS_DIR/docker.sh
 . $SCRIPTS_DIR/sbuild.sh
 . $SCRIPTS_DIR/distro.sh
 . $SCRIPTS_DIR/debian-source-package.sh
 . $SCRIPTS_DIR/debian-binary-package.sh
 . $SCRIPTS_DIR/debian-pkg-repo.sh
+
+# Source distro and package configs
+if test -n "$CODENAME"; then
+    debug "    Sourcing config for distro '$CODENAME'"
+    . $DISTRO_CONFIG_DIR/$CODENAME.sh
+fi
+if test -n "$PACKAGE"; then
+    debug "    Sourcing config for package '$PACKAGE'"
+    . $PACKAGE_CONFIG_DIR/$PACKAGE.sh
+fi
 
 
 # Debug
@@ -142,4 +184,3 @@ if test $NUM_ARGS -gt 2 -a "$PACKAGES" = "${PACKAGES/ $PACKAGE /}"; then
     echo "Package '$PACKAGE' not valid for codename '$CODENAME'" >&2
     exit 1
 fi
-

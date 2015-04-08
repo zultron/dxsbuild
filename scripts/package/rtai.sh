@@ -1,5 +1,3 @@
-debug "Sourcing configs/package/rtai.sh"
-
 GIT_REV=a416758
 VERSION=4.0.5.${GIT_REV}
 RELEASE=1

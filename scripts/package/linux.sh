@@ -1,5 +1,3 @@
-debug "Sourcing configs/package/linux.sh"
-
 VERSION=3.8.13
 RELEASE=11
 TARBALL_URL=http://www.kernel.org/pub/linux/kernel/v3.0/linux-${VERSION}.tar.xz
@@ -28,10 +26,10 @@ configure_package() {
 	sed -ie '/^compiler:/ s/gcc-.*/gcc-4.8/' debian/config/defines
     fi
     for featureset in $DISABLED_FEATURESETS; do
-	debug "      Disabling featureset $featureset"
+	debug "    Disabling featureset $featureset"
 	sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
     done
-    debug "      Running configure script"
+    debug "    Running configure script"
     debian/rules debian/control NOFAIL=true
     debian/rules clean
 }

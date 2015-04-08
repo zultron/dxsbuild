@@ -40,16 +40,16 @@ source_tarball_download() {
 	    mkdir -p $SOURCE_PKG_DIR
 	    wget $TARBALL_URL -O $SOURCE_PKG_DIR/$DEBIAN_TARBALL
 	else
-	    debug "    (Source tarball exists; not downloading)"
+	    debug "      (Source tarball exists; not downloading)"
 	fi
     else
-	debug "    (No TARBALL_URL defined; not downloading source tarball)"
+	debug "      (No TARBALL_URL defined; not downloading source tarball)"
     fi
 }
 
 source_tarball_unpack() {
     if test -z "$TARBALL_URL"; then
-	debug "    (No TARBALL_URL defined; not unpacking source tarball)"
+	debug "      (No TARBALL_URL defined; not unpacking source tarball)"
 	return
     fi
 

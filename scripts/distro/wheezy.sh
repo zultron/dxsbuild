@@ -1,5 +1,3 @@
-debug "    Sourcing configs/distro/wheezy.sh"
-
 # RT kernel packages
 PACKAGES="xenomai rtai linux linux-tools linux-latest"
 # ZeroMQ packages

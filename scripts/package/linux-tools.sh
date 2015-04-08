@@ -1,5 +1,3 @@
-debug "Sourcing configs/package/linux-tools.sh"
-
 VERSION=3.8.13
 RELEASE=3da
 TARBALL_URL=http://www.kernel.org/pub/linux/kernel/v3.0/linux-${VERSION}.tar.xz

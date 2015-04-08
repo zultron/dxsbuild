@@ -37,25 +37,35 @@ sbuild_chroot_init() {
 }
 
 sbuild_chroot_install_keys() {
-    if test -f /var/lib/sbuild/apt-keys/sbuild-key.sec; then
+    SBUILD_KEY_DIR=/var/lib/sbuild/apt-keys
+    if test -f $SBUILD_KEY_DIR/sbuild-key.sec; then
 	if test -f $GNUPGHOME/sbuild-key.sec; then
 	    debug "      (sbuild package keys installed; doing nothing)"
 	else
-	    debug "    Copying signing keys from chroot into $GNUPGHOME"
+	    debug "    Saving signing keys from sbuild into $GNUPGHOME"
+	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
 	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
-	    cp /var/lib/sbuild/apt-keys/sbuild-key.* $GNUPGHOME
+	    run cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
 	fi
     else
 	if ! test -f $GNUPGHOME/sbuild-key.sec; then
 	    debug "    Generating new sbuild keys"
-	    sbuild-update --keygen
+	    run sbuild-update --keygen
+	    debug "    Saving signing keys from sbuild into $GNUPGHOME"
+	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
 	    mkdir -p $GNUPGHOME; chmod 700 $GNUPGHOME
-	    cp /var/lib/sbuild/apt-keys/sbuild-key.* $GNUPGHOME
+	    run cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
 	else
-	    debug "    Copying signing keys from $GNUPGHOME into chroot"
-	    cp $GNUPGHOME/sbuild-key.* /var/lib/sbuild/apt-keys
+	    debug "    Copying signing keys from $GNUPGHOME into sbuild"
+	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
+	    run cp $GNUPGHOME/sbuild-key.* $SBUILD_KEY_DIR
 	fi
     fi
+    debug "      Sbuild keyring contents:"
+    apt-key --keyring $SBUILD_KEY_DIR/sbuild-key.pub list | \
+	while read line; do
+	    debug "        $line"
+    done
 }
 
 sbuild_chroot_setup() {
@@ -77,7 +87,7 @@ sbuild_chroot_setup() {
 	cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
     fi
     debug "    Running sbuild-createchroot"
-    sbuild-createchroot $SBUILD_VERBOSE \
+    run sbuild-createchroot $SBUILD_VERBOSE \
     	--components=$COMPONENTS \
     	--arch=$SBUILD_CHROOT_ARCH \
     	$CODENAME $CHROOT_DIR $MIRROR
@@ -86,6 +96,7 @@ sbuild_chroot_setup() {
     test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
 	mv $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
 	$CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+    debug "    Updating chroot fstab"
     grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
 	echo setup.fstab=default/fstab >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 
@@ -109,18 +120,18 @@ sbuild_configure_package() {
 
     debug "      Installing extra packages in schroot:"
     debug "        $EXTRA_BUILD_PACKAGES"
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	apt-get update
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	apt-get install --no-install-recommends -y \
 	$EXTRA_BUILD_PACKAGES
 
     debug "      Running configure function in schroot"
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
-	./$DBUILD -C $CODENAME $PACKAGE
+    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+	./$DBUILD -C $(! $DEBUG || echo -d) $CODENAME $PACKAGE
 
     debug "      Uninstalling extra packages"
-    schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
+    run schroot -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild $SBUILD_VERBOSE -- \
 	apt-get purge -y --auto-remove \
 	$EXTRA_BUILD_PACKAGES
 }
@@ -129,22 +140,19 @@ sbuild_build_package() {
     debug "      Build dir: $BUILD_DIR"
     debug "      Source package .dsc file: $DSC_FILE"
 
+    test -f $BUILD_DIR/$DSC_FILE || error "No .dsc file '$DSC_FILE'"
+
     sbuild_chroot_init
     sbuild_chroot_install_keys
-
-    if test -n "$SBUILD_RESOLVER"; then
-	SBUILD_DEP_RESOLVER="--build-dep-resolver=$SBUILD_RESOLVER"
-	debug "      Sbuild dependency resolver:  $SBUILD_RESOLVER"
-    fi
 
     debug "    Running sbuild"
     (
 	cd $BUILD_DIR
-	sbuild \
+	run sbuild \
 	    --host=$HOST_ARCH --build=$SBUILD_CHROOT_ARCH \
 	    -d $CODENAME $BUILD_INDEP $SBUILD_VERBOSE $SBUILD_DEBUG $NUM_JOBS \
 	    -c $CODENAME-$SBUILD_CHROOT_ARCH-sbuild \
-	    $SBUILD_DEP_RESOLVER \
+	    ${SBUILD_RESOLVER:+--build-dep-resolver=$SBUILD_RESOLVER} \
 	    $DSC_FILE
     )
 }
@@ -153,6 +161,6 @@ sbuild_shell() {
     msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
 
     sbuild_chroot_init
-    sbuild-shell $SBUILD_CHROOT
+    run sbuild-shell $SBUILD_CHROOT
 }
 

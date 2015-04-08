@@ -1,5 +1,3 @@
-debug "Sourcing czmq.sh"
-
 VERSION=2.2.0
 RELEASE=0.4
 TARBALL_URL=http://download.zeromq.org/czmq-${VERSION}.tar.gz

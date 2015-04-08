@@ -17,7 +17,7 @@ configure_package_wrapper() {
 	msg "    Configuring source package"
 	sbuild_configure_package
     else
-	debug "    (No configure_package function defined)"
+	debug "      (No configure_package function defined)"
     fi
 }
 
@@ -29,7 +29,7 @@ source_package_build_from_tree() {
     debug "      Debianized source tree: $BUILD_SRC_DIR"
     (
 	cd $BUILD_SRC_DIR
-	dpkg-source -b .
+	run dpkg-source -b --format="${DEBIAN_PACKAGE_FORMAT:-3.0 (quilt)}" .
     )
 }
 

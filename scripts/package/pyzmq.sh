@@ -1,5 +1,3 @@
-debug "Sourcing pyzmq.sh"
-
 VERSION=14.3.0
 RELEASE=4
 TARBALL_URL=https://github.com/zeromq/pyzmq/archive/v${VERSION}.tar.gz

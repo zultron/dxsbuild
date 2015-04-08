@@ -1,5 +1,3 @@
-debug "Sourcing python-pyftpdlib.sh"
-
 VERSION=1.2.0
 RELEASE=4
 TARBALL_URL=https://github.com/giampaolo/pyftpdlib/archive/release-$VERSION.tar.gz

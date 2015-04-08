@@ -17,13 +17,6 @@ case $MODE in
 	;;
 
     ##### Functions run inside Docker container #####
-    *) # If not yet in Docker, re-run function inside Docker
-	if ! $IN_DOCKER; then
-	    debug "Running Docker:  '$0 $ARG_LIST'"
-	    docker_run $0 $ARG_LIST
-	    exit $?
-	fi
-	;;&
 
     BUILD_SBUILD_CHROOT)  # -r CODENAME:  Build sbuild chroot
 	sbuild_chroot_setup
@@ -50,3 +43,5 @@ case $MODE in
 	deb_repo_list
 	;;
 esac
+
+wrap_up $?

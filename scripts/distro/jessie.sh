@@ -1,5 +1,3 @@
-debug "    Sourcing jessie.sh"
-
 # RT kernel packages
 PACKAGES="xenomai rtai linux linux-tools linux-latest"
 # ZeroMQ packages
