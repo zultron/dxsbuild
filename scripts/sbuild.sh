@@ -91,8 +91,9 @@ sbuild_save_config() {
 
 	if ! grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
 	    debug "    Adding fstab setting to schroot config"
-	    run_user bash -c "echo setup.fstab=default/fstab \
-	    >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT"
+	    run_user sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
+		-e '"$ a setup.fstab=default/fstab"'
+	    run cat $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 	else
 	    debug "      (Found fstab setting in schroot config)"
 	fi
@@ -124,9 +125,11 @@ sbuild_chroot_setup() {
 	cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
     fi
 
-    debug "    Cleaning old apt sources lists"
-    run bash -c "> $CHROOT_DIR/etc/apt/sources.list"
-    run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
+    if test -f $CHROOT_DIR/etc/apt/sources.list; then
+	debug "    Cleaning old apt sources lists"
+	run bash -c "> $CHROOT_DIR/etc/apt/sources.list"
+	run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
+    fi
 
     debug "    Running sbuild-createchroot"
     run sbuild-createchroot $SBUILD_VERBOSE \
