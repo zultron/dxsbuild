@@ -9,7 +9,7 @@ deb_repo_init() {
 	debug "    Setting up GPG package signing keys"
 	run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
 	run_user GNUPGHOME=$GNUPGHOME gpg --import \
-	    /var/lib/sbuild/apt-keys/sbuild-key.sec
+	    $GNUPGHOME/sbuild-key.sec
     fi
     SIGNING_KEY=$(GNUPGHOME=$GNUPGHOME gpg --fingerprint \
 	--no-permission-warning 'Sbuild Signer' | \
