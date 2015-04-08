@@ -17,10 +17,12 @@ DISTRO_COMPONENTS=universe
 
 distro_configure_repos() {
     # Ubuntu distro
-    repo_add_apt_source ubuntu $DISTRO_MIRROR amd64,i386 \
-	$DISTRO_COMPONENTS
-    repo_add_apt_source ubuntu $DISTRO_MIRROR_armhf armhf \
-	$DISTRO_COMPONENTS
+    case $HOST_ARCH in
+	amd64|i386)
+	    repo_add_apt_source ubuntu $DISTRO_MIRROR_armhf armhf \
+		$DISTRO_COMPONENTS
+	    ;;
+    esac
 
     # Dovetail Automata; enable to pull deps not built locally
     #repo_configure_dovetail_automata  # include for partial builds

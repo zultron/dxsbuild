@@ -30,7 +30,7 @@ debianization_git_tree_unpack() {
 	debug "      Debzn git dir: $DEBZN_GIT_DIR"
 	debug "      Dest dir: $BUILD_SRC_DIR/debian"
 	debug "      Git branch:  ${GIT_BRANCH:-master}"
-	mkdir -p $BUILD_SRC_DIR/debian
+	run_user mkdir -p $BUILD_SRC_DIR/debian
 	run_user git --git-dir=$DEBZN_GIT_DIR/.git archive \
 	    --prefix=./ ${GIT_BRANCH:-master} | \
 	    run_user tar xCf $BUILD_SRC_DIR/debian -

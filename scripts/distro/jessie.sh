@@ -14,15 +14,11 @@ ARCHES="amd64 i386 armhf"
 DISTRO_MIRROR=http://http.debian.net/debian
 
 distro_configure_repos() {
-    # Debian distro
-    repo_add_apt_source debian $DISTRO_MIRROR
-    repo_add_apt_key 7DE089671804772E
+    # Cross-build tools
+    repo_configure_emdebian
 
     # Dovetail Automata; enable to pull deps not built locally
     #repo_configure_dovetail_automata  # include for partial builds
-
-    # Cross-build tools
-    repo_configure_emdebian
 
     # RCN's ARM repo
     # repo_configure_rcn

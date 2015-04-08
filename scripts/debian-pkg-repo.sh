@@ -1,6 +1,7 @@
 debug "    Sourcing debian-pkg-repo.sh"
 
 deb_repo_init() {
+    test -z "$SIGNING_KEY" || return
     REPO_DIR_ABS=$(readlink -f $REPO_DIR)
     debug "      Apt repo dir: $REPO_DIR_ABS"
     debug "      GPG key dir: $GNUPGHOME"
@@ -10,7 +11,8 @@ deb_repo_init() {
 	run_user GNUPGHOME=$GNUPGHOME gpg --import \
 	    /var/lib/sbuild/apt-keys/sbuild-key.sec
     fi
-    SIGNING_KEY=$(GNUPGHOME=$GNUPGHOME gpg --fingerprint 'Sbuild Signer' | \
+    SIGNING_KEY=$(GNUPGHOME=$GNUPGHOME gpg --fingerprint \
+	--no-permission-warning 'Sbuild Signer' | \
 	awk '/Key fingerprint/ { print $12 $13; }')
     debug "      GPG package signing key fingerprint:  $SIGNING_KEY"
 
@@ -21,19 +23,25 @@ deb_repo_init() {
 }
 
 deb_repo_setup() {
-    if test ! -f ${REPO_DIR}/conf-${CODENAME}/distributions; then
-	msg "Initializing Debian Apt package repository"
+    msg "Initializing Debian Apt package repository"
+    if test ! -s ${REPO_DIR}/conf-${CODENAME}/distributions; then
 	deb_repo_init
 
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
 	run_user mkdir -p ${REPO_DIR_ABS}/conf-${CODENAME}
-	run_user bash -c "sed < $SCRIPTS_DIR/ppa-distributions.tmpl \
+	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \
 	    > ${REPO_DIR_ABS}/conf-${CODENAME}/distributions \
 	    -e s/@CODENAME@/${CODENAME}/g \
-	    -e s/@SIGNING_KEY@/${SIGNING_KEY}/g"
+	    -e s/@SIGNING_KEY@/${SIGNING_KEY}/g'"
+    else
+	debug "      (Apt repo config already initialized; doing nothing)"
+    fi
 
+    if test ! -s ${REPO_DIR}/${CODENAME}/dists/${CODENAME}/Release; then
 	debug "    Initializing repository files"
 	${REPREPRO} export ${CODENAME}
+    else
+	debug "      (Apt repo already initialized; doing nothing)"
     fi
 }
 

@@ -36,41 +36,68 @@ sbuild_chroot_init() {
     fi
 }
 
+sbuild_chroot_save_keys() {
+    debug "    Saving signing keys from sbuild into $GNUPGHOME"
+    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
+    run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
+    run cp $SBUILD_KEY_DIR/sbuild-key.* /tmp
+    run chown user /tmp/sbuild-key.*
+    run_user cp /tmp/sbuild-key.* $GNUPGHOME
+}
+
+sbuild_chroot_restore_keys() {
+    debug "    Restoring signing keys from $GNUPGHOME into sbuild"
+    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
+    run install -o user -g sbuild $GNUPGHOME/sbuild-key.* $SBUILD_KEY_DIR
+}
+
 sbuild_chroot_install_keys() {
     SBUILD_KEY_DIR=/var/lib/sbuild/apt-keys
     if test -f $SBUILD_KEY_DIR/sbuild-key.sec; then
 	if test -f $GNUPGHOME/sbuild-key.sec; then
 	    debug "      (sbuild package keys installed; doing nothing)"
 	else
-	    debug "    Saving signing keys from sbuild into $GNUPGHOME"
-	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
-	    run_user cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
+	    sbuild_chroot_save_keys
 	fi
     else
 	if ! test -f $GNUPGHOME/sbuild-key.sec; then
 	    debug "    Generating new sbuild keys"
 	    run sbuild-update --keygen
-	    debug "    Saving signing keys from sbuild into $GNUPGHOME"
-	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
-	    run_user cp $SBUILD_KEY_DIR/sbuild-key.* $GNUPGHOME
+	    sbuild_chroot_save_keys
 	else
-	    debug "    Copying signing keys from $GNUPGHOME into sbuild"
-	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    run install -o user -g sbuild $GNUPGHOME/sbuild-key.* $SBUILD_KEY_DIR
+	    sbuild_chroot_restore_keys
 	fi
     fi
     debug "      Sbuild keyring contents:"
     run_debug apt-key --keyring $SBUILD_KEY_DIR/sbuild-key.pub list
 }
 
-sbuild_install_config() {
+sbuild_restore_config() {
     if test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
-	debug "    Copying schroot config $SBUILD_CHROOT"
-	cp $CONFIG_DIR/chroot.d/$SBUILD_CHROOT /etc/schroot/chroot.d
+	debug "    Restoring saved schroot config $SBUILD_CHROOT"
+	run cp $CONFIG_DIR/chroot.d/$SBUILD_CHROOT /etc/schroot/chroot.d
+	run_debug ls -l /etc/schroot/chroot.d | tail -n +2
     else
-	debug "      (Config $SBUILD_CHROOT does not exist)"
+	debug "      (No saved config for $SBUILD_CHROOT)"
+    fi
+}
+
+sbuild_save_config() {
+    if test -f /etc/schroot/chroot.d/$SBUILD_CHROOT-*; then
+	debug "    Saving generated schroot config from Docker"
+	run_user mkdir -p $CONFIG_DIR/chroot.d
+	run_user cp /etc/schroot/chroot.d/${SBUILD_CHROOT}-* \
+	    $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+
+	if ! grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
+	    debug "    Adding fstab setting to schroot config"
+	    run_user bash -c "echo setup.fstab=default/fstab \
+	    >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT"
+	else
+	    debug "      (Found fstab setting in schroot config)"
+	fi
+    else
+	debug "      (No new schroot config found in /etc/schroot/chroot.d)"
     fi
 }
 
@@ -86,34 +113,31 @@ sbuild_chroot_setup() {
     COMPONENTS=main${DISTRO_COMPONENTS:+,$DISTRO_COMPONENTS}
     debug "      Components:  $COMPONENTS"
     debug "      Distro mirror:  $MIRROR"
-    sbuild_install_config
+
+    # If the chroot config already exists, restore it
+    sbuild_restore_config
+    sbuild_chroot_install_keys
+
     if $FOREIGN && test $BUILD_ARCH=armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
 	mkdir -p $CHROOT_DIR/usr/bin
 	cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
     fi
+
+    debug "    Cleaning old apt sources lists"
+    run bash -c "> $CHROOT_DIR/etc/apt/sources.list"
+    run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
+
     debug "    Running sbuild-createchroot"
     run sbuild-createchroot $SBUILD_VERBOSE \
     	--components=$COMPONENTS \
     	--arch=$SBUILD_CHROOT_ARCH \
     	$CODENAME $CHROOT_DIR $MIRROR
 
-    debug "    Updating config files"
-    run_user mkdir -p $CONFIG_DIR/chroot.d
-    ! test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT-* || \
-	run_user cp $CONFIG_DIR/chroot.d/${SBUILD_CHROOT}-* \
-	$CONFIG_DIR/chroot.d/$SBUILD_CHROOT
-    debug "    Updating chroot fstab setting"
-    grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT || \
-	run_user bash -c "echo setup.fstab=default/fstab \
-	    >> $CONFIG_DIR/chroot.d/$SBUILD_CHROOT"
-
-    # Add local sbuild chroot users
-    # FIXME
-    #sbuild-adduser 1000
+    # Save generated sbuild config from Docker
+    sbuild_save_config
 
     debug "    Configuring apt sources"
-    > $CHROOT_DIR/etc/apt/sources.list
     distro_configure_repos
     # Set up local repo
     deb_repo_init  # Set up variables
@@ -123,7 +147,7 @@ sbuild_chroot_setup() {
 
 sbuild_configure_package() {
     sbuild_chroot_init
-    sbuild_install_config
+    sbuild_restore_config
 
     # FIXME run with union-type=aufs in schroot.conf
 
@@ -153,7 +177,7 @@ sbuild_build_package() {
 
     sbuild_chroot_init
     sbuild_chroot_install_keys
-    sbuild_install_config
+    sbuild_restore_config
 
     debug "    Running sbuild"
     (
@@ -171,7 +195,11 @@ sbuild_shell() {
     msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
 
     sbuild_chroot_init
-    sbuild_install_config
-    run_user sbuild-shell $SBUILD_CHROOT
+    sbuild_restore_config
+    if test $DOCKER_UID = 0; then
+	run sbuild-shell $SBUILD_CHROOT
+    else
+	run_user sbuild-shell $SBUILD_CHROOT
+    fi
 }
 

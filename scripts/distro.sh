@@ -7,12 +7,11 @@ repo_add_apt_key() {
     case $KEY in
 	http://*|https://*)
 	    # Install key from URL
-	    wget -O - -q $KEY | \
-		apt-key --keyring $KEYRING add -
+	    run bash -c "wget -O - -q $KEY | apt-key --keyring $KEYRING add -"
 	    ;;
 	[0-9A-F][0-9A-F][0-9A-F][0-9A-F]*)
 	    # Install key from key server
-	    apt-key --keyring $KEYRING \
+	    run apt-key --keyring $KEYRING \
 		adv --keyserver $GPG_KEY_SERVER --recv-key $KEY
 	    ;;
 	*)
