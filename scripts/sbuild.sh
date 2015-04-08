@@ -185,6 +185,8 @@ sbuild_build_package() {
     sbuild_chroot_install_keys
     sbuild_restore_config
 
+    test -d "$CHROOT_DIR" || error "Absent chroot directory:  $CHROOT_DIR"
+
     debug "    Running sbuild"
     (
 	cd $BUILD_DIR
