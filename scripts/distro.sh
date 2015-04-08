@@ -18,6 +18,7 @@ repo_add_apt_key() {
 	    error "Unrecognized key '$KEY'"
 	    ;;
     esac
+    run_debug apt-key --keyring $KEYRING list
 }
 
 repo_add_apt_source() {
