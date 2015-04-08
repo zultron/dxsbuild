@@ -94,7 +94,7 @@ DDEBUG=false
 NEEDED_ARGS=0
 ARG_LIST=""
 if $IN_DOCKER; then  # dpkg-architecture is distro-specific
-    HOST_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
+    HOST_ARCH=$(dpkg-architecture -qDEB_HOST_ARCH)
     BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
 fi
 RERUN_IN_DOCKER=true

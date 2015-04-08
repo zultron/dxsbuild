@@ -9,19 +9,22 @@ sbuild_chroot_init() {
 
     # Detect foreign architecture
     # FIXME:  This only takes care of amd64-cross-armhf
-    FOREIGN=false
     if ! dpkg-architecture -earmhf && test $HOST_ARCH = armhf; then
 	FOREIGN=true
 	debug "      Detected foreign arch:  $BUILD_ARCH != $HOST_ARCH"
+    else
+	FOREIGN=false
+	debug "      Detected non-foreign arch:  $BUILD_ARCH ~= $HOST_ARCH"
     fi
 
     if mode BUILD_SBUILD_CHROOT SBUILD_SHELL || \
-	test -n "$NATIVE_BUILD_ONLY"; then
+	! $FOREIGN || test -z "$NATIVE_BUILD_ONLY"; then
 	SBUILD_CHROOT_ARCH=$HOST_ARCH
+	debug "      Using host-arch $SBUILD_CHROOT_ARCH"
     else
 	SBUILD_CHROOT_ARCH=$BUILD_ARCH
+	debug "      Using build-arch $SBUILD_CHROOT_ARCH"
     fi
-    debug "      Sbuild chroot arch: $SBUILD_CHROOT_ARCH"
     SBUILD_CHROOT=$CODENAME-$SBUILD_CHROOT_ARCH-sbuild
     debug "      Sbuild chroot: $SBUILD_CHROOT"
     CHROOT_DIR=$SBUILD_CHROOT_DIR/$CODENAME-$SBUILD_CHROOT_ARCH
