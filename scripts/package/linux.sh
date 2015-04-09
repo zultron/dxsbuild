@@ -8,15 +8,15 @@ NATIVE_BUILD_ONLY=true  # Build-Depends: gcc-4.9
 FEATURESETS="xenomai rtai"
 DISABLED_FEATURESETS=""  # Set to 'xenomai' or 'rtai' to skip build
 
-EXTRA_BUILD_PACKAGES=python
+CONFIGURE_PACKAGE_DEPS=python
 # Add xenomai-kernel-source if not disabled
 DISABLED_FEATURESETS=" $DISABLED_FEATURESETS "
 test "${DISABLED_FEATURESETS/xenomai/}" != "$DISABLED_FEATURESETS" || \
-EXTRA_BUILD_PACKAGES+=" xenomai-kernel-source"
+CONFIGURE_PACKAGE_DEPS+=" xenomai-kernel-source"
 # Add rtai-source if not disabled
 DISABLED_FEATURESETS=" $DISABLED_FEATURESETS "
 test "${DISABLED_FEATURESETS/rtai/}" != "$DISABLED_FEATURESETS" || \
-EXTRA_BUILD_PACKAGES+=" rtai-source"
+CONFIGURE_PACKAGE_DEPS+=" rtai-source"
 
 configure_package() {
     if test $CODENAME = trusty; then

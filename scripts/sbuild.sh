@@ -169,12 +169,12 @@ sbuild_configure_package() {
     # FIXME run with union-type=aufs in schroot.conf
 
     debug "      Installing extra packages in schroot:"
-    debug "        $EXTRA_BUILD_PACKAGES"
+    debug "        $CONFIGURE_PACKAGE_DEPS"
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get update
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get install --no-install-recommends -y \
-	$EXTRA_BUILD_PACKAGES
+	$CONFIGURE_PACKAGE_DEPS
 
     debug "      Running configure function in schroot"
     run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
@@ -183,7 +183,7 @@ sbuild_configure_package() {
     debug "      Uninstalling extra packages"
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get purge -y --auto-remove \
-	$EXTRA_BUILD_PACKAGES
+	$CONFIGURE_PACKAGE_DEPS
 }
 
 sbuild_build_package() {

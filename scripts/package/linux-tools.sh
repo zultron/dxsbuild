@@ -6,7 +6,7 @@ DEBIAN_PACKAGE_COMP=xz
 # 'aptitude' resolver installs a bunch of amd64-arch pkgs
 NATIVE_BUILD_ONLY=true
 
-EXTRA_BUILD_PACKAGES="python debhelper"
+CONFIGURE_PACKAGE_DEPS="python debhelper"
 
 configure_package() {
     debian/rules debian/control || true # always fails

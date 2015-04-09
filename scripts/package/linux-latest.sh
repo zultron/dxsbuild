@@ -4,7 +4,7 @@ DEBIAN_PACKAGE_COMP=xz
 SBUILD_RESOLVER=aptitude  # Default 'apt' resolver chokes on linux-support-3.8-1
 GIT_BRANCH=3.8.13
 
-EXTRA_BUILD_PACKAGES="python debhelper linux-support-3.8-1"
+CONFIGURE_PACKAGE_DEPS="python debhelper linux-support-3.8-1"
 
 configure_package() {
     debian/rules debian/control || true # always fails
