@@ -108,7 +108,8 @@ sbuild_save_config() {
 	    debug "    Adding fstab setting to schroot config"
 	    run_user sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
 		-e '"$ a setup.fstab=default/fstab"'
-	    run cat $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+	    debug "      Chroot config:"
+	    run_debug cat $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 	else
 	    debug "      (Found fstab setting in schroot config)"
 	fi
