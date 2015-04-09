@@ -39,6 +39,18 @@ sbuild_chroot_init() {
     fi
 }
 
+sbuild_chroot_save_sbuild_conf() {
+    debug "    Installing sbuild.conf into /etc/sbuild/sbuild.conf"
+    run cp $SCRIPTS_DIR/sbuild.conf /etc/sbuild
+    run sed -i /etc/sbuild/sbuild.conf \
+	-e "s/@CODENAME@/$CODENAME/" \
+	-e "s/@MAINTAINER@/$MAINTAINER/" \
+	-e "s/@EMAIL@/$EMAIL/" \
+	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
+	-e "s/@/\\\\@/g"
+    run_debug grep -v -e '^$' -e '^#' /etc/sbuild/sbuild.conf
+}
+
 sbuild_chroot_save_keys() {
     debug "    Saving signing keys from sbuild into $GNUPGHOME"
     debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
@@ -120,6 +132,7 @@ sbuild_chroot_setup() {
 
     # If the chroot config already exists, restore it
     sbuild_restore_config
+    sbuild_chroot_save_sbuild_conf
     sbuild_chroot_install_keys
 
     if $FOREIGN && test $BUILD_ARCH=armhf; then
@@ -182,6 +195,7 @@ sbuild_build_package() {
     test -f $BUILD_DIR/$DSC_FILE || error "No .dsc file '$DSC_FILE'"
 
     sbuild_chroot_init
+    sbuild_chroot_save_sbuild_conf
     sbuild_chroot_install_keys
     sbuild_restore_config
 

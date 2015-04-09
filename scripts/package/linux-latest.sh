@@ -1,4 +1,3 @@
-VERSION=60
 GIT_URL=https://github.com/zultron/linux-latest-deb.git
 DEBIAN_PACKAGE_FORMAT='3.0 (native)'
 DEBIAN_PACKAGE_COMP=xz

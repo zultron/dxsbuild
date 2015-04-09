@@ -1,7 +1,7 @@
 debug "    Sourcing debian-pkg-repo.sh"
 
 deb_repo_init() {
-    test -z "$SIGNING_KEY" || return
+    test -z "$SIGNING_KEY" || return 0
     REPO_DIR_ABS=$(readlink -f $REPO_DIR)
     debug "      Apt repo dir: $REPO_DIR_ABS"
     debug "      GPG key dir: $GNUPGHOME"
@@ -18,7 +18,6 @@ deb_repo_init() {
 
     REPREPRO="run_user reprepro -VV -b ${REPO_DIR_ABS} \
         --confdir +b/conf-${CODENAME} --dbdir +b/db-${CODENAME} \
-	--outdir +b/${CODENAME} \
 	--gnupghome $GNUPGHOME"
 }
 
@@ -49,7 +48,7 @@ deb_repo_build() {
     msg "Updating Debian Apt package repository"
     deb_repo_init	# repo config
     deb_repo_setup	# set up repo, if needed
-    binary_package_init	# source pkg config
+    source_package_init	# source pkg config
 
     # add source pkg
     msg "    Removing all packages for '$PACKAGE'"

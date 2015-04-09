@@ -17,12 +17,13 @@ source_tarball_init() {
 	    ;;
     esac
 
+    local BASENAME=${PACKAGE}_${PACKAGE_VER}
     case "$DEBIAN_PACKAGE_FORMAT" in
 	'3.0 (quilt)')
-	    DEBIAN_TARBALL=${PACKAGE}_${VERSION}.orig.tar.${DEBIAN_PACKAGE_COMP}
+	    DEBIAN_TARBALL=${BASENAME}.orig.tar.${DEBIAN_PACKAGE_COMP}
 	    ;;
 	'3.0 (native)')
-	    DEBIAN_TARBALL=${PACKAGE}_${VERSION}.tar.${DEBIAN_PACKAGE_COMP}
+	    DEBIAN_TARBALL=${BASENAME}.tar.${DEBIAN_PACKAGE_COMP}
 	    ;;
 	*)
 	    error "Package ${PACKAGE}:" \
@@ -54,13 +55,6 @@ source_tarball_unpack() {
     fi
 
     msg "    Unpacking source tarball"
-    debug "      Tarball path: $SOURCE_PKG_DIR/$DEBIAN_TARBALL"
-    debug "      Build dir: $BUILD_DIR"
-    debug "      Linking original tarball to $BUILD_DIR"
-    run_user mkdir -p $BUILD_DIR
-    run_user ln -f $SOURCE_PKG_DIR/$DEBIAN_TARBALL $BUILD_DIR
-    debug "      Unpacking tarball into $BUILD_SRC_DIR"
-    run_user rm -rf $BUILD_SRC_DIR; run_user mkdir -p $BUILD_SRC_DIR
     run_user tar xCf $BUILD_SRC_DIR $SOURCE_PKG_DIR/$DEBIAN_TARBALL \
 	--strip-components=1
 }

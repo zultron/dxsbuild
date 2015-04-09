@@ -9,6 +9,22 @@ debug "    Sourcing debian-source-package.sh"
 . $SCRIPTS_DIR/debian-debzn.sh
 
 ########################################
+# Source package init vars
+source_package_init() {
+    debianization_init  # Init vars after unpacking
+
+    debug "      Package format:  ${DEBIAN_PACKAGE_FORMAT:=3.0 (quilt)}"
+}
+
+########################################
+# Source package setup
+source_package_setup() {
+    msg "    Preparing source directory $BUILD_SRC_DIR"
+    run_user rm -rf $BUILD_SRC_DIR
+    run_user mkdir -p $BUILD_SRC_DIR/debian
+}
+
+########################################
 # Source package configuration
 
 configure_package_wrapper() {
@@ -30,7 +46,7 @@ source_package_build_from_tree() {
     (
 	cd $BUILD_SRC_DIR
 	run_user dpkg-source -b \
-	    --format="'${DEBIAN_PACKAGE_FORMAT:-3.0 (quilt)}'" .
+	    --format="'${DEBIAN_PACKAGE_FORMAT}'" .
     )
 }
 
@@ -45,17 +61,26 @@ source_package_cleanup() {
 # Source package build
 source_package_build() {
     msg "Building source package '$PACKAGE'"
-    # Download source tarball and unpack
-    source_tarball_init
-    source_tarball_download
-    source_tarball_unpack
+    # Initialize directories
+    source_package_setup
 
     # Update debianization git tree and copy to source tree
     debianization_git_tree_update
     debianization_git_tree_unpack
 
+    # Init variables
+    source_package_init
+
+    # Download source tarball and unpack
+    source_tarball_init
+    source_tarball_download
+    source_tarball_unpack
+
     # Some packages may define a configuration step
     configure_package_wrapper
+
+    # Add new changelog
+    debianization_add_changelog
 
     # Build the source package and clean up
     source_package_build_from_tree

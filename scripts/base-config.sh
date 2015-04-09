@@ -26,10 +26,10 @@ SOURCE_PKG_DIR=$BUILD_BASE_DIR
 DEBZN_GIT_DIR=$BUILD_BASE_DIR/debzn-git
 
 # Build directory for a distro codename
-BUILD_DIR=$BUILD_BASE_DIR/$CODENAME
+BUILD_DIR=$BUILD_BASE_DIR
 
 # Where sources are built
-BUILD_SRC_DIR=$BUILD_DIR/tree
+BUILD_SRC_DIR=$BUILD_DIR/tree-$CODENAME
 
 # Where the Apt package repo is built
 REPO_DIR=repo
@@ -59,6 +59,8 @@ SCRIPTS_DIR=scripts
 DISTRO_CONFIG_DIR=$SCRIPTS_DIR/distro
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
+# Suffix for package version
+PACKAGE_VERSION_SUFFIX=~1mk.dbuild
 
 # TCL default version; override in distro config
 TCL_VER=8.6
