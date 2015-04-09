@@ -2,8 +2,8 @@
 
 ARCHES="amd64 i386 armhf"
 DISTROS="jessie trusty"
-PACKAGES="dovetail-automata-keyring python-pyftpdlib rtai xenomai linux-latest \
-    linux-tools linux czmq pyzmq"
+PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
+    linux-tools czmq pyzmq"
 
 for arch in $ARCHES; do
     for distro in $DISTROS; do
