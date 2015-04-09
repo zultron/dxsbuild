@@ -39,7 +39,7 @@ sbuild_chroot_init() {
     fi
 }
 
-sbuild_chroot_save_sbuild_conf() {
+sbuild_install_sbuild_conf() {
     debug "    Installing sbuild.conf into /etc/sbuild/sbuild.conf"
     run cp $SCRIPTS_DIR/sbuild.conf /etc/sbuild
     run sed -i /etc/sbuild/sbuild.conf \
@@ -48,6 +48,7 @@ sbuild_chroot_save_sbuild_conf() {
 	-e "s/@EMAIL@/$EMAIL/" \
 	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
 	-e "s/@/\\\\@/g"
+    debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^#' /etc/sbuild/sbuild.conf
 }
 
@@ -60,13 +61,7 @@ sbuild_chroot_save_keys() {
     run_user cp /tmp/sbuild-key.* $GNUPGHOME
 }
 
-sbuild_chroot_restore_keys() {
-    debug "    Restoring signing keys from $GNUPGHOME into sbuild"
-    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-    run install -o user -g sbuild $GNUPGHOME/sbuild-key.* $SBUILD_KEY_DIR
-}
-
-sbuild_chroot_install_keys() {
+sbuild_install_keys() {
     SBUILD_KEY_DIR=/var/lib/sbuild/apt-keys
     if test -f $SBUILD_KEY_DIR/sbuild-key.sec; then
 	if test -f $GNUPGHOME/sbuild-key.sec; then
@@ -80,18 +75,22 @@ sbuild_chroot_install_keys() {
 	    run sbuild-update --keygen
 	    sbuild_chroot_save_keys
 	else
-	    sbuild_chroot_restore_keys
+	    debug "    Installing signing keys from $GNUPGHOME into sbuild"
+	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
+	    run install -o user -g sbuild $GNUPGHOME/sbuild-key.* \
+		$SBUILD_KEY_DIR
 	fi
     fi
     debug "      Sbuild keyring contents:"
     run_debug apt-key --keyring $SBUILD_KEY_DIR/sbuild-key.pub list
 }
 
-sbuild_restore_config() {
+sbuild_install_config() {
     if test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
-	debug "    Restoring saved schroot config $SBUILD_CHROOT"
+	debug "    Installing saved schroot config $SBUILD_CHROOT"
 	run cp $CONFIG_DIR/chroot.d/$SBUILD_CHROOT /etc/schroot/chroot.d
-	run_debug ls -l /etc/schroot/chroot.d | tail -n +2
+	debug "      Contents of /etc/schroot/chroot.d/$SBUILD_CHROOT:"
+	run_debug cat /etc/schroot/chroot.d/$SBUILD_CHROOT
     else
 	debug "      (No saved config for $SBUILD_CHROOT)"
     fi
@@ -121,6 +120,9 @@ sbuild_save_config() {
 sbuild_chroot_setup() {
     msg "Creating sbuild chroot, distro $CODENAME, arch $SBUILD_CHROOT_ARCH"
     sbuild_chroot_init
+    sbuild_install_config
+    sbuild_install_sbuild_conf
+    sbuild_install_keys
 
     local MIRROR=$DISTRO_MIRROR
     # If e.g. $DISTRO_MIRROR_armhf defined, use it
@@ -130,11 +132,6 @@ sbuild_chroot_setup() {
     COMPONENTS=main${DISTRO_COMPONENTS:+,$DISTRO_COMPONENTS}
     debug "      Components:  $COMPONENTS"
     debug "      Distro mirror:  $MIRROR"
-
-    # If the chroot config already exists, restore it
-    sbuild_restore_config
-    sbuild_chroot_save_sbuild_conf
-    sbuild_chroot_install_keys
 
     if $FOREIGN && test $BUILD_ARCH=armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
@@ -167,7 +164,7 @@ sbuild_chroot_setup() {
 
 sbuild_configure_package() {
     sbuild_chroot_init
-    sbuild_restore_config
+    sbuild_install_config
 
     # FIXME run with union-type=aufs in schroot.conf
 
@@ -196,9 +193,9 @@ sbuild_build_package() {
     test -f $BUILD_DIR/$DSC_FILE || error "No .dsc file '$DSC_FILE'"
 
     sbuild_chroot_init
-    sbuild_chroot_save_sbuild_conf
-    sbuild_chroot_install_keys
-    sbuild_restore_config
+    sbuild_install_sbuild_conf
+    sbuild_install_keys
+    sbuild_install_config
 
     test -d "$CHROOT_DIR" || error "Absent chroot directory:  $CHROOT_DIR"
 
@@ -218,7 +215,7 @@ sbuild_shell() {
     msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
 
     sbuild_chroot_init
-    sbuild_restore_config
+    sbuild_install_config
     if test $DOCKER_UID = 0; then
 	run sbuild-shell $SBUILD_CHROOT
     else
