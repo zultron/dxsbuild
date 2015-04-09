@@ -36,7 +36,7 @@ deb_repo_setup() {
 	debug "      (Apt repo config already initialized; doing nothing)"
     fi
 
-    if test ! -s ${REPO_DIR}/${CODENAME}/dists/${CODENAME}/Release; then
+    if test ! -s ${REPO_DIR}/dists/${CODENAME}/Release; then
 	debug "    Initializing repository files"
 	${REPREPRO} export ${CODENAME}
     else

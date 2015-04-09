@@ -159,7 +159,7 @@ sbuild_chroot_setup() {
     # Set up local repo
     deb_repo_init  # Set up variables
     deb_repo_setup
-    repo_add_apt_source local file://$BASE_DIR/$REPO_DIR/$CODENAME
+    repo_add_apt_source local file://$BASE_DIR/$REPO_DIR
 }
 
 sbuild_configure_package() {
