@@ -204,6 +204,11 @@ if test -n "$PACKAGE"; then
     . $PACKAGE_CONFIG_DIR/$PACKAGE.sh
 fi
 
+# Source optional config override file
+if test -f $BASE_DIR/local-config.sh; then
+    debug "    Sourcing local config"
+    . $BASE_DIR/local-config.sh
+fi
 
 # Debug
 ! $DDEBUG || set -x

@@ -10,3 +10,5 @@
 /docker/
 # apt package repository
 /repo/
+# local config
+/local-config.sh
