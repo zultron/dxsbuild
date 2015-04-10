@@ -173,6 +173,11 @@ if ! $IN_DOCKER && $RERUN_IN_DOCKER; then
     wrap_up $?
 fi
 
+# Pretend BUILD_ARCH is HOST_ARCH in some cases
+if test $BUILD_ARCH = amd64 -a $HOST_ARCH = i386; then
+    BUILD_ARCH=i386
+fi
+
 # Check distro name
 test $NUM_ARGS -lt 1 -o -f $DISTRO_CONFIG_DIR/${DISTRO:-bogus}.sh || \
     usage "Distro name '$DISTRO' not valid"

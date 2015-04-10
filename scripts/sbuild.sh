@@ -8,13 +8,12 @@ sbuild_chroot_init() {
     fi
 
     # Detect foreign architecture
-    # FIXME:  This only takes care of amd64-cross-armhf
-    if ! dpkg-architecture -earmhf && test $HOST_ARCH = armhf; then
+    if test $HOST_ARCH = $BUILD_ARCH; then
+	FOREIGN=false
+	debug "      Detected non-foreign arch:  $BUILD_ARCH = $HOST_ARCH"
+    else
 	FOREIGN=true
 	debug "      Detected foreign arch:  $BUILD_ARCH != $HOST_ARCH"
-    else
-	FOREIGN=false
-	debug "      Detected non-foreign arch:  $BUILD_ARCH ~= $HOST_ARCH"
     fi
 
     if mode BUILD_SBUILD_CHROOT SBUILD_SHELL || \
