@@ -71,3 +71,6 @@ TCL_VER=8.6
 
 # Build script name
 DBUILD=$(basename $0)
+
+# ccache directory
+CCACHE_DIR=$CONFIG_DIR/ccache

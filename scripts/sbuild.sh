@@ -47,9 +47,10 @@ sbuild_install_sbuild_conf() {
 	-e "s/@MAINTAINER@/$MAINTAINER/" \
 	-e "s/@EMAIL@/$EMAIL/" \
 	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
+	-e "s,@CCACHE_DIR@,$CCACHE_DIR," \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
-    run_debug grep -v -e '^$' -e '^#' /etc/sbuild/sbuild.conf
+    run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf
 
     debug "    Installing fstab into /etc/schroot/sbuild/fstab"
     run cp $SCRIPTS_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
@@ -193,6 +194,7 @@ sbuild_chroot_setup() {
     run sbuild-createchroot $SBUILD_VERBOSE \
 	--components=$COMPONENTS \
 	--arch=$SBUILD_CHROOT_ARCH \
+	--include=ccache \
 	$SCHROOT_EXCLUDE_ARG \
 	$BUILD_SCHROOT_SETUP_ONLY \
 	$CODENAME $CHROOT_DIR $MIRROR
