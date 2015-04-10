@@ -28,6 +28,6 @@ configure_package() {
 	sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
     done
     debug "    Running configure script"
-    debian/rules debian/control NOFAIL=true
-    debian/rules clean
+    run debian/rules debian/control NOFAIL=true
+    run debian/rules clean
 }
