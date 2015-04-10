@@ -64,8 +64,9 @@ usage() {
     msg "    $0 -i | -c [-d]"
     msg "        -i:		Build docker image"
     msg "        -c:		Spawn interactive shell in docker container"
-    msg "    $0 -r | -s | -L [-d] [-a ARCH] DISTRO"
+    msg "    $0 -r [-P] | -s | -L [-d] [-a ARCH] DISTRO"
     msg "        -r:		Create sbuild chroot"
+    msg "        -P:		Don't install packages; just configure chroot"
     msg "        -s:		Spawn interactive shell in sbuild chroot"
     msg "        -L:		List apt package repository contents"
     msg "    $0 -S | -b [-j n] | -R [-f] [-d] DISTRO PACKAGE"
@@ -109,12 +110,14 @@ RERUN_IN_DOCKER=true
 IN_SCHROOT=false
 FORCE_INDEP=false
 NUM_JOBS=""
-while getopts icrsLSbRCfj:a:u:d ARG; do
+BUILD_SCHROOT_SKIP_PACKAGES=false
+while getopts icrPsLSbRCfj:a:u:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
 	c) MODE=DOCKER_SHELL; RERUN_IN_DOCKER=false ;;
 	r) MODE=BUILD_SBUILD_CHROOT; NEEDED_ARGS=1 ;;
+	P) BUILD_SCHROOT_SKIP_PACKAGES=true ;;
 	s) MODE=SBUILD_SHELL; NEEDED_ARGS=1 ;;
 	L) MODE=LIST_APT_REPO; NEEDED_ARGS=1 ;;
 	S) MODE=BUILD_SOURCE_PACKAGE; NEEDED_ARGS=2 ;;

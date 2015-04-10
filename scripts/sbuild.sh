@@ -100,7 +100,7 @@ sbuild_install_config() {
 sbuild_save_config() {
     SBUILD_CHROOT=$DISTRO-$SBUILD_CHROOT_ARCH-sbuild
     SBUILD_CHROOT_GEN=$(readlink -e \
-	/etc/schroot/chroot.d/$CODENAME-$SBUILD_CHROOT_ARCH-sbuild-*)
+	/etc/schroot/chroot.d/$CODENAME-$SBUILD_CHROOT_ARCH-sbuild-* || true)
     if test -n "$SBUILD_CHROOT_GEN"; then
 	debug "    Saving generated schroot config from Docker"
 	run_user mkdir -p $CONFIG_DIR/chroot.d
@@ -128,6 +128,33 @@ sbuild_save_config() {
 	debug "      (No new schroot config found in /etc/schroot/chroot.d)"
     fi
 }
+
+sbuild_chroot_apt_sources() {
+    debug "    Installing /etc/apt/sources.list"
+    # Set arches in base apt source
+    local BASE_ARCHES="arch=$BUILD_ARCH"
+    # If no separate source defined for armhf, use base for
+    # cross-build source
+    if test $BUILD_ARCH = amd64 -a -z "$DISTRO_MIRROR_armhf"; then
+	BASE_ARCHES+=",armhf"
+    fi
+    local COMPONENTS="main${DISTRO_COMPONENTS:+ $DISTRO_COMPONENTS}"
+    local APT_SOURCE="deb [$BASE_ARCHES] $DISTRO_MIRROR $CODENAME $COMPONENTS"
+    run bash -c \
+	"echo $APT_SOURCE > $CHROOT_DIR/etc/apt/sources.list"
+
+    debug "      Contents of /etc/apt/sources.list:"
+    run_debug cat $CHROOT_DIR/etc/apt/sources.list
+
+    if declare -f distro_configure_repos >/dev/null; then
+	debug "    Configuring extra apt sources"
+	distro_configure_repos
+    else
+	debug "      (No distro_configure_repos function defined)"
+    fi
+
+}
+
 
 sbuild_chroot_setup() {
     msg "Creating sbuild chroot, distro $DISTRO, arch $SBUILD_CHROOT_ARCH"
@@ -165,30 +192,22 @@ sbuild_chroot_setup() {
     fi
 
     debug "    Running sbuild-createchroot"
+    if $BUILD_SCHROOT_SKIP_PACKAGES; then
+	debug "      Running in setup-only mode"
+	BUILD_SCHROOT_SETUP_ONLY=--setup-only
+    fi
     run sbuild-createchroot $SBUILD_VERBOSE \
-    	--components=$COMPONENTS \
-    	--arch=$SBUILD_CHROOT_ARCH \
+	--components=$COMPONENTS \
+	--arch=$SBUILD_CHROOT_ARCH \
 	$SCHROOT_EXCLUDE_ARG \
-    	$CODENAME $CHROOT_DIR $MIRROR
+	$BUILD_SCHROOT_SETUP_ONLY \
+	$CODENAME $CHROOT_DIR $MIRROR
 
     # Save generated sbuild config from Docker
     sbuild_save_config
 
-    if declare -f distro_configure_repos >/dev/null; then
-	debug "    Configuring extra apt sources"
-	distro_configure_repos
-    else
-	debug "      (No distro_configure_repos function defined)"
+    sbuild_chroot_apt_sources
     fi
-
-    # Set arches in base apt source
-    local ARCHES=$BUILD_ARCH
-    if test $BUILD_ARCH = amd64 -a -z "$DISTRO_MIRROR_armhf"; then
-	# Use amd64 to cross-build for armhf
-	ARCHES+=",armhf"
-    fi
-    run sed -i $CHROOT_DIR/etc/apt/sources.list \
-	-e "s/^deb http/deb \\[arch=$ARCHES\\] http/"
 
     # Set up local repo
     deb_repo_init  # Set up variables
