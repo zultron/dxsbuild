@@ -207,6 +207,13 @@ sbuild_chroot_setup() {
     sbuild_save_config
 
     sbuild_chroot_apt_sources
+
+    # Set apt proxy
+    if test -n "$HTTP_PROXY"; then
+	debug "    Setting apt proxy:  $HTTP_PROXY"
+	run bash -c "echo Acquire::http::Proxy \\\"$HTTP_PROXY\\\"\\; > \
+	    $CHROOT_DIR/etc/apt/apt.conf.d/05proxy"
+	run_debug cat $CHROOT_DIR/etc/apt/apt.conf.d/05proxy
     fi
 
     # Set up local repo

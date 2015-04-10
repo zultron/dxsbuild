@@ -237,3 +237,11 @@ if test -n "$PACKAGE"; then
 	done
     fi
 fi
+
+
+# Proxy
+if test -n "$HTTP_PROXY"; then
+    debug "      Setting proxy:  $HTTP_PROXY"
+    export http_proxy="$HTTP_PROXY"
+    export https_proxy="$HTTP_PROXY"
+fi
