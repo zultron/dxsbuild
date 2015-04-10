@@ -42,7 +42,8 @@ run_debug() {
 }
 
 wrap_up() {
-    RES=${1:-1}
+    RES=${1:-100}
+
     if $IN_SCHROOT; then
 	debug "    Exiting ($RES) schroot"
     elif $IN_DOCKER; then
@@ -50,10 +51,12 @@ wrap_up() {
     else
 	debug "Finished with exit status $RES at $(date)"
     fi
+
+    trap - EXIT ERR  # clear traps
     exit $RES
 }
 
-trap wrap_up ERR
+trap 'wrap_up $? from_trap' EXIT ERR
 
 usage() {
     test -z "$1" || msg "$1"
