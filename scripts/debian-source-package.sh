@@ -76,11 +76,11 @@ source_package_build() {
     source_tarball_download
     source_tarball_unpack
 
-    # Some packages may define a configuration step
-    configure_package_wrapper
-
     # Add new changelog
     debianization_add_changelog
+
+    # Some packages may define a configuration step
+    configure_package_wrapper
 
     # Build the source package and clean up
     source_package_build_from_tree
