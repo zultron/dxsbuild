@@ -30,10 +30,11 @@ docker_build() {
 
 docker_run() {
     DOCKER_BIND_MOUNTS="-v `pwd`:/srv"
-    if test -z "$*"; then
+    if $DOCKER_ALWAYS_ALLOCATE_TTY || test -z "$*"; then
 	msg "Starting interactive shell in Docker container '$DOCKER_IMAGE'"
+	DOCKER_TTY=-t
     fi
-    run docker run --privileged -i -t -e IN_DOCKER=true \
+    run docker run --privileged -i -e IN_DOCKER=true $DOCKER_TTY \
 	$DOCKER_BIND_MOUNTS \
 	$DOCKER_IMAGE "$@"
 }

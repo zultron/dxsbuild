@@ -37,8 +37,12 @@ REPO_DIR=repo
 # Where the Docker context is built
 DOCKER_DIR=$BUILD_BASE_DIR/docker
 
-# Docker run command
-DOCKER_CMD="docker run -i -t -v `pwd`:$DOCKER_SRC_DIR $DOCKER_SUPERUSER"
+# Whether to always allocate a tty in Docker
+#
+# A bug in Docker pre-1.1.1 prevents command exit status from the
+# `docker run` command when a tty is allocated. Set to `false` if you
+# need exit status from Docker.
+DOCKER_ALWAYS_ALLOCATE_TTY=true
 
 # Debug flag for passing to docker and scripts
 DEBUG_FLAG="`! $DEBUG || echo -d`"

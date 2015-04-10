@@ -160,7 +160,13 @@ fi
 if ! $IN_DOCKER && $RERUN_IN_DOCKER; then
     . $SCRIPTS_DIR/docker.sh
     debug "    Re-running command in Docker container"
-    docker_run $0 $ARG_LIST
+    if mode DOCKER_SHELL SBUILD_SHELL; then
+	debug "      Allocating tty in Docker container"
+	DOCKER_TTY=-t docker_run $0 $ARG_LIST
+    else
+	debug "      Not allocating tty in Docker container"
+	docker_run $0 $ARG_LIST
+    fi
     wrap_up $?
 fi
 
