@@ -34,9 +34,6 @@ RUN	wget -O - -q http://archive.raspbian.org/raspbian.public.key | \
 
 ############################
 # Sbuild configuration:
-# - bind mounts
-RUN	echo "/srv\t\t/srv\t\tnone\trw,bind\t\t0\t0" \
-	    >> /etc/schroot/default/fstab
 # - aufs on tmpfs config
 ADD	schroot-04tmpfs /etc/schroot/setup.d/04tmpfs
 

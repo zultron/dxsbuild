@@ -51,6 +51,9 @@ sbuild_install_sbuild_conf() {
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^#' /etc/sbuild/sbuild.conf
+
+    debug "    Installing fstab into /etc/schroot/sbuild/fstab"
+    run cp $SCRIPTS_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
 }
 
 sbuild_chroot_save_keys() {
@@ -106,14 +109,6 @@ sbuild_save_config() {
 	run_user mkdir -p $CONFIG_DIR/chroot.d
 	run_user cp $SBUILD_CHROOT_GEN \
 	    $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
-
-	if ! grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
-	    debug "    Adding fstab setting to schroot config"
-	    run_user sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
-		-e '"$ a setup.fstab=default/fstab"'
-	else
-	    debug "      (Found fstab setting in schroot config)"
-	fi
 
 	if test $DISTRO != $CODENAME; then
 	    debug "    Patching schroot config name"
@@ -225,6 +220,7 @@ sbuild_chroot_setup() {
 
 sbuild_configure_package() {
     sbuild_chroot_init
+    sbuild_install_sbuild_conf
     sbuild_install_config
 
     # FIXME run with union-type=aufs in schroot.conf
@@ -276,6 +272,7 @@ sbuild_shell() {
     msg "Starting shell in sbuild chroot $SBUILD_CHROOT"
 
     sbuild_chroot_init
+    sbuild_install_sbuild_conf
     sbuild_install_config
     if test $DOCKER_UID = 0; then
 	run sbuild-shell $SBUILD_CHROOT
