@@ -24,7 +24,7 @@ CROSS_BUILD_PACKAGES="
 repo_configure_dovetail_automata() {
     # Dovetail Automata LLC Machinekit repository; currently Wheezy,
     # Jessie, Trusty
-    echo "deb http://deb.dovetail-automata.com $CODENAME main" > \
+    echo "deb http://deb.dovetail-automata.com $DISTRO main" > \
 	/etc/apt/sources.list.d/machinekit.list
 
     apt-key adv --keyserver hkp://keys.gnupg.net --recv-key 7F32AE6B73571BB9

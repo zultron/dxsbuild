@@ -9,6 +9,10 @@ repo_add_apt_key() {
 	    # Install key from URL
 	    run bash -c "wget -O - -q $KEY | apt-key --keyring $KEYRING add -"
 	    ;;
+	*/sbuild-key.pub)
+	    # Install sbuild key from sbuild-key.pub
+	    run apt-key --keyring $KEYRING add $KEY
+	    ;;
 	[0-9A-F][0-9A-F][0-9A-F][0-9A-F]*)
 	    # Install key from key server
 	    run apt-key --keyring $KEYRING \
@@ -22,16 +26,12 @@ repo_add_apt_key() {
 }
 
 repo_add_apt_source() {
-    NAME=$1
-    URL=$2
-    ARCHES=$3
-    COMPONENTS=$4
-    APT_SOURCE="deb "
-    if test -n "$ARCHES"; then
-	APT_SOURCE+="[arch=$ARCHES] "
-    fi
-    APT_SOURCE+="$URL $CODENAME main${COMPONENTS:+ $COMPONENTS}"
-    echo "$APT_SOURCE" >> $CHROOT_DIR/etc/apt/sources.list.d/$NAME.list
+    local NAME=$1
+    local URL=$2
+    local ARCHES=${3:-$BUILD_ARCH}
+    local COMPONENTS="main${4:+ $4}"
+    echo "deb [arch=$ARCHES] $URL $CODENAME $COMPONENTS" \
+	>> $CHROOT_DIR/etc/apt/sources.list.d/$NAME.list
 }
 
 repo_configure_dovetail_automata() {

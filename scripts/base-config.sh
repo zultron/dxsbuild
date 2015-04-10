@@ -29,7 +29,7 @@ DEBZN_GIT_DIR=$BUILD_BASE_DIR/debzn-git
 BUILD_DIR=$BUILD_BASE_DIR
 
 # Where sources are built
-BUILD_SRC_DIR=$BUILD_DIR/tree-$CODENAME
+BUILD_SRC_DIR=$BUILD_DIR/tree-$DISTRO
 
 # Where the Apt package repo is built
 REPO_DIR=repo

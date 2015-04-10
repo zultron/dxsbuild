@@ -61,11 +61,11 @@ usage() {
     msg "    $0 -i | -c [-d]"
     msg "        -i:		Build docker image"
     msg "        -c:		Spawn interactive shell in docker container"
-    msg "    $0 -r | -s | -L [-d] [-a ARCH] CODENAME"
+    msg "    $0 -r | -s | -L [-d] [-a ARCH] DISTRO"
     msg "        -r:		Create sbuild chroot"
     msg "        -s:		Spawn interactive shell in sbuild chroot"
     msg "        -L:		List apt package repository contents"
-    msg "    $0 -S | -b [-j n] | -R [-f] [-d] CODENAME PACKAGE"
+    msg "    $0 -S | -b [-j n] | -R [-f] [-d] DISTRO PACKAGE"
     msg "        -S:		Build source package"
     msg "        -b:		Run package build (build source pkg if needed)"
     msg "        -R:		Build apt package repository"
@@ -136,7 +136,7 @@ NUM_ARGS=$#
 ARG_LIST+=" $*"
 
 # CL args
-CODENAME="$1"; shift || true
+DISTRO="$1"; shift || true
 PACKAGE="$*"
 
 # Mode and possible non-flag args must be set
@@ -161,16 +161,16 @@ if ! $IN_DOCKER && $RERUN_IN_DOCKER; then
     wrap_up $?
 fi
 
-# Check codename
-test $NUM_ARGS -lt 1 -o -f $DISTRO_CONFIG_DIR/${CODENAME:-bogus}.sh || \
-    usage "Codename '$CODENAME' not valid"
+# Check distro name
+test $NUM_ARGS -lt 1 -o -f $DISTRO_CONFIG_DIR/${DISTRO:-bogus}.sh || \
+    usage "Distro name '$DISTRO' not valid"
 
 # Check package
 test $NUM_ARGS -lt 2 -o -f $PACKAGE_CONFIG_DIR/${PACKAGE:-bogus}.sh || \
     usage "Package '$PACKAGE' not valid"
 
 # Set variables
-DOCKER_CONTAINER=$CODENAME-$PACKAGE
+DOCKER_CONTAINER=$DISTRO-$PACKAGE
 
 # Source scripts
 debug "Sourcing include scripts"
@@ -182,9 +182,10 @@ debug "Sourcing include scripts"
 . $SCRIPTS_DIR/debian-pkg-repo.sh
 
 # Source distro and package configs
-if test -n "$CODENAME"; then
-    debug "    Sourcing config for distro '$CODENAME'"
-    . $DISTRO_CONFIG_DIR/$CODENAME.sh
+if test -n "$DISTRO"; then
+    debug "    Sourcing config for distro '$DISTRO'"
+    CODENAME=$DISTRO  # Default
+    . $DISTRO_CONFIG_DIR/$DISTRO.sh
 fi
 if test -n "$PACKAGE"; then
     debug "    Sourcing config for package '$PACKAGE'"
@@ -201,8 +202,7 @@ if $IN_DOCKER && ! $IN_SCHROOT; then
 fi
 
 
-# Sanity checks
-
+# Package sanity checks
 if test -n "$PACKAGE"; then
     if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO; then
         # Be sure package is valid for distro
@@ -213,7 +213,7 @@ if test -n "$PACKAGE"; then
 		break
 	    fi
 	done
-	$DISTRO_PKG_OK || error "Package $PACKAGE excluded from distro $CODENAME"
+	$DISTRO_PKG_OK || error "Package $PACKAGE excluded from distro $DISTRO"
     fi
 
     if mode BUILD_PACKAGE BUILD_APT_REPO; then

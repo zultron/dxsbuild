@@ -20,12 +20,13 @@ debianization_init() {
     debug "      Package distribution:  $PACKAGE_DISTRIBUTION"
     PACKAGE_URGENCY=$(parse_changelog urgency)
     debug "      Package urgency:  $PACKAGE_URGENCY"
-    PACKAGE_NEW_VERSION_SUFFIX="~1${CODENAME}${PACKAGE_VERSION_SUFFIX}"
+    DISTRO_SUFFIX="~1${DISTRO/-/.}"
+    PACKAGE_NEW_VERSION_SUFFIX="${DISTRO_SUFFIX}${PACKAGE_VERSION_SUFFIX}"
     PACKAGE_NEW_VERSION="${PACKAGE_VERSION}${PACKAGE_NEW_VERSION_SUFFIX}"
     debug "      New package version-release:  $PACKAGE_NEW_VERSION"
     DSC_FILE=${PACKAGE}_${PACKAGE_NEW_VERSION}.dsc
     debug "      .dsc file name:  $DSC_FILE"
-    CHANGELOG=/tmp/changelog-$PACKAGE-$CODENAME
+    CHANGELOG=/tmp/changelog-$PACKAGE-$DISTRO
 
     if test -z "$MAINTAINER"; then
 	MAINTAINER="$(git config user.name)" || MAINTAINER="mk-dbuild user"

@@ -20,12 +20,17 @@ RUN	apt-get install -y xdeb sbuild pdebuild-cross
 RUN	apt-get install -y git ca-certificates openssh-client
 # - reprepro
 RUN	apt-get install -y reprepro
+# - qemu
+RUN	apt-get install -y qemu-user-static binfmt-support
 # - Debian signing keys
 #     Fixes "W: Cannot check Release signature; keyring file not available
 #                /usr/share/keyrings/debian-archive-keyring.gpg"
 RUN	apt-get install -y debian-archive-keyring
-# - qemu
-RUN	apt-get install -y qemu-user-static binfmt-support
+# - Raspbian signing keys
+#   - Put in sbuild default keyring
+RUN	wget -O - -q http://archive.raspbian.org/raspbian.public.key | \
+	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg \
+	        add -
 
 ############################
 # Sbuild configuration:
@@ -40,6 +45,16 @@ ADD	schroot-04tmpfs /etc/schroot/setup.d/04tmpfs
 #
 # Fix `sbuild-createchroot --foreign` flag
 RUN	sed -i /usr/sbin/sbuild-createchroot -e '/set_conf..FOREIGN/ s/0/1/'
+
+############################
+# Debug output
+ENV	DEBUG true
+
+# List apt keys
+RUN	! $DEBUG || { echo "System apt keys:"; apt-key list; }
+RUN	! $DEBUG || { echo "Debootstrap apt keys:"; \
+	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg \
+	        list; }
 
 ############################
 # Start in the dbuild directory

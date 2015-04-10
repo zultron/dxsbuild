@@ -17,28 +17,28 @@ deb_repo_init() {
     debug "      GPG package signing key fingerprint:  $SIGNING_KEY"
 
     REPREPRO="run_user reprepro -VV -b ${REPO_DIR_ABS} \
-        --confdir +b/conf-${CODENAME} --dbdir +b/db-${CODENAME} \
+        --confdir +b/conf-${DISTRO} --dbdir +b/db-${DISTRO} \
 	--gnupghome $GNUPGHOME"
 }
 
 deb_repo_setup() {
     msg "Initializing Debian Apt package repository"
-    if test ! -s ${REPO_DIR}/conf-${CODENAME}/distributions; then
+    if test ! -s ${REPO_DIR}/conf-${DISTRO}/distributions; then
 	deb_repo_init
 
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
-	run_user mkdir -p ${REPO_DIR_ABS}/conf-${CODENAME}
+	run_user mkdir -p ${REPO_DIR_ABS}/conf-${DISTRO}
 	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \
-	    > ${REPO_DIR_ABS}/conf-${CODENAME}/distributions \
-	    -e s/@CODENAME@/${CODENAME}/g \
+	    > ${REPO_DIR_ABS}/conf-${DISTRO}/distributions \
+	    -e s/@DISTRO@/${DISTRO}/g \
 	    -e s/@SIGNING_KEY@/${SIGNING_KEY}/g'"
     else
 	debug "      (Apt repo config already initialized; doing nothing)"
     fi
 
-    if test ! -s ${REPO_DIR}/dists/${CODENAME}/Release; then
+    if test ! -s ${REPO_DIR}/dists/${DISTRO}/Release; then
 	debug "    Initializing repository files"
-	${REPREPRO} export ${CODENAME}
+	${REPREPRO} export ${DISTRO}
     else
 	debug "      (Apt repo already initialized; doing nothing)"
     fi
@@ -53,26 +53,26 @@ deb_repo_build() {
     # add source pkg
     msg "    Removing all packages for '$PACKAGE'"
     ${REPREPRO} \
-	removesrc ${CODENAME} ${PACKAGE}
+	removesrc ${DISTRO} ${PACKAGE}
 
     debug "    Adding source package '$DSC_FILE'"
     ${REPREPRO} -C main \
-	includedsc ${CODENAME} \
+	includedsc ${DISTRO} \
 	$BUILD_DIR/${DSC_FILE}
 
     # remove src pkg
 	    # ${REPREPRO} -T dsc \
-	    # 	remove ${CODENAME} $($(1)_SOURCE_NAME)
+	    # 	remove ${DISTRO} $($(1)_SOURCE_NAME)
 
     # remove bin pkg
 	    # ${REPREPRO} -T deb \
 	    # 	$$(if $$(filter-out $$(ARCH),$$(BUILD_INDEP_ARCH)),-A $$(ARCH)) \
-	    # 	remove ${CODENAME} $$(call REPREPRO_PKGS,$(1),$$(ARCH))
+	    # 	remove ${DISTRO} $$(call REPREPRO_PKGS,$(1),$$(ARCH))
 
     for CHANGES in $BUILD_DIR/*.changes; do
 	debug "    Adding changes file '$CHANGES'"
 	${REPREPRO} -C main \
-	    include ${CODENAME} \
+	    include ${DISTRO} \
 	    $CHANGES
     done
 }
@@ -81,5 +81,5 @@ deb_repo_list() {
     deb_repo_init
 
     ${REPREPRO} \
-	list ${CODENAME}
+	list ${DISTRO}
 }

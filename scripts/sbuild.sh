@@ -18,16 +18,16 @@ sbuild_chroot_init() {
     fi
 
     if mode BUILD_SBUILD_CHROOT SBUILD_SHELL || \
-	! $FOREIGN || test -z "$NATIVE_BUILD_ONLY"; then
+	! $FOREIGN || test -n "$NATIVE_BUILD_ONLY"; then
 	SBUILD_CHROOT_ARCH=$HOST_ARCH
 	debug "      Using host-arch $SBUILD_CHROOT_ARCH"
     else
 	SBUILD_CHROOT_ARCH=$BUILD_ARCH
 	debug "      Using build-arch $SBUILD_CHROOT_ARCH"
     fi
-    SBUILD_CHROOT=$CODENAME-$SBUILD_CHROOT_ARCH-sbuild
+    SBUILD_CHROOT=$DISTRO-$SBUILD_CHROOT_ARCH-sbuild
     debug "      Sbuild chroot: $SBUILD_CHROOT"
-    CHROOT_DIR=$SBUILD_CHROOT_DIR/$CODENAME-$SBUILD_CHROOT_ARCH
+    CHROOT_DIR=$SBUILD_CHROOT_DIR/$DISTRO-$SBUILD_CHROOT_ARCH
     debug "      Sbuild chroot dir: $CHROOT_DIR"
 
     # sbuild verbosity
@@ -44,6 +44,7 @@ sbuild_install_sbuild_conf() {
     run cp $SCRIPTS_DIR/sbuild.conf /etc/sbuild
     run sed -i /etc/sbuild/sbuild.conf \
 	-e "s/@CODENAME@/$CODENAME/" \
+	-e "s/@DISTRO@/$DISTRO/" \
 	-e "s/@MAINTAINER@/$MAINTAINER/" \
 	-e "s/@EMAIL@/$EMAIL/" \
 	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
@@ -97,28 +98,39 @@ sbuild_install_config() {
 }
 
 sbuild_save_config() {
-    if test -f /etc/schroot/chroot.d/$SBUILD_CHROOT-*; then
+    SBUILD_CHROOT=$DISTRO-$SBUILD_CHROOT_ARCH-sbuild
+    SBUILD_CHROOT_GEN=$(readlink -e \
+	/etc/schroot/chroot.d/$CODENAME-$SBUILD_CHROOT_ARCH-sbuild-*)
+    if test -n "$SBUILD_CHROOT_GEN"; then
 	debug "    Saving generated schroot config from Docker"
 	run_user mkdir -p $CONFIG_DIR/chroot.d
-	run_user cp /etc/schroot/chroot.d/${SBUILD_CHROOT}-* \
+	run_user cp $SBUILD_CHROOT_GEN \
 	    $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 
 	if ! grep -q setup.fstab $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
 	    debug "    Adding fstab setting to schroot config"
 	    run_user sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
 		-e '"$ a setup.fstab=default/fstab"'
-	    debug "      Chroot config:"
-	    run_debug cat $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 	else
 	    debug "      (Found fstab setting in schroot config)"
 	fi
+
+	if test $DISTRO != $CODENAME; then
+	    debug "    Patching schroot config name"
+	    run sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
+		-e '1 s/.*/[raspbian-jessie-amd64-sbuild]/'
+	fi
+
+	debug "      Chroot config:"
+	run_debug cat $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+
     else
 	debug "      (No new schroot config found in /etc/schroot/chroot.d)"
     fi
 }
 
 sbuild_chroot_setup() {
-    msg "Creating sbuild chroot, distro $CODENAME, arch $SBUILD_CHROOT_ARCH"
+    msg "Creating sbuild chroot, distro $DISTRO, arch $SBUILD_CHROOT_ARCH"
     sbuild_chroot_init
     sbuild_install_config
     sbuild_install_sbuild_conf
@@ -145,21 +157,44 @@ sbuild_chroot_setup() {
 	run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
     fi
 
+    # Check for packages to exclude from this schroot
+    eval "SCHROOT_EXCLUDE=\${SCHROOT_EXCLUDE_${BUILD_ARCH}}"
+    if test -n "$SCHROOT_EXCLUDE"; then
+	debug "      Excluding packages:  $SCHROOT_EXCLUDE"
+	SCHROOT_EXCLUDE_ARG="--exclude=$SCHROOT_EXCLUDE"
+    fi
+
     debug "    Running sbuild-createchroot"
     run sbuild-createchroot $SBUILD_VERBOSE \
     	--components=$COMPONENTS \
     	--arch=$SBUILD_CHROOT_ARCH \
+	$SCHROOT_EXCLUDE_ARG \
     	$CODENAME $CHROOT_DIR $MIRROR
 
     # Save generated sbuild config from Docker
     sbuild_save_config
 
-    debug "    Configuring apt sources"
-    distro_configure_repos
+    if declare -f distro_configure_repos >/dev/null; then
+	debug "    Configuring extra apt sources"
+	distro_configure_repos
+    else
+	debug "      (No distro_configure_repos function defined)"
+    fi
+
+    # Set arches in base apt source
+    local ARCHES=$BUILD_ARCH
+    if test $BUILD_ARCH = amd64 -a -z "$DISTRO_MIRROR_armhf"; then
+	# Use amd64 to cross-build for armhf
+	ARCHES+=",armhf"
+    fi
+    run sed -i $CHROOT_DIR/etc/apt/sources.list \
+	-e "s/^deb http/deb \\[arch=$ARCHES\\] http/"
+
     # Set up local repo
     deb_repo_init  # Set up variables
     deb_repo_setup
-    repo_add_apt_source local file://$BASE_DIR/$REPO_DIR
+    CODENAME=$DISTRO repo_add_apt_source local file://$BASE_DIR/$REPO_DIR
+    repo_add_apt_key $GNUPGHOME/sbuild-key.pub
 }
 
 sbuild_configure_package() {
@@ -178,7 +213,7 @@ sbuild_configure_package() {
 
     debug "      Running configure function in schroot"
     run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
-	./$DBUILD -C $(! $DEBUG || echo -d) $CODENAME $PACKAGE
+	./$DBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
 
     debug "      Uninstalling extra packages"
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
