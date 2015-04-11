@@ -5,33 +5,31 @@ DISTROS="jessie trusty"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
     linux-tools czmq"
 
-for arch in $ARCHES; do
-    echo '############### arch $arch ###############'
-    for distro in $DISTROS; do
-	echo '############### distro $distro ###############'
+for distro in $DISTROS; do
+    for arch in $ARCHES; do
+	echo "########### dbuild schroot, $distro:  $arch ###########"
 	./dbuild -rda $arch $distro
+    done
 
-	for package in $PACKAGES; do
-	    echo '############### package $package ###############'
-	    if test $arch = amd64; then
-		echo '----------- build source package -----------'
-		./dbuild -Sda $arch $distro $package
-	    fi
+    for package in $PACKAGES; do
+	echo "########### dbuild source, $distro: $package ###########"
+	./dbuild -Sd $distro $package
 
+	for arch in $ARCHES; do
 	    if test $arch = armhf -a $package = rtai; then
 		# don't build rtai for armhf
 		continue
 	    fi
 
-	    echo '----------- build binary package -----------'
+	    echo "########### dbuild binary, $distro: $package:$arch ###########"
 	    ./dbuild -bda $arch -j 8 $distro $package
 
-	    echo '----------- add package to repo -----------'
-	    ./dbuild -Rd $distro $package
-
-	    echo '----------- repo list -----------'
-	    ./dbuild -L $distro
 	done
+
+	echo "########### dbuild repo, $distro: $package ###########"
+	./dbuild -Rd $distro $package
+	./dbuild -L $distro
+
     done
 done
 
