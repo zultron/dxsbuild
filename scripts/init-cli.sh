@@ -103,10 +103,7 @@ DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
 ARG_LIST=""
-if $IN_DOCKER; then  # dpkg-architecture is distro-specific
-    HOST_ARCH=$(dpkg-architecture -qDEB_HOST_ARCH)
-    BUILD_ARCH=$(dpkg-architecture -qDEB_BUILD_ARCH)
-fi
+HOST_ARCH=default  # If no -a arg, gets filled out in architecture.sh
 RERUN_IN_DOCKER=true
 IN_SCHROOT=false
 FORCE_INDEP=false
@@ -174,11 +171,6 @@ if ! $IN_DOCKER && $RERUN_IN_DOCKER; then
     wrap_up $?
 fi
 
-# Pretend BUILD_ARCH is HOST_ARCH in some cases
-if test $BUILD_ARCH = amd64 -a $HOST_ARCH = i386; then
-    BUILD_ARCH=i386
-fi
-
 # Check distro name
 test $NUM_ARGS -lt 1 -o -f $DISTRO_CONFIG_DIR/${DISTRO:-bogus}.sh || \
     usage "Distro name '$DISTRO' not valid"
@@ -192,6 +184,7 @@ DOCKER_CONTAINER=$DISTRO-$PACKAGE
 
 # Source scripts
 debug "Sourcing include scripts"
+. $SCRIPTS_DIR/architecture.sh
 . $SCRIPTS_DIR/docker.sh
 . $SCRIPTS_DIR/sbuild.sh
 . $SCRIPTS_DIR/distro.sh
@@ -199,22 +192,22 @@ debug "Sourcing include scripts"
 . $SCRIPTS_DIR/debian-binary-package.sh
 . $SCRIPTS_DIR/debian-pkg-repo.sh
 
-# Source distro and package configs
-if test -n "$DISTRO"; then
-    debug "    Sourcing config for distro '$DISTRO'"
-    CODENAME=$DISTRO  # Default
-    . $DISTRO_CONFIG_DIR/$DISTRO.sh
-fi
+# Source distro, repo and package configs
+distro_read_all_configs
+repo_read_all_configs
+NATIVE_BUILD_ONLY=false
 if test -n "$PACKAGE"; then
     debug "    Sourcing config for package '$PACKAGE'"
     . $PACKAGE_CONFIG_DIR/$PACKAGE.sh
 fi
-
 # Source optional config override file
 if test -f $BASE_DIR/local-config.sh; then
     debug "    Sourcing local config"
     . $BASE_DIR/local-config.sh
 fi
+
+# Print distro debug info
+#distro_debug
 
 # Debug
 ! $DDEBUG || set -x
@@ -230,7 +223,7 @@ if test -n "$PACKAGE"; then
     if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO; then
         # Be sure package is valid for distro
 	DISTRO_PKG_OK=false
-	for p in $PACKAGES; do
+	for p in ${DISTRO_PACKAGES[$DISTRO]}; do
 	    if test $p = $PACKAGE; then
 		DISTRO_PKG_OK=true
 		break

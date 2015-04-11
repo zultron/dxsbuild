@@ -19,7 +19,7 @@ test "${DISABLED_FEATURESETS/rtai/}" != "$DISABLED_FEATURESETS" || \
 CONFIGURE_PACKAGE_DEPS+=" rtai-source"
 
 configure_package() {
-    if test $CODENAME = trusty; then
+    if test $DISTRO = trusty; then
 	debug "    Setting gcc to 'gcc-4.8'"
 	sed -ie '/^compiler:/ s/gcc-.*/gcc-4.8/' debian/config/defines
     fi

@@ -1,7 +1,107 @@
 debug "    Sourcing distro.sh"
 
+# Distros
+declare DISTROS
+declare -A DISTRO_PACKAGES
+declare -A DISTRO_ARCHES
+declare -A DISTRO_REPOS
+declare -A DISTRO_CODENAME
+for arch in $ARCHES; do
+    eval "declare -A DISTRO_ARCHES_$arch"
+done
+
+# Repos
+declare REPOS
+declare -A REPO_MIRROR
+declare -A REPO_ARCHES
+declare -A REPO_KEY
+declare -A REPO_COMPONENTS
+declare -A REPO_IS_BASE
+
+distro_read_config() {
+    local DISTRO=$1
+    DISTROS+=" $DISTRO"
+
+    # set up defaults
+    DISTRO_PACKAGES[$DISTRO]=
+    DISTRO_ARCHES[$DISTRO]="$ARCHES"
+    DISTRO_REPOS[$DISTRO]=
+    DISTRO_CODENAME[$DISTRO]=$DISTRO
+
+    . $DISTRO_CONFIG_DIR/$DISTRO.sh
+}
+
+distro_read_all_configs() {
+    debug "    Sourcing distro configurations:"
+    for config in $DISTRO_CONFIG_DIR/*.sh; do
+	local distro=$(basename $config .sh)
+	debug "      $distro"
+	distro_read_config $distro
+    done
+}
+
+repo_read_config() {
+    local REPO=$1
+    REPOS+=" $REPO"
+
+    # set up defaults
+    REPO_MIRROR[$REPO]=
+    REPO_ARCHES[$REPO]="$ARCHES"
+    REPO_KEY[$REPO]=
+    REPO_COMPONENTS[$REPO]="main"
+    REPO_IS_BASE[$REPO]="false"
+
+    . $REPO_CONFIG_DIR/$REPO.sh
+}
+
+repo_read_all_configs() {
+    debug "    Sourcing repo configurations:"
+    for config in $REPO_CONFIG_DIR/*.sh; do
+	local repo=$(basename $config .sh)
+	debug "      $repo"
+	repo_read_config $repo
+    done
+}
+
+distro_base_mirror() {
+    local DISTRO=$1
+    local ARCH=$2
+    echo ${REPO_MIRROR[$(distro_base_repo $DISTRO $ARCH)]}
+}
+
+distro_base_components() {
+    local DISTRO=$1
+    local ARCH=$2
+    echo ${REPO_COMPONENTS[$(distro_base_repo $DISTRO $ARCH)]}
+}
+
+repo_has_arch() {
+    local REPO=$1
+    local ARCH=$2
+    local ARCHES=" ${REPO_ARCHES[$REPO]} "
+    local RES
+    test "$ARCHES" != "${ARCHES/ $ARCH /}" && RES=0 || RES=1
+    return $RES
+}
+
+distro_base_repo() {
+    local DISTRO=$1
+    local ARCH=$2
+    local repo
+    for repo in ${DISTRO_REPOS[$DISTRO]}; do
+	if repo_has_arch $repo $ARCH && ${REPO_IS_BASE[$repo]}; then
+	    echo $repo
+	    return
+	fi
+    done
+    return 1
+}
+
 repo_add_apt_key() {
-    KEY=$1
+    REPO=$1
+    KEY=${REPO_KEY[$REPO]}
+    test -n "$KEY" || return 0
+
     KEYRING=$CHROOT_DIR/etc/apt/trusted.gpg.d/sbuild-extra.gpg
     debug "    Adding apt key '$KEY'"
     case $KEY in
@@ -26,33 +126,80 @@ repo_add_apt_key() {
 }
 
 repo_add_apt_source() {
-    local NAME=$1
-    local URL=$2
-    local ARCHES=${3:-$BUILD_ARCH}
-    local COMPONENTS="main${4:+ $4}"
-    echo "deb [arch=$ARCHES] $URL $CODENAME $COMPONENTS" \
-	>> $CHROOT_DIR/etc/apt/sources.list.d/$NAME.list
+    local REPO=$1
+    local URL=${REPO_MIRROR[$REPO]}
+    local ARCHES=$(echo ${REPO_ARCHES[$REPO]} | sed 's/ /,/g')
+    local CODENAME=${DISTRO_CODENAME[$DISTRO]}
+    local COMPONENTS=${REPO_COMPONENTS[$REPO]}
+
+    if test $REPO = local; then
+	CODENAME=$DISTRO
+    else
+	CODENAME=${DISTRO_CODENAME[$DISTRO]}
+    fi
+    run bash -c "echo deb [arch=$ARCHES] $URL $CODENAME	$COMPONENTS \\
+	>> $CHROOT_DIR/etc/apt/sources.list.d/$REPO.list"
 }
 
-repo_configure_dovetail_automata() {
-    # Dovetail Automata LLC Machinekit repository; currently Wheezy,
-    # Jessie, Trusty
-    repo_add_apt_source machinekit http://deb.dovetail-automata.com
-    repo_add_apt_key 7F32AE6B73571BB9
+repo_configure() {
+    local REPO=$1
+    debug "    Configuring repo $REPO"
+    repo_add_apt_source $REPO
+    repo_add_apt_key $REPO
 }
 
-repo_configure_emdebian() {
-    # Emdebian.org cross-build toolchain
-    repo_add_apt_source emdebian http://emdebian.org/tools/debian
-    repo_add_apt_key \
-	http://emdebian.org/tools/debian/emdebian-toolchain-archive.key
+distro_clear_apt() {
+    if test -f $CHROOT_DIR/etc/apt/sources.list; then
+	debug "    Cleaning old apt sources lists"
+	run bash -c "> $CHROOT_DIR/etc/apt/sources.list"
+	run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
+    fi
 }
 
-repo_configure_rcn() {
-    # Robert C Nelson's Beaglebone Black distro; currently Wheezy,
-    # Jessie, Trusty
-    repo_add_apt_source rcn http://repos.rcn-ee.net/debian armhf
-    repo_add_apt_key \
-	http://repos.rcn-ee.net/debian/conf/repos.rcn-ee.net.gpg.key
+distro_configure_apt() {
+    local DISTRO=$1
+    distro_clear_apt
+
+    debug "    Configuring distro $DISTRO"
+    for repo in ${DISTRO_REPOS[$DISTRO]} local; do
+	repo_configure $repo
+    done
+
+    # Set apt proxy
+    if test -n "$HTTP_PROXY"; then
+	debug "    Setting apt proxy:  $HTTP_PROXY"
+	run bash -c "echo Acquire::http::Proxy \\\"$HTTP_PROXY\\\"\\; > \
+	    $CHROOT_DIR/etc/apt/apt.conf.d/05proxy"
+	run_debug cat $CHROOT_DIR/etc/apt/apt.conf.d/05proxy
+    fi
+
 }
 
+distro_debug() {
+    for d in $DISTROS; do
+	echo "distro $d:"
+	echo "	codename ${DISTRO_CODENAME[$d]}"
+	echo "	arches ${DISTRO_ARCHES[$d]}"
+	echo "	repos ${DISTRO_REPOS[$d]}"
+	for a in ${DISTRO_ARCHES[$d]}; do
+	    echo "	arch $a:"
+	    echo "	  base repo:  $(distro_base_repo $d $a)"
+	    echo "	  base mirror:  $(distro_base_mirror $d $a)"
+	    echo "	  base components:  $(distro_base_components $d $a)"
+	    repos=
+	    for r in ${DISTRO_REPOS[$d]}; do
+		if repo_has_arch $r $a; then
+		    repos+=" $r"
+		fi
+	    done
+	    echo "	  repos:	$repos"
+	done
+    done
+    for r in $REPOS; do
+	echo "repo $r:"
+	echo "	mirror ${REPO_MIRROR[$r]}"
+	echo "	components ${REPO_COMPONENTS[$r]}"
+	echo "	arches ${REPO_ARCHES[$r]}"
+	echo "	key ${REPO_KEY[$r]:-(none)}"
+    done
+}

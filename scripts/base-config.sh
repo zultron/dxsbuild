@@ -61,6 +61,7 @@ GNUPGHOME=$CONFIG_DIR/gpg
 # Scripts and configs directories
 SCRIPTS_DIR=scripts
 DISTRO_CONFIG_DIR=$SCRIPTS_DIR/distro
+REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
 # Suffix for package version
@@ -74,3 +75,7 @@ DBUILD=$(basename $0)
 
 # ccache directory
 CCACHE_DIR=$CONFIG_DIR/ccache
+
+
+# Default arch list
+ARCHES="amd64 i386 armhf"

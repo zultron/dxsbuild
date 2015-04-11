@@ -16,3 +16,9 @@
 # need exit status from Docker.
 #DOCKER_ALWAYS_ALLOCATE_TTY=true
 
+# Override distro settings
+#
+# Custom mirror
+#DISTRO_MIRROR[jessie]="http://http.debian.net/debian"
+# Restrict list of arches
+#DISTRO_ARCHES[jessie]="armhf"

@@ -2,32 +2,21 @@ debug "    Sourcing sbuild.sh"
 
 sbuild_chroot_init() {
     # By default, only build arch-indep packages on build arch
-    BUILD_INDEP="--no-arch-all"
-    if dpkg-architecture -e$HOST_ARCH || $FORCE_INDEP; then
+    if arch_is_foreign $DISTRO $HOST_ARCH || $FORCE_INDEP; then
 	BUILD_INDEP="--arch-all"
+    else
+	BUILD_INDEP="--no-arch-all"
     fi
 
-    # Detect foreign architecture
-    if test $HOST_ARCH = $BUILD_ARCH; then
-	FOREIGN=false
-	debug "      Detected non-foreign arch:  $BUILD_ARCH = $HOST_ARCH"
-    else
-	FOREIGN=true
-	debug "      Detected foreign arch:  $BUILD_ARCH != $HOST_ARCH"
-    fi
-
-    if mode BUILD_SBUILD_CHROOT SBUILD_SHELL || \
-	! $FOREIGN || test -n "$NATIVE_BUILD_ONLY"; then
-	SBUILD_CHROOT_ARCH=$HOST_ARCH
-	debug "      Using host-arch $SBUILD_CHROOT_ARCH"
-    else
-	SBUILD_CHROOT_ARCH=$BUILD_ARCH
-	debug "      Using build-arch $SBUILD_CHROOT_ARCH"
-    fi
-    SBUILD_CHROOT=$DISTRO-$SBUILD_CHROOT_ARCH-sbuild
+    SBUILD_CHROOT=$DISTRO-$(arch_build $DISTRO $HOST_ARCH)-sbuild
     debug "      Sbuild chroot: $SBUILD_CHROOT"
-    CHROOT_DIR=$SBUILD_CHROOT_DIR/$DISTRO-$SBUILD_CHROOT_ARCH
+    CHROOT_DIR=$SBUILD_CHROOT_DIR/$DISTRO-$(arch_build $DISTRO $HOST_ARCH)
     debug "      Sbuild chroot dir: $CHROOT_DIR"
+
+    if $BUILD_SCHROOT_SKIP_PACKAGES; then
+	debug "      Running in setup-only mode"
+	BUILD_SCHROOT_SETUP_ONLY=--setup-only
+    fi
 
     # sbuild verbosity
     if $DEBUG; then
@@ -42,7 +31,7 @@ sbuild_install_sbuild_conf() {
     debug "    Installing sbuild.conf into /etc/sbuild/sbuild.conf"
     run cp $SCRIPTS_DIR/sbuild.conf /etc/sbuild
     run sed -i /etc/sbuild/sbuild.conf \
-	-e "s/@CODENAME@/$CODENAME/" \
+	-e "s/@CODENAME@/${DISTRO_CODENAME[$DISTRO]}/" \
 	-e "s/@DISTRO@/$DISTRO/" \
 	-e "s/@MAINTAINER@/$MAINTAINER/" \
 	-e "s/@EMAIL@/$EMAIL/" \
@@ -103,14 +92,14 @@ sbuild_install_config() {
 sbuild_save_config() {
     SBUILD_CHROOT=$DISTRO-$SBUILD_CHROOT_ARCH-sbuild
     SBUILD_CHROOT_GEN=$(readlink -e \
-	/etc/schroot/chroot.d/$CODENAME-$SBUILD_CHROOT_ARCH-sbuild-* || true)
+	/etc/schroot/chroot.d/${DISTRO_CODENAME[$DISTRO]}-$SBUILD_CHROOT_ARCH-sbuild-* || true)
     if test -n "$SBUILD_CHROOT_GEN"; then
 	debug "    Saving generated schroot config from Docker"
 	run_user mkdir -p $CONFIG_DIR/chroot.d
 	run_user cp $SBUILD_CHROOT_GEN \
 	    $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
 
-	if test $DISTRO != $CODENAME; then
+	if test $DISTRO != ${DISTRO_CODENAME[$DISTRO]}; then
 	    debug "    Patching schroot config name"
 	    run sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
 		-e '1 s/.*/[raspbian-jessie-amd64-sbuild]/'
@@ -124,99 +113,41 @@ sbuild_save_config() {
     fi
 }
 
-sbuild_chroot_apt_sources() {
-    debug "    Installing /etc/apt/sources.list"
-    # Set arches in base apt source
-    local BASE_ARCHES="arch=$BUILD_ARCH"
-    # If no separate source defined for armhf, use base for
-    # cross-build source
-    if test $BUILD_ARCH = amd64 -a -z "$DISTRO_MIRROR_armhf"; then
-	BASE_ARCHES+=",armhf"
-    fi
-    local COMPONENTS="main${DISTRO_COMPONENTS:+ $DISTRO_COMPONENTS}"
-    local APT_SOURCE="deb [$BASE_ARCHES] $DISTRO_MIRROR $CODENAME $COMPONENTS"
-    run bash -c \
-	"echo $APT_SOURCE > $CHROOT_DIR/etc/apt/sources.list"
-
-    debug "      Contents of /etc/apt/sources.list:"
-    run_debug cat $CHROOT_DIR/etc/apt/sources.list
-
-    if declare -f distro_configure_repos >/dev/null; then
-	debug "    Configuring extra apt sources"
-	distro_configure_repos
-    else
-	debug "      (No distro_configure_repos function defined)"
-    fi
-
-}
-
-
 sbuild_chroot_setup() {
-    msg "Creating sbuild chroot, distro $DISTRO, arch $SBUILD_CHROOT_ARCH"
+    local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
+    msg "Creating sbuild chroot, distro $DISTRO, arch $BUILD_ARCH"
     sbuild_chroot_init
     sbuild_install_config
     sbuild_install_sbuild_conf
     sbuild_install_keys
 
-    local MIRROR=$DISTRO_MIRROR
-    # If e.g. $DISTRO_MIRROR_armhf defined, use it
-    eval local MIRROR_ARCH=\${DISTRO_MIRROR_${HOST_ARCH}}
-    test -z "$MIRROR_ARCH" || MIRROR=$MIRROR_ARCH
+    # Clean out any existing apt config
+    distro_clear_apt
 
-    COMPONENTS=main${DISTRO_COMPONENTS:+,$DISTRO_COMPONENTS}
-    debug "      Components:  $COMPONENTS"
-    debug "      Distro mirror:  $MIRROR"
-
-    if $FOREIGN && test $BUILD_ARCH=armhf; then
+    if arch_is_foreign $DISTRO $HOST_ARCH && test $BUILD_ARCH=armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
 	mkdir -p $CHROOT_DIR/usr/bin
 	cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
     fi
 
-    if test -f $CHROOT_DIR/etc/apt/sources.list; then
-	debug "    Cleaning old apt sources lists"
-	run bash -c "> $CHROOT_DIR/etc/apt/sources.list"
-	run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
-    fi
-
-    # Check for packages to exclude from this schroot
-    eval "SCHROOT_EXCLUDE=\${SCHROOT_EXCLUDE_${BUILD_ARCH}}"
-    if test -n "$SCHROOT_EXCLUDE"; then
-	debug "      Excluding packages:  $SCHROOT_EXCLUDE"
-	SCHROOT_EXCLUDE_ARG="--exclude=$SCHROOT_EXCLUDE"
-    fi
-
     debug "    Running sbuild-createchroot"
-    if $BUILD_SCHROOT_SKIP_PACKAGES; then
-	debug "      Running in setup-only mode"
-	BUILD_SCHROOT_SETUP_ONLY=--setup-only
-    fi
     run sbuild-createchroot $SBUILD_VERBOSE \
-	--components=$COMPONENTS \
-	--arch=$SBUILD_CHROOT_ARCH \
+	--components=$(distro_base_components $DISTRO $BUILD_ARCH) \
+	--arch=$BUILD_ARCH \
 	--include=ccache \
-	$SCHROOT_EXCLUDE_ARG \
 	$BUILD_SCHROOT_SETUP_ONLY \
-	$CODENAME $CHROOT_DIR $MIRROR
+	${DISTRO_CODENAME[$DISTRO]} $CHROOT_DIR \
+	$(distro_base_mirror $DISTRO $BUILD_ARCH)
 
     # Save generated sbuild config from Docker
     sbuild_save_config
 
-    sbuild_chroot_apt_sources
-
-    # Set apt proxy
-    if test -n "$HTTP_PROXY"; then
-	debug "    Setting apt proxy:  $HTTP_PROXY"
-	run bash -c "echo Acquire::http::Proxy \\\"$HTTP_PROXY\\\"\\; > \
-	    $CHROOT_DIR/etc/apt/apt.conf.d/05proxy"
-	run_debug cat $CHROOT_DIR/etc/apt/apt.conf.d/05proxy
-    fi
+    # Set up apt configuration
+    distro_configure_apt $DISTRO
 
     # Set up local repo
     deb_repo_init  # Set up variables
     deb_repo_setup
-    CODENAME=$DISTRO repo_add_apt_source local file://$BASE_DIR/$REPO_DIR
-    repo_add_apt_key $GNUPGHOME/sbuild-key.pub
 }
 
 sbuild_configure_package() {
@@ -245,6 +176,7 @@ sbuild_configure_package() {
 }
 
 sbuild_build_package() {
+    local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     debug "      Build dir: $BUILD_DIR"
     debug "      Source package .dsc file: $DSC_FILE"
 
@@ -261,8 +193,9 @@ sbuild_build_package() {
     (
 	cd $BUILD_DIR
 	run_user sbuild \
-	    --host=$HOST_ARCH --build=$SBUILD_CHROOT_ARCH \
-	    -d $CODENAME $BUILD_INDEP $SBUILD_VERBOSE $SBUILD_DEBUG $NUM_JOBS \
+	    --host=$HOST_ARCH --build=$BUILD_ARCH \
+	    -d ${DISTRO_CODENAME[$DISTRO]} $BUILD_INDEP $SBUILD_VERBOSE \
+	    $SBUILD_DEBUG $NUM_JOBS \
 	    -c $SBUILD_CHROOT \
 	    ${SBUILD_RESOLVER:+--build-dep-resolver=$SBUILD_RESOLVER} \
 	    $DSC_FILE
