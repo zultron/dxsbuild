@@ -3,7 +3,7 @@
 ARCHES="amd64 i386 armhf"
 DISTROS="jessie trusty"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
-    linux-tools czmq pyzmq"
+    linux-tools czmq"
 
 for arch in $ARCHES; do
     echo '############### arch $arch ###############'
