@@ -1,29 +1,33 @@
-VERSION=3.8.13
-TARBALL_URL=http://www.kernel.org/pub/linux/kernel/v3.0/linux-${VERSION}.tar.xz
-GIT_URL=https://github.com/zultron/linux-ipipe-deb.git
-GIT_BRANCH=${VERSION}
-DEBIAN_PACKAGE_COMP=xz
-NATIVE_BUILD_ONLY=true  # Build-Depends: gcc-4.9
+PKG="linux"
+VERSION="3.8.13"
+BASEURL="http://www.kernel.org/pub/linux/kernel/v3.0"
 
-FEATURESETS="xenomai rtai"
-DISABLED_FEATURESETS=""  # Set to 'xenomai' or 'rtai' to skip build
+# Disable 'xenomai' or 'rtai' build
+LINUX_DISABLED_FEATURESETS=""
 
-CONFIGURE_PACKAGE_DEPS=python
-# Add xenomai-kernel-source if not disabled
-DISABLED_FEATURESETS=" $DISABLED_FEATURESETS "
-test "${DISABLED_FEATURESETS/xenomai/}" != "$DISABLED_FEATURESETS" || \
-CONFIGURE_PACKAGE_DEPS+=" xenomai-kernel-source"
-# Add rtai-source if not disabled
-DISABLED_FEATURESETS=" $DISABLED_FEATURESETS "
-test "${DISABLED_FEATURESETS/rtai/}" != "$DISABLED_FEATURESETS" || \
-CONFIGURE_PACKAGE_DEPS+=" rtai-source"
+# Package sources
+PACKAGE_TARBALL_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
+PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/linux-ipipe-deb.git"
+PACKAGE_DEBZN_GIT_BRANCH[$PKG]="${VERSION}"
 
-configure_package() {
+# Build params
+PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"  # Build-Depends: gcc-4.9
+
+# Source package configuration
+PACKAGE_CONFIGURE_DEPS[$PKG]="python"
+# Install Xenomai and RTAI source packages, if applicable
+case " ${LINUX_DISABLED_FEATURESETS} " in
+    "* xenomai *") PACKAGE_CONFIGURE_DEPS[$PKG]+=" xenomai-kernel-source" ;;
+    "* rtai *") PACKAGE_CONFIGURE_DEPS[$PKG]+=" rtai-source" ;;
+esac
+PACKAGE_CONFIGURE_FUNC[$PKG]="configure_linux"
+
+configure_linux() {
     if test $DISTRO = trusty; then
 	debug "    Setting gcc to 'gcc-4.8'"
 	sed -ie '/^compiler:/ s/gcc-.*/gcc-4.8/' debian/config/defines
     fi
-    for featureset in $DISABLED_FEATURESETS; do
+    for featureset in $LINUX_DISABLED_FEATURESETS; do
 	debug "    Disabling featureset $featureset"
 	sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
     done

@@ -49,6 +49,7 @@ deb_repo_build() {
     deb_repo_init	# repo config
     deb_repo_setup	# set up repo, if needed
     source_package_init	# source pkg config
+    distro_check_package $DISTRO $PACKAGE
 
     # add source pkg
     msg "    Removing all packages for '$PACKAGE'"

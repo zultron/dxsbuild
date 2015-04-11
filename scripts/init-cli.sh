@@ -188,26 +188,24 @@ debug "Sourcing include scripts"
 . $SCRIPTS_DIR/docker.sh
 . $SCRIPTS_DIR/sbuild.sh
 . $SCRIPTS_DIR/distro.sh
-. $SCRIPTS_DIR/debian-source-package.sh
-. $SCRIPTS_DIR/debian-binary-package.sh
+. $SCRIPTS_DIR/debian-package.sh
 . $SCRIPTS_DIR/debian-pkg-repo.sh
 
 # Source distro, repo and package configs
 distro_read_all_configs
 repo_read_all_configs
-NATIVE_BUILD_ONLY=false
-if test -n "$PACKAGE"; then
-    debug "    Sourcing config for package '$PACKAGE'"
-    . $PACKAGE_CONFIG_DIR/$PACKAGE.sh
-fi
+package_read_all_configs
+
 # Source optional config override file
 if test -f $BASE_DIR/local-config.sh; then
     debug "    Sourcing local config"
     . $BASE_DIR/local-config.sh
 fi
 
-# Print distro debug info
-#distro_debug
+# Print config debug info
+# distro_debug
+# package_debug
+# exit 1
 
 # Debug
 ! $DDEBUG || set -x
@@ -215,37 +213,4 @@ fi
 # Set up user in Docker
 if $IN_DOCKER && ! $IN_SCHROOT; then
     docker_set_user
-fi
-
-
-# Package sanity checks
-if test -n "$PACKAGE"; then
-    if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO; then
-        # Be sure package is valid for distro
-	DISTRO_PKG_OK=false
-	for p in ${DISTRO_PACKAGES[$DISTRO]}; do
-	    if test $p = $PACKAGE; then
-		DISTRO_PKG_OK=true
-		break
-	    fi
-	done
-	$DISTRO_PKG_OK || error "Package $PACKAGE excluded from distro $DISTRO"
-    fi
-
-    if mode BUILD_PACKAGE BUILD_APT_REPO; then
-        # Be sure package is valid for arch
-	for a in $EXCLUDE_ARCHES; do
-	    if test $a = $HOST_ARCH; then
-		error "Package $PACKAGE excluded from arch $HOST_ARCH"
-	    fi
-	done
-    fi
-fi
-
-
-# Proxy
-if test -n "$HTTP_PROXY"; then
-    debug "      Setting proxy:  $HTTP_PROXY"
-    export http_proxy="$HTTP_PROXY"
-    export https_proxy="$HTTP_PROXY"
 fi

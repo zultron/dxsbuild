@@ -13,7 +13,7 @@ case $MODE in
 	;;
 
     CONFIGURE_PKG)  # -C:  (Internal use)  Pre-build configure script
-	( cd $BUILD_SRC_DIR && configure_package; )
+	run_configure_package_func
 	;;
 
     ##### Functions run inside Docker container #####

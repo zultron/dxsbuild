@@ -1,4 +1,8 @@
-VERSION=1.2.0
-TARBALL_URL=https://github.com/giampaolo/pyftpdlib/archive/release-$VERSION.tar.gz
-GIT_URL=https://github.com/zultron/python-pyftpdlib-deb.git
-DEBIAN_PACKAGE_COMP=gz
+PKG="python-pyftpdlib"
+VERSION="1.2.0"
+BASEURL="https://github.com/giampaolo/pyftpdlib/archive"
+GIT_BASEURL="https://github.com/zultron"
+
+# Package sources
+PACKAGE_TARBALL_URL[$PKG]="$BASEURL/release-$VERSION.tar.gz"
+PACKAGE_DEBZN_GIT_URL[$PKG]="$GIT_BASEURL/python-pyftpdlib-deb.git"

@@ -1,6 +1,10 @@
-GIT_REV=a416758
-TARBALL_URL=https://github.com/ShabbyX/RTAI/archive/${GIT_REV}.tar.gz
-GIT_URL=https://github.com/zultron/rtai-deb.git
-GIT_REPO=rtai-deb
-DEBIAN_PACKAGE_COMP=gz
-EXCLUDE_ARCHES=armhf
+PKG="rtai"
+GIT_REV="a416758"
+GIT_BASEURL="https://github.com/ShabbyX/RTAI/archive"
+
+# Package sources
+PACKAGE_TARBALL_URL[$PKG]="$GIT_BASEURL/${GIT_REV}.tar.gz"
+PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/rtai-deb.git"
+
+# Build params
+PACKAGE_EXCLUDE_ARCHES[$PKG]="armhf"

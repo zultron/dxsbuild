@@ -11,9 +11,11 @@ debug "    Sourcing debian-source-package.sh"
 ########################################
 # Source package init vars
 source_package_init() {
+    distro_check_package $DISTRO $PACKAGE
+
     debianization_init  # Init vars after unpacking
 
-    debug "      Package format:  ${DEBIAN_PACKAGE_FORMAT:=3.0 (quilt)}"
+    debug "      Package format:  ${PACKAGE_FORMAT[$PACKAGE]}"
 }
 
 ########################################
@@ -22,19 +24,34 @@ source_package_setup() {
     msg "    Preparing source directory $BUILD_SRC_DIR"
     run_user rm -rf $BUILD_SRC_DIR
     run_user mkdir -p $BUILD_SRC_DIR/debian
+
+    # Proxy
+    if test -n "$HTTP_PROXY"; then
+	debug "    Setting proxy:  $HTTP_PROXY"
+	export http_proxy="$HTTP_PROXY"
+	export https_proxy="$HTTP_PROXY"
+    fi
+
 }
 
 ########################################
 # Source package configuration
 
-configure_package_wrapper() {
-    # Some packages may define a configuration step
-    if declare -f configure_package >/dev/null; then
-	msg "    Configuring source package"
-	sbuild_configure_package
-    else
-	debug "      (No configure_package function defined)"
+configure_package() {
+    if test -z "${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"; then
+	debug "      (No source pkg configure function defined)"
+	return
     fi
+
+    sbuild_configure_package
+}
+
+run_configure_package_func() {
+    debug "    Running configure function: ${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"
+    (
+	cd $BUILD_SRC_DIR
+	run ${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}
+    )
 }
 
 ########################################
@@ -46,7 +63,7 @@ source_package_build_from_tree() {
     (
 	cd $BUILD_SRC_DIR
 	run_user dpkg-source -b \
-	    --format="'${DEBIAN_PACKAGE_FORMAT}'" .
+	    --format="'${PACKAGE_FORMAT[$PACKAGE]}'" .
     )
 }
 
@@ -80,7 +97,7 @@ source_package_build() {
     debianization_add_changelog
 
     # Some packages may define a configuration step
-    configure_package_wrapper
+    configure_package
 
     # Build the source package and clean up
     source_package_build_from_tree

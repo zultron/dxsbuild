@@ -10,12 +10,14 @@ arch_host() {
     local ARCH=$2
 
     if test $ARCH = 'default'; then
-	ARCH=$(arch_default)
+	ARCH=$(arch_default $DISTRO)
     fi
     echo $ARCH
 }
 
 arch_build() {
+    # For non-binary pkg builds, simply return the host arch.
+    #
     # The build arch for a package is the host arch if the package
     # cannot be cross-built. Otherwise, if the host arch is a
     # 'personality' of the machine arch (e.g. amd64->i386), use the
@@ -24,8 +26,10 @@ arch_build() {
     local ARCH=$2
     local HOST_ARCH=$(arch_host $DISTRO $ARCH)
 
-    if $NATIVE_BUILD_ONLY || \
-	! distro_base_repo $DISTRO $HOST_ARCH >/dev/null; then
+    if ! mode BUILD_PACKAGE || \
+	${PACKAGE_NATIVE_BUILD_ONLY[$PACKAGE]} || \
+	! distro_base_repo $DISTRO $HOST_ARCH >/dev/null;
+    then
 	echo $HOST_ARCH
 	return
     fi

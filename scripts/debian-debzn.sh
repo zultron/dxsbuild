@@ -7,7 +7,8 @@ parse_changelog() {
 }
 
 debianization_init() {
-    test -z "$PACKAGE_VERSION" || return
+    test -z "$DEBIANIZATION_INIT" || return 0
+    DEBIANIZATION_INIT=1  # Don't do this twice
 
     PACKAGE_VERSION=$(parse_changelog version)
     debug "      Upstream package version-release:  $PACKAGE_VERSION"
@@ -38,24 +39,24 @@ debianization_init() {
 }
 
 debianization_git_tree_update() {
-    if test -z "$GIT_URL"; then
-	debug "    (No GIT_URL defined; not handling debianization git tree)"
+    if test -z "${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"; then
+	debug "    (No PACKAGE_DEBZN_GIT_URL defined; not handling git tree)"
 	return
     fi
 
     if test ! -d $DEBZN_GIT_DIR/.git; then
 	msg "    Cloning new debianization git tree"
-	debug "      Source: $GIT_URL"
+	debug "      Source: ${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"
 	debug "      Dir: $DEBZN_GIT_DIR"
-	debug "      Git branch:  ${GIT_BRANCH:-master}"
-	run_user git clone -o dbuild -b ${GIT_BRANCH:-master} --depth=1 \
-	    $GIT_URL $DEBZN_GIT_DIR
+	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
+	run_user git clone -o dbuild -b ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]} \
+	    --depth=1 ${PACKAGE_DEBZN_GIT_URL[$PACKAGE]} $DEBZN_GIT_DIR
     else
 	msg "    Updating debianization git tree"
 	debug "      Dir: $DEBZN_GIT_DIR"
-	debug "      Git branch:  ${GIT_BRANCH:-master}"
+	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
 	run_user git --git-dir=$DEBZN_GIT_DIR/.git --work-tree=$DEBZN_GIT_DIR \
-	    pull --ff-only dbuild ${GIT_BRANCH:-master}
+	    pull --ff-only dbuild ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}
     fi
 
     debug "    Saving original changelog"
@@ -89,16 +90,16 @@ debianization_add_changelog() {
 }
 
 debianization_git_tree_unpack() {
-    if test -n "$GIT_URL"; then
+    if test -n "${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"; then
 	msg "    Copying debianization from git tree"
 	debug "      Debzn git dir: $DEBZN_GIT_DIR"
 	debug "      Dest dir: $BUILD_SRC_DIR/debian"
-	debug "      Git branch:  ${GIT_BRANCH:-master}"
-	run_user git --git-dir=$DEBZN_GIT_DIR/.git archive \
-	    --prefix=debian/ ${GIT_BRANCH:-master} | \
-	    run_user tar xCf $BUILD_SRC_DIR -
+	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
+	run_user bash -c "'git --git-dir=$DEBZN_GIT_DIR/.git archive \\
+	    --prefix=debian/ ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]} | \\
+	    tar xCf $BUILD_SRC_DIR -'"
     else
-	debug "      (No GIT_URL defined; not unpacking debianization from git)"
+	debug "      (No PACKAGE_DEBZN_GIT_URL defined; not unpacking from git)"
     fi
 }
 

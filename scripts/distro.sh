@@ -84,6 +84,22 @@ repo_has_arch() {
     return $RES
 }
 
+distro_check_package() {
+    # Be sure package is valid for distro
+    local DISTRO=$1
+    local PACKAGE=$2
+    local DISTRO_PKG_OK=false
+
+    for p in ${DISTRO_PACKAGES[$DISTRO]}; do
+	if test $p = $PACKAGE; then
+	    DISTRO_PKG_OK=true
+	    break
+	fi
+    done
+    $DISTRO_PKG_OK || error "Package $PACKAGE excluded from distro $DISTRO"
+    debug "      Package $PACKAGE included in distro $DISTRO:  OK"
+}
+
 distro_base_repo() {
     local DISTRO=$1
     local ARCH=$2
@@ -164,42 +180,46 @@ distro_configure_apt() {
     for repo in ${DISTRO_REPOS[$DISTRO]} local; do
 	repo_configure $repo
     done
+}
 
+distro_set_apt_proxy() {
     # Set apt proxy
     if test -n "$HTTP_PROXY"; then
-	debug "    Setting apt proxy:  $HTTP_PROXY"
+	debug "    Setting http proxy:  $HTTP_PROXY"
 	run bash -c "echo Acquire::http::Proxy \\\"$HTTP_PROXY\\\"\\; > \
 	    $CHROOT_DIR/etc/apt/apt.conf.d/05proxy"
 	run_debug cat $CHROOT_DIR/etc/apt/apt.conf.d/05proxy
-    fi
 
+	export http_proxy="$HTTP_PROXY"
+	export https_proxy="$HTTP_PROXY"
+    fi
 }
 
 distro_debug() {
     for d in $DISTROS; do
-	echo "distro $d:"
-	echo "	codename ${DISTRO_CODENAME[$d]}"
-	echo "	arches ${DISTRO_ARCHES[$d]}"
-	echo "	repos ${DISTRO_REPOS[$d]}"
+	debug "distro $d:"
+	debug "	codename ${DISTRO_CODENAME[$d]}"
+	debug "	arches ${DISTRO_ARCHES[$d]}"
+	debug "	repos ${DISTRO_REPOS[$d]}"
 	for a in ${DISTRO_ARCHES[$d]}; do
-	    echo "	arch $a:"
-	    echo "	  base repo:  $(distro_base_repo $d $a)"
-	    echo "	  base mirror:  $(distro_base_mirror $d $a)"
-	    echo "	  base components:  $(distro_base_components $d $a)"
+	    debug "	arch $a:"
+	    debug "	  base repo:  $(distro_base_repo $d $a)"
+	    debug "	  base mirror:  $(distro_base_mirror $d $a)"
+	    debug "	  base components:  $(distro_base_components $d $a)"
 	    repos=
 	    for r in ${DISTRO_REPOS[$d]}; do
 		if repo_has_arch $r $a; then
 		    repos+=" $r"
 		fi
 	    done
-	    echo "	  repos:	$repos"
+	    debug "	  repos:	$repos"
 	done
     done
     for r in $REPOS; do
-	echo "repo $r:"
-	echo "	mirror ${REPO_MIRROR[$r]}"
-	echo "	components ${REPO_COMPONENTS[$r]}"
-	echo "	arches ${REPO_ARCHES[$r]}"
-	echo "	key ${REPO_KEY[$r]:-(none)}"
+	debug "repo $r:"
+	debug "	mirror ${REPO_MIRROR[$r]}"
+	debug "	components ${REPO_COMPONENTS[$r]}"
+	debug "	arches ${REPO_ARCHES[$r]}"
+	debug "	key ${REPO_KEY[$r]:-(none)}"
     done
 }

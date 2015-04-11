@@ -1,4 +1,6 @@
-VERSION=2.2.0
-TARBALL_URL=http://download.zeromq.org/czmq-${VERSION}.tar.gz
-GIT_URL=https://github.com/zultron/czmq-deb.git
-DEBIAN_PACKAGE_COMP=gz
+PKG="czmq"
+VERSION="2.2.0"
+
+# Package sources
+PACKAGE_TARBALL_URL[$PKG]="http://download.zeromq.org/czmq-${VERSION}.tar.gz"
+PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/czmq-deb.git"

@@ -2,7 +2,7 @@ debug "    Sourcing sbuild.sh"
 
 sbuild_chroot_init() {
     # By default, only build arch-indep packages on build arch
-    if arch_is_foreign $DISTRO $HOST_ARCH || $FORCE_INDEP; then
+    if test $HOST_ARCH = $(arch_default $DISTRO) || $FORCE_INDEP; then
 	BUILD_INDEP="--arch-all"
     else
 	BUILD_INDEP="--no-arch-all"
@@ -16,6 +16,19 @@ sbuild_chroot_init() {
     if $BUILD_SCHROOT_SKIP_PACKAGES; then
 	debug "      Running in setup-only mode"
 	BUILD_SCHROOT_SETUP_ONLY=--setup-only
+    fi
+
+    if test -n "$PACKAGE" && test -n "${PACKAGE_SBUILD_RESOLVER[$PACKAGE]}"
+    then
+	local r=${PACKAGE_SBUILD_RESOLVER[$PACKAGE]}
+	debug "      Using sbuild resolver $r"
+	SBUILD_RESOLVER_ARG=--build-dep-resolver=$r
+    fi
+
+    if test $HOST_ARCH = i386; then
+	SCHROOT_PERSONALITY=linux32
+    else
+	SCHROOT_PERSONALITY=linux
     fi
 
     # sbuild verbosity
@@ -79,38 +92,17 @@ sbuild_install_keys() {
 }
 
 sbuild_install_config() {
-    if test -f $CONFIG_DIR/chroot.d/$SBUILD_CHROOT; then
-	debug "    Installing saved schroot config $SBUILD_CHROOT"
-	run cp $CONFIG_DIR/chroot.d/$SBUILD_CHROOT /etc/schroot/chroot.d
-	debug "      Contents of /etc/schroot/chroot.d/$SBUILD_CHROOT:"
-	run_debug cat /etc/schroot/chroot.d/$SBUILD_CHROOT
-    else
-	debug "      (No saved config for $SBUILD_CHROOT)"
-    fi
-}
+    local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
+    debug "    Installing schroot config:  $DISTRO-$BUILD_ARCH"
 
-sbuild_save_config() {
-    SBUILD_CHROOT=$DISTRO-$SBUILD_CHROOT_ARCH-sbuild
-    SBUILD_CHROOT_GEN=$(readlink -e \
-	/etc/schroot/chroot.d/${DISTRO_CODENAME[$DISTRO]}-$SBUILD_CHROOT_ARCH-sbuild-* || true)
-    if test -n "$SBUILD_CHROOT_GEN"; then
-	debug "    Saving generated schroot config from Docker"
-	run_user mkdir -p $CONFIG_DIR/chroot.d
-	run_user cp $SBUILD_CHROOT_GEN \
-	    $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
+    run bash -c "sed $SCRIPTS_DIR/schroot.conf \\
+	-e 's/@DISTRO@/$DISTRO/g' \\
+	-e 's/@BUILD_ARCH@/$BUILD_ARCH/g' \\
+	-e 's/@SCHROOT_PERSONALITY@/$SCHROOT_PERSONALITY/g' \\
+	> /etc/schroot/chroot.d/$SBUILD_CHROOT"
 
-	if test $DISTRO != ${DISTRO_CODENAME[$DISTRO]}; then
-	    debug "    Patching schroot config name"
-	    run sed -i $CONFIG_DIR/chroot.d/$SBUILD_CHROOT \
-		-e '1 s/.*/[raspbian-jessie-amd64-sbuild]/'
-	fi
-
-	debug "      Chroot config:"
-	run_debug cat $CONFIG_DIR/chroot.d/$SBUILD_CHROOT
-
-    else
-	debug "      (No new schroot config found in /etc/schroot/chroot.d)"
-    fi
+    debug "      Contents of /etc/schroot/chroot.d/$SBUILD_CHROOT:"
+    run_debug cat /etc/schroot/chroot.d/$SBUILD_CHROOT
 }
 
 sbuild_chroot_setup() {
@@ -121,8 +113,9 @@ sbuild_chroot_setup() {
     sbuild_install_sbuild_conf
     sbuild_install_keys
 
-    # Clean out any existing apt config
+    # Clean out any existing apt config and set http proxy
     distro_clear_apt
+    distro_set_apt_proxy
 
     if arch_is_foreign $DISTRO $HOST_ARCH && test $BUILD_ARCH=armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
@@ -139,9 +132,6 @@ sbuild_chroot_setup() {
 	${DISTRO_CODENAME[$DISTRO]} $CHROOT_DIR \
 	$(distro_base_mirror $DISTRO $BUILD_ARCH)
 
-    # Save generated sbuild config from Docker
-    sbuild_save_config
-
     # Set up apt configuration
     distro_configure_apt $DISTRO
 
@@ -157,26 +147,32 @@ sbuild_configure_package() {
 
     # FIXME run with union-type=aufs in schroot.conf
 
-    debug "      Installing extra packages in schroot:"
-    debug "        $CONFIGURE_PACKAGE_DEPS"
+    if test -z "${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}"; then
+	debug "      (No source pkg configure deps to install)"
+	return
+    fi
+
+    debug "      Installing source package configure deps in schroot:"
+    debug "        ${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}"
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get update
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get install --no-install-recommends -y \
-	$CONFIGURE_PACKAGE_DEPS
+	${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}
 
     debug "      Running configure function in schroot"
     run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	./$DBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
 
-    debug "      Uninstalling extra packages"
+    debug "      Removing source package configure deps"
     run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	apt-get purge -y --auto-remove \
-	$CONFIGURE_PACKAGE_DEPS
+	${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}
 }
 
 sbuild_build_package() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
+    local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
     debug "      Build dir: $BUILD_DIR"
     debug "      Source package .dsc file: $DSC_FILE"
 
@@ -197,7 +193,7 @@ sbuild_build_package() {
 	    -d ${DISTRO_CODENAME[$DISTRO]} $BUILD_INDEP $SBUILD_VERBOSE \
 	    $SBUILD_DEBUG $NUM_JOBS \
 	    -c $SBUILD_CHROOT \
-	    ${SBUILD_RESOLVER:+--build-dep-resolver=$SBUILD_RESOLVER} \
+	    $SBUILD_RESOLVER_ARG \
 	    $DSC_FILE
     )
 }
