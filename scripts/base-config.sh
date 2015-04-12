@@ -1,5 +1,23 @@
+
+# Default arch list
+ARCHES="amd64 i386 armhf"
+
+
+####################################
+# Docker configuration
+
 # Docker sbuild image name
 DOCKER_IMAGE=docker-sbuild
+
+# Whether to always allocate a tty in Docker
+#
+# A bug in Docker pre-1.1.1 prevents command exit status from the
+# `docker run` command when a tty is allocated. Set to `false` if you
+# need exit status from Docker.
+DOCKER_ALWAYS_ALLOCATE_TTY=true
+
+####################################
+# Docker container directory configuration
 
 # Base directory of this tree in Docker container
 BASE_DIR=/srv
@@ -10,14 +28,8 @@ SBUILD_CHROOT_DIR=$BASE_DIR/chroots
 # Package directory
 SBUILD_PKG_DIR=$BASE_DIR/packages
 
-# Repo with various packages
-GITHUB_REPO=https://github.com/zultron
-
 # Top-level directory for builds
 BUILD_BASE_DIR=$BASE_DIR/build/$PACKAGE
-
-# Where to put files in the Docker container
-DOCKER_SRC_DIR=/usr/src/docker-build
 
 # Where source packages live
 SOURCE_PKG_DIR=$BUILD_BASE_DIR
@@ -31,32 +43,20 @@ BUILD_DIR=$BUILD_BASE_DIR
 # Where sources are built
 BUILD_SRC_DIR=$BUILD_DIR/tree-$DISTRO
 
-# Where the Apt package repo is built
-REPO_DIR=repo
-
 # Where the Docker context is built
 DOCKER_DIR=$BUILD_BASE_DIR/docker
 
-# Whether to always allocate a tty in Docker
-#
-# A bug in Docker pre-1.1.1 prevents command exit status from the
-# `docker run` command when a tty is allocated. Set to `false` if you
-# need exit status from Docker.
-DOCKER_ALWAYS_ALLOCATE_TTY=true
-
-# Debug flag for passing to docker and scripts
-DEBUG_FLAG="`! $DEBUG || echo -d`"
-DOCKER_BUILD_DEBUG_FLAG="`! $DEBUG || echo --force-rm=false`"
-
-# Debianization tarball
-DEBZN_TARBALL=$PACKAGE.debian.tar.gz
-
-# Key server
-GPG_KEY_SERVER=hkp://keys.gnupg.net
-
 # Generated config directory
 CONFIG_DIR=$BASE_DIR/configs
-GNUPGHOME=$CONFIG_DIR/gpg
+
+# ccache directory
+CCACHE_DIR=$CONFIG_DIR/ccache
+
+####################################
+# Relative directories
+
+# Where the Apt package repo is built
+REPO_DIR=repo
 
 # Scripts and configs directories
 SCRIPTS_DIR=scripts
@@ -64,18 +64,23 @@ DISTRO_CONFIG_DIR=$SCRIPTS_DIR/distro
 REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
-# Suffix for package version
-PACKAGE_VERSION_SUFFIX=~1dxsbuild
+####################################
+# GPG key config
 
-# TCL default version; override in distro config
-TCL_VER=8.6
+# Key server
+GPG_KEY_SERVER=hkp://keys.gnupg.net
+
+# Key directory
+GNUPGHOME=$CONFIG_DIR/gpg
+
+####################################
+
+# Debianization tarball
+DEBZN_TARBALL=$PACKAGE.debian.tar.gz
+
+# Suffix for package version
+PACKAGE_VERSION_SUFFIX=~1dxs
 
 # Build script name
-DBUILD=$(basename $0)
+DXSBUILD=$(basename $0)
 
-# ccache directory
-CCACHE_DIR=$CONFIG_DIR/ccache
-
-
-# Default arch list
-ARCHES="amd64 i386 armhf"

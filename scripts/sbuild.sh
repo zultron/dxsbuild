@@ -157,7 +157,7 @@ sbuild_configure_package() {
 
     debug "      Running configure function in schroot"
     run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
-	./$DBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
+	./$DXSBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
 
     if test -z "${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}"; then
 	debug "      (No source pkg configure deps to remove)"
