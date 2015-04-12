@@ -58,34 +58,28 @@ sbuild_install_sbuild_conf() {
     run cp $SCRIPTS_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
 }
 
-sbuild_chroot_save_keys() {
-    debug "    Saving signing keys from sbuild into $GNUPGHOME"
-    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-    run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
-    run cp $SBUILD_KEY_DIR/sbuild-key.* /tmp
-    run chown user /tmp/sbuild-key.*
-    run_user cp /tmp/sbuild-key.* $GNUPGHOME
-}
-
 sbuild_install_keys() {
     SBUILD_KEY_DIR=/var/lib/sbuild/apt-keys
+
+    if ! test -f $GNUPGHOME/sbuild-key.sec; then
+	debug "    Generating new sbuild keys"
+	run sbuild-update --keygen
+
+	debug "    Saving signing keys from sbuild into $GNUPGHOME"
+	debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
+	run_user mkdir -p $GNUPGHOME; run_user chmod 700 $GNUPGHOME
+	run cp $SBUILD_KEY_DIR/sbuild-key.* /tmp
+	run chown user /tmp/sbuild-key.*
+	run_user cp /tmp/sbuild-key.* $GNUPGHOME
+    fi
+
     if test -f $SBUILD_KEY_DIR/sbuild-key.sec; then
-	if test -f $GNUPGHOME/sbuild-key.sec; then
-	    debug "      (sbuild package keys installed; doing nothing)"
-	else
-	    sbuild_chroot_save_keys
-	fi
+	debug "      (sbuild package keys installed; doing nothing)"
     else
-	if ! test -f $GNUPGHOME/sbuild-key.sec; then
-	    debug "    Generating new sbuild keys"
-	    run sbuild-update --keygen
-	    sbuild_chroot_save_keys
-	else
-	    debug "    Installing signing keys from $GNUPGHOME into sbuild"
-	    debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
-	    run install -o user -g sbuild $GNUPGHOME/sbuild-key.* \
-		$SBUILD_KEY_DIR
-	fi
+	debug "    Installing signing keys from $GNUPGHOME into sbuild"
+	debug "      Sbuild key dir:  $SBUILD_KEY_DIR"
+	run install -o user -g sbuild $GNUPGHOME/sbuild-key.* \
+	    $SBUILD_KEY_DIR
     fi
     debug "      Sbuild keyring contents:"
     run_debug apt-key --keyring $SBUILD_KEY_DIR/sbuild-key.pub list
