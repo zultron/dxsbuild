@@ -16,10 +16,9 @@ PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"  # Build-Depends: gcc-4.9
 # Source package configuration
 PACKAGE_CONFIGURE_DEPS[$PKG]="python"
 # Install Xenomai and RTAI source packages, if applicable
-case " ${LINUX_DISABLED_FEATURESETS} " in
-    "* xenomai *") PACKAGE_CONFIGURE_DEPS[$PKG]+=" xenomai-kernel-source" ;;
-    "* rtai *") PACKAGE_CONFIGURE_DEPS[$PKG]+=" rtai-source" ;;
-esac
+declare -A linux_confdeps=([xenomai]=xenomai-kernel-source [rtai]=rtai-source )
+for i in ${LINUX_DISABLED_FEATURESETS}; do linux_confdeps[$i]=; done
+PACKAGE_CONFIGURE_DEPS[$PKG]+=" ${linux_confdeps[*]}"
 PACKAGE_CONFIGURE_FUNC[$PKG]="configure_linux"
 
 configure_linux() {
