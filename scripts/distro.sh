@@ -71,7 +71,8 @@ distro_base_mirror() {
 distro_base_components() {
     local DISTRO=$1
     local ARCH=$2
-    echo ${REPO_COMPONENTS[$(distro_base_repo $DISTRO $ARCH)]}
+    echo ${REPO_COMPONENTS[$(distro_base_repo $DISTRO $ARCH)]} | \
+	sed 's/ /,/g'
 }
 
 repo_has_arch() {
@@ -154,7 +155,7 @@ repo_add_apt_source() {
     local URL=${REPO_MIRROR[$REPO]}
     local ARCHES=$(echo ${REPO_ARCHES[$REPO]} | sed 's/ /,/g')
     local CODENAME=${DISTRO_CODENAME[$DISTRO]}
-    local COMPONENTS=${REPO_COMPONENTS[$REPO]}
+    local COMPONENTS="${REPO_COMPONENTS[$REPO]}"
 
     if test $REPO = local; then
 	CODENAME=$DISTRO
