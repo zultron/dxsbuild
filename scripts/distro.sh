@@ -6,9 +6,6 @@ declare -A DISTRO_PACKAGES
 declare -A DISTRO_ARCHES
 declare -A DISTRO_REPOS
 declare -A DISTRO_CODENAME
-for arch in $ARCHES; do
-    eval "declare -A DISTRO_ARCHES_$arch"
-done
 
 # Repos
 declare REPOS
@@ -79,6 +76,15 @@ repo_has_arch() {
     local REPO=$1
     local ARCH=$2
     local ARCHES=" ${REPO_ARCHES[$REPO]} "
+    local RES
+    test "$ARCHES" != "${ARCHES/ $ARCH /}" && RES=0 || RES=1
+    return $RES
+}
+
+distro_has_arch() {
+    local DISTRO=$1
+    local ARCH=$2
+    local ARCHES=" ${DISTRO_ARCHES[$DISTRO]} "
     local RES
     test "$ARCHES" != "${ARCHES/ $ARCH /}" && RES=0 || RES=1
     return $RES

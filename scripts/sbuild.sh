@@ -179,6 +179,7 @@ sbuild_configure_package() {
 sbuild_build_package() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
+    debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
     debug "      Build dir: $BUILD_DIR"
     debug "      Source package .dsc file: $DSC_FILE"
 

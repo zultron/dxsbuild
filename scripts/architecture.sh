@@ -42,6 +42,13 @@ arch_build() {
 	BUILD_ARCH=i386
     fi
     
+    # And if the arch isn't supported, pick the first in the list
+    if ! distro_has_arch $DISTRO $BUILD_ARCH; then
+	debug "      (Distro $DISTRO doesn't support arch $BUILD_ARCH)"
+	BUILD_ARCH=$(echo ${DISTRO_ARCHES[$DISTRO]} | awk '{print $1}')
+	debug "      (...falling back to $BUILD_ARCH)"
+    fi
+
     echo $BUILD_ARCH
 }
 
