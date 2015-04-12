@@ -186,6 +186,8 @@ distro_set_apt_proxy() {
     # Set apt proxy
     if test -n "$HTTP_PROXY"; then
 	debug "    Setting http proxy:  $HTTP_PROXY"
+	test -d $CHROOT_DIR/etc/apt/apt.conf.d || \
+	    run mkdir -p $CHROOT_DIR/etc/apt/apt.conf.d
 	run bash -c "echo Acquire::http::Proxy \\\"$HTTP_PROXY\\\"\\; > \
 	    $CHROOT_DIR/etc/apt/apt.conf.d/05proxy"
 	run_debug cat $CHROOT_DIR/etc/apt/apt.conf.d/05proxy
