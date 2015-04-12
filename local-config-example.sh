@@ -20,5 +20,9 @@
 #
 # Custom mirror
 #DISTRO_MIRROR[jessie]="http://http.debian.net/debian"
+#
 # Restrict list of arches
 #DISTRO_ARCHES[jessie]="armhf"
+#
+# Add repo to distro
+#DISTRO_REPOS[jessie]+=" dovetail-automata"
