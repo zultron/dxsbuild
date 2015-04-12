@@ -18,8 +18,8 @@ cross-built when possible, and fall back to `qemu` when necessary.
 
 ## Work flow
 
-These scripts are originally written to maintain the Dovetail Automata
-LLC distribution of Machinekit. Since Jessie and Trusty, Machinekit
+These scripts are originally written to maintain the [Dovetail Automata
+LLC distribution][1] of [Machinekit][2]. Since Jessie and Trusty, Machinekit
 only requires a handful of packages not present in upstream distros.
 However, building and maintaining the distribution is quite complex,
 since packages are interdependent and packages require a special
@@ -27,29 +27,32 @@ configuration step in the chroot before `dpkg-source -b`.
 
 Below, the most common work flows are described.
 
+[1]: http://deb.dovetail-automata.com
+[2]: http://machinekit.io
+
 ### Setting up
 
 - Install Docker
 - Check out this source
 - Get command line usage
 
-    ./dbuild
+		./dxsbuild
 
 - Set up and edit a local configuration as needed
 
-    cp local-config-example.sh local-config.sh
-	$EDITOR local-config.sh
+		cp local-config-example.sh local-config.sh
+		$EDITOR local-config.sh
 
 - Build the Docker container image
 
-    ./dbuild -i
+		./dxsbuild -i
 
 - Set up chroots; for cross-building `armhf`, set up an `amd64` chroot
 
-    # amd64 (default) chroot
-    ./dbuild -r jessie
-    # armhf chroot
-    ./dbuild -ra armhf jessie
+		# amd64 (default) chroot
+		./dxsbuild -r jessie
+		# armhf chroot
+		./dxsbuild -ra armhf jessie
 
 ### Build a package
 
@@ -59,17 +62,17 @@ Apt package repository is in `/repo`.
 
 - Build a source package.
 
-    ./dxsbuild -S jessie xenomai
+		./dxsbuild -S jessie xenomai
 
 - Build binary packages.
 
-    # amd64 and armhf binary packages; 16 parallel jobs
-    ./dxsbuild -b -j 16 jessie xenomai
-	./dxsbuild -ba armhf -j 16 jessie xenomai
+		# amd64 and armhf binary packages; 16 parallel jobs
+		./dxsbuild -b -j 16 jessie xenomai
+		./dxsbuild -ba armhf -j 16 jessie xenomai
 
 - Add source and binary packages to Apt package repository.
 
-    ./dxsbuild -R jessie xenomai
+		./dxsbuild -R jessie xenomai
 
 ## Use cases
 
@@ -114,12 +117,12 @@ and other very verbose output with `-dd`.
 
 Start a **Docker shell**:
 
-    ./dbuild -c
+    ./dxsbuild -c
 
 Start an **schroot shell**:
 
     # Machine arch chroot
-    ./dbuild -s jessie
+    ./dxsbuild -s jessie
     # Foreign arch chroot
-    ./dbuild -sa i386 jessie
+    ./dxsbuild -sa i386 jessie
 
