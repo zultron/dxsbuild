@@ -1,9 +1,13 @@
-# RT kernel packages
-DISTRO_PACKAGES[jessie]="xenomai rtai linux linux-tools linux-latest"
-# ZeroMQ packages
-DISTRO_PACKAGES[jessie]+=" czmq"
-# Zultron Debian package repo
-DISTRO_PACKAGES[jessie]+=" dovetail-automata-keyring"
+DISTRO="jessie"
 
-# Repos to configure for jessie
-DISTRO_REPOS[jessie]="debian emdebian"
+# List of packages to build for this distribution
+#
+# RT kernel packages
+DISTRO_PACKAGES[$DISTRO]="xenomai rtai linux linux-tools linux-latest"
+# ZeroMQ packages
+DISTRO_PACKAGES[$DISTRO]+=" czmq"
+# Zultron Debian package repo
+DISTRO_PACKAGES[$DISTRO]+=" dovetail-automata-keyring"
+
+# Apt package repositories to configure for this distribution
+DISTRO_REPOS[$DISTRO]="debian emdebian"

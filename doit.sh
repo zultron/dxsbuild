@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 ARCHES="amd64 i386 armhf"
 DISTROS="jessie trusty"
@@ -7,13 +7,13 @@ PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
 
 for distro in $DISTROS; do
     for arch in $ARCHES; do
-	echo "########### dbuild schroot, $distro:  $arch ###########"
-	./dbuild -rda $arch $distro
+	echo "########### dxsbuild schroot, $distro:  $arch ###########"
+	./dxsbuild -rda $arch $distro
     done
 
     for package in $PACKAGES; do
-	echo "########### dbuild source, $distro: $package ###########"
-	./dbuild -Sd $distro $package
+	echo "########### dxsbuild source, $distro: $package ###########"
+	./dxsbuild -Sd $distro $package
 
 	for arch in $ARCHES; do
 	    if test $arch = armhf -a $package = rtai; then
@@ -21,14 +21,14 @@ for distro in $DISTROS; do
 		continue
 	    fi
 
-	    echo "########### dbuild binary, $distro: $package:$arch ###########"
-	    ./dbuild -bda $arch -j 8 $distro $package
+	    echo "########### dxsbuild binary, $distro: $package:$arch ###########"
+	    ./dxsbuild -bda $arch -j 8 $distro $package
 
 	done
 
-	echo "########### dbuild repo, $distro: $package ###########"
-	./dbuild -Rd $distro $package
-	./dbuild -L $distro
+	echo "########### dxsbuild repo, $distro: $package ###########"
+	./dxsbuild -Rd $distro $package
+	./dxsbuild -L $distro
 
     done
 done

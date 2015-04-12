@@ -65,7 +65,7 @@ REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
 # Suffix for package version
-PACKAGE_VERSION_SUFFIX=~1mk.dbuild
+PACKAGE_VERSION_SUFFIX=~1dxsbuild
 
 # TCL default version; override in distro config
 TCL_VER=8.6

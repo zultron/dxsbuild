@@ -1,4 +1,13 @@
-REPO_MIRROR[trusty]="http://archive.ubuntu.com/ubuntu"
-REPO_ARCHES[trusty]="amd64 i386"
-REPO_COMPONENTS[trusty]="main universe"
-REPO_IS_BASE[trusty]="true"
+REPO="trusty"
+
+# Mirror URL
+REPO_MIRROR[$REPO]="http://archive.ubuntu.com/ubuntu"
+
+# Supported arches
+REPO_ARCHES[$REPO]="amd64 i386"
+
+# Supported arches
+REPO_COMPONENTS[$REPO]="main universe"
+
+# Base distribution flag
+REPO_IS_BASE[$REPO]="true"

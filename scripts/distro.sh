@@ -32,6 +32,7 @@ distro_read_all_configs() {
     debug "    Sourcing distro configurations:"
     for config in $DISTRO_CONFIG_DIR/*.sh; do
 	local distro=$(basename $config .sh)
+	test $distro != 'template' || continue  # skip template
 	debug "      $distro"
 	distro_read_config $distro
     done
@@ -55,6 +56,7 @@ repo_read_all_configs() {
     debug "    Sourcing repo configurations:"
     for config in $REPO_CONFIG_DIR/*.sh; do
 	local repo=$(basename $config .sh)
+	test $repo != 'template' || continue  # skip template
 	debug "      $repo"
 	repo_read_config $repo
     done

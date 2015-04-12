@@ -30,10 +30,10 @@ debianization_init() {
     CHANGELOG=/tmp/changelog-$PACKAGE-$DISTRO
 
     if test -z "$MAINTAINER"; then
-	MAINTAINER="$(git config user.name)" || MAINTAINER="mk-dbuild user"
+	MAINTAINER="$(git config user.name)" || MAINTAINER="dxsbuild user"
     fi
     if test -z "$EMAIL"; then
-	EMAIL="$(git config user.email)" || EMAIL="mk-dbuild@example.com"
+	EMAIL="$(git config user.email)" || EMAIL="dxsbuild@example.com"
     fi
     debug "      Maintainer <email>:  $MAINTAINER <$EMAIL>"
 }
@@ -49,14 +49,14 @@ debianization_git_tree_update() {
 	debug "      Source: ${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"
 	debug "      Dir: $DEBZN_GIT_DIR"
 	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
-	run_user git clone -o dbuild -b ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]} \
+	run_user git clone -o dxsbuild -b ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]} \
 	    --depth=1 ${PACKAGE_DEBZN_GIT_URL[$PACKAGE]} $DEBZN_GIT_DIR
     else
 	msg "    Updating debianization git tree"
 	debug "      Dir: $DEBZN_GIT_DIR"
 	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
 	run_user git --git-dir=$DEBZN_GIT_DIR/.git --work-tree=$DEBZN_GIT_DIR \
-	    pull --ff-only dbuild ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}
+	    pull --ff-only dxsbuild ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}
     fi
 
     debug "    Saving original changelog"
@@ -78,7 +78,7 @@ debianization_add_changelog() {
     (
 	echo "$PACKAGE_CHANGELOG_HEAD"
 	echo "  * Rebuilt in mk-debuild"
-	echo "    - See https://github.com/zultron/mk-dbuild"
+	echo "    - See https://github.com/zultron/dxsbuild"
 	echo "$PACKAGE_CHANGELOG_TRAILER"
 	echo
     ) > $CHANGELOG

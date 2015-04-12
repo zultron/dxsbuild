@@ -1,4 +1,13 @@
-REPO_MIRROR[raspbian-jessie]="http://archive.raspbian.org/raspbian"
-REPO_ARCHES[raspbian-jessie]="armhf"
-REPO_KEY[raspbian-jessie]="http://archive.raspbian.org/raspbian.public.key"
-REPO_IS_BASE[raspbian-jessie]="true"
+REPO="raspbian-jessie"
+
+# Mirror URL
+REPO_MIRROR[$REPO]="http://archive.raspbian.org/raspbian"
+
+# Supported arches
+REPO_ARCHES[$REPO]="armhf"
+
+# GPG key
+REPO_KEY[$REPO]="http://archive.raspbian.org/raspbian.public.key"
+
+# Base distribution flag
+REPO_IS_BASE[$REPO]="true"

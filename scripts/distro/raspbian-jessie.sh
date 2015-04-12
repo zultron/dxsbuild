@@ -5,21 +5,27 @@
 #
 # http://www.raspbian.org/RaspbianRepository
 
+DISTRO="raspbian-jessie"
+
+# List of packages to build for this distribution
+#
 # RT kernel packages
-DISTRO_PACKAGES[raspbian-jessie]="xenomai linux linux-tools linux-latest"
+DISTRO_PACKAGES[$DISTRO]="xenomai linux linux-tools linux-latest"
 # ZeroMQ packages
-DISTRO_PACKAGES[raspbian-jessie]+=" czmq"
+DISTRO_PACKAGES[$DISTRO]+=" czmq"
 # Zultron Debian package repo
-DISTRO_PACKAGES[raspbian-jessie]+=" dovetail-automata-keyring"
+DISTRO_PACKAGES[$DISTRO]+=" dovetail-automata-keyring"
 # FIXME testing
-DISTRO_PACKAGES[raspbian-jessie]+=" pyzmq"
+DISTRO_PACKAGES[$DISTRO]+=" pyzmq"
 
-# Repos to configure for raspbian-jessie
-DISTRO_REPOS[raspbian-jessie]="raspbian-jessie"
+# Apt package repositories to configure for this distribution
+DISTRO_REPOS[$DISTRO]="raspbian-jessie"
 
-# Codename (when doesn't match distro name)
-DISTRO_CODENAME[raspbian-jessie]="jessie"
+# Codename
+DISTRO_CODENAME[$DISTRO]="jessie"
 
+# Distro architectures
+#
 # Mixing Raspbian-armhf and Debian-amd64 doesn't work because of
 # package differences:
 #
@@ -27,4 +33,4 @@ DISTRO_CODENAME[raspbian-jessie]="jessie"
 # linux-libc-dev:armhf : Breaks: linux-libc-dev (!= 3.16.7-ckt4-1+rpi1) but 3.16.7-ckt7-1 is installed.
 #
 # So, only armhf
-DISTRO_ARCHES[raspbian-jessie]="armhf"
+DISTRO_ARCHES[$DISTRO]="armhf"
