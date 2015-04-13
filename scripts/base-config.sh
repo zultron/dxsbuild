@@ -25,9 +25,6 @@ BASE_DIR=/srv
 # Sbuild `chroots` directory
 SBUILD_CHROOT_DIR=$BASE_DIR/chroots
 
-# Package directory
-SBUILD_PKG_DIR=$BASE_DIR/packages
-
 # Top-level directory for builds
 BUILD_BASE_DIR=$BASE_DIR/build/$PACKAGE
 
@@ -63,6 +60,9 @@ SCRIPTS_DIR=scripts
 DISTRO_CONFIG_DIR=$SCRIPTS_DIR/distro
 REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
+
+# Build log directory:  store with Apt repository
+LOG_DIR=$REPO_DIR/log
 
 ####################################
 # GPG key config

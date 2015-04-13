@@ -50,12 +50,18 @@ sbuild_install_sbuild_conf() {
 	-e "s/@EMAIL@/$EMAIL/" \
 	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
 	-e "s,@CCACHE_DIR@,$CCACHE_DIR," \
+	-e "s,@LOG_DIR@,$BASE_DIR/$LOG_DIR," \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf
 
     debug "    Installing fstab into /etc/schroot/sbuild/fstab"
     run cp $SCRIPTS_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
+}
+
+sbuild_install_log_dir() {
+    debug "    Creating log directory"
+    run_user mkdir -p $LOG_DIR
 }
 
 sbuild_install_keys() {
@@ -134,6 +140,14 @@ sbuild_chroot_setup() {
     deb_repo_setup
 }
 
+sbuild_adjust_log_link() {
+    debug "    Adjusting log symlink to relative"
+    local LOG=$(readlink $BUILD_DIR/${PACKAGE}_*.build | \
+	sed "s,^/srv/,../../,")
+    run_user rm -f $BUILD_DIR/${PACKAGE}_*.build
+    run_user ln -sf $LOG $BUILD_DIR/build.log
+}
+
 sbuild_configure_package() {
     sbuild_chroot_init
     sbuild_install_sbuild_conf
@@ -182,6 +196,7 @@ sbuild_build_package() {
 
     sbuild_chroot_init
     sbuild_install_sbuild_conf
+    sbuild_install_log_dir
     sbuild_install_keys
     sbuild_install_config
 
@@ -198,6 +213,8 @@ sbuild_build_package() {
 	    $SBUILD_RESOLVER_ARG \
 	    $DSC_FILE
     )
+
+    sbuild_adjust_log_link
 }
 
 sbuild_shell() {
