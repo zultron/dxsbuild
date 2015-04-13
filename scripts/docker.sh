@@ -21,11 +21,7 @@ docker_set_user() {
 
 docker_build() {
     msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
-    mkdir -p docker
-    cp $SCRIPTS_DIR/schroot-04tmpfs docker
-    cp Dockerfile docker
-    run docker build -t $DOCKER_IMAGE docker
-    rm -rf docker
+    run bash -c "docker build -t $DOCKER_IMAGE - < Dockerfile"
 }
 
 docker_run() {

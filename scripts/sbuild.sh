@@ -95,10 +95,20 @@ sbuild_install_config() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     debug "    Installing schroot config:  $DISTRO-$BUILD_ARCH"
 
+    if $SBUILD_USE_AUFS; then
+	debug "    Installing aufs on tmpfs config"
+	run install -m 755 $SCRIPTS_DIR/schroot-04tmpfs \
+	    /etc/schroot/setup.d/04tmpfs
+	SCHROOT_UNION_TYPE="aufs"
+    else
+	SCHROOT_UNION_TYPE="none"
+    fi
+
     run bash -c "sed $SCRIPTS_DIR/schroot.conf \\
 	-e 's/@DISTRO@/$DISTRO/g' \\
 	-e 's/@BUILD_ARCH@/$BUILD_ARCH/g' \\
 	-e 's/@SCHROOT_PERSONALITY@/$SCHROOT_PERSONALITY/g' \\
+	-e 's/@SCHROOT_UNION_TYPE@/$SCHROOT_UNION_TYPE/g' \\
 	> /etc/schroot/chroot.d/$SBUILD_CHROOT"
 
     debug "      Contents of /etc/schroot/chroot.d/$SBUILD_CHROOT:"

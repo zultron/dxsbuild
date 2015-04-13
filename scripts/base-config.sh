@@ -2,6 +2,9 @@
 # Default arch list
 ARCHES="amd64 i386 armhf"
 
+# Use aufs on tmpfs in sbuild
+SBUILD_USE_AUFS="false"
+
 
 ####################################
 # Docker configuration

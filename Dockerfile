@@ -16,6 +16,8 @@ RUN	echo "APT::Install-Recommends \"0\";\nAPT::Install-Suggests \"0\";" \
 RUN	apt-get install -y build-essential fakeroot devscripts
 # - cross-build tools
 RUN	apt-get install -y xdeb sbuild pdebuild-cross
+# - aufs tools for sbuild
+RUN	apt-get install -y aufs-tools
 # - git
 RUN	apt-get install -y git ca-certificates openssh-client
 # - reprepro
@@ -31,11 +33,6 @@ RUN	apt-get install -y debian-archive-keyring
 RUN	wget -O - -q http://archive.raspbian.org/raspbian.public.key | \
 	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg \
 	        add -
-
-############################
-# Sbuild configuration:
-# - aufs on tmpfs config
-ADD	schroot-04tmpfs /etc/schroot/setup.d/04tmpfs
 
 ############################
 # Monkey patches

@@ -5,16 +5,10 @@
 #
 # Copied into /etc/schroot/setup.d/04tmpfs
 
-. "$SETUP_DATA_DIR/common-data"
-. "$SETUP_DATA_DIR/common-functions"
-. "$SETUP_DATA_DIR/common-config"
-
+. "$SETUP_DATA_DIR/common-data"  # $STAGE
+OVERLAY=/var/lib/schroot/union/overlay
 
 case $STAGE in
-    setup-start|setup-recover)
-	mount -t tmpfs overlay /var/lib/schroot/union/overlay
-	;;
-    setup-stop)
-	mount -t tmpfs overlay /var/lib/schroot/union/overlay
-	;;
+    setup-start|setup-recover) mount -t tmpfs overlay $OVERLAY ;;
+    setup-stop) umount -f $OVERLAY ;;
 esac

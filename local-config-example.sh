@@ -23,6 +23,9 @@
 # Add repo to distro
 #DISTRO_REPOS[jessie]+=" dovetail-automata"
 
+# Use aufs on tmpfs in sbuild
+#SBUILD_USE_AUFS="true"
+
 # Use http/https proxy for package downloads. Especially useful for
 # caching packages between removing and rebuilding schroots.
 #
