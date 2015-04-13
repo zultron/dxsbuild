@@ -173,11 +173,12 @@ sbuild_configure_package() {
 sbuild_build_package() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
+    local DSC_FILE=$BUILD_DIR/${PACKAGE}_*.dsc
     debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
     debug "      Build dir: $BUILD_DIR"
     debug "      Source package .dsc file: $DSC_FILE"
 
-    test -f $BUILD_DIR/$DSC_FILE || error "No .dsc file '$DSC_FILE'"
+    test -f $DSC_FILE || error "No .dsc file '$DSC_FILE'"
 
     sbuild_chroot_init
     sbuild_install_sbuild_conf

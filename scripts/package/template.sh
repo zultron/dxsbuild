@@ -8,7 +8,8 @@ PKG="mypkg"  # Name of source package
 # These parameters describe the package sources. The only mandatory
 # ones are the tarball url and/or the debianization url.
 
-PACKAGE_TARBALL_URL[$PKG]="http://www.example.com/mypkg-1.0.tar.gz"
+PACKAGE_SOURCE_URL[$PKG]="http://www.example.com/mypkg-1.0.tar.gz"
+#PACKAGE_SOURCE_GIT_BRANCH[$PKG]="master"
 PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/octocat/mypkg-deb.git"
 #PACKAGE_DEBZN_GIT_BRANCH[$PKG]="maint"		# Default "master"
 #PACKAGE_COMP[$PKG]="gz"			# Default: guess from tarball

@@ -48,7 +48,6 @@ deb_repo_build() {
     msg "Updating Debian Apt package repository"
     deb_repo_init	# repo config
     deb_repo_setup	# set up repo, if needed
-    debianization_init	# source pkg config
     distro_check_package $DISTRO $PACKAGE
 
     # add source pkg
@@ -56,10 +55,11 @@ deb_repo_build() {
     ${REPREPRO} \
 	removesrc ${DISTRO} ${PACKAGE}
 
+    local DSC_FILE=$BUILD_DIR/${PACKAGE}_*.dsc
     debug "    Adding source package '$DSC_FILE'"
     ${REPREPRO} -C main \
 	includedsc ${DISTRO} \
-	$BUILD_DIR/${DSC_FILE}
+	${DSC_FILE}
 
     # remove src pkg
 	    # ${REPREPRO} -T dsc \

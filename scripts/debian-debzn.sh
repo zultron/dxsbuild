@@ -3,13 +3,22 @@
 debug "    Sourcing debian-debzn.sh"
 
 parse_changelog() {
-    dpkg-parsechangelog --file $BUILD_DIR/changelog.orig --show-field $1
+    dpkg-parsechangelog --file $BUILD_SRC_DIR/debian/changelog --show-field $1
+}
+
+debianization_git_tree_update() {
+    if test -z "${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"; then
+	debug "    (No PACKAGE_DEBZN_GIT_URL defined; not handling git tree)"
+	return
+    fi
+
+    git_tree_update \
+	$DEBZN_GIT_DIR \
+	${PACKAGE_DEBZN_GIT_URL[$PACKAGE]} \
+	${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}
 }
 
 debianization_init() {
-    test -z "$DEBIANIZATION_INIT" || return 0
-    DEBIANIZATION_INIT=1  # Don't do this twice
-
     PACKAGE_VERSION=$(parse_changelog version)
     debug "      Upstream package version-release:  $PACKAGE_VERSION"
     PACKAGE_VER=$(echo $PACKAGE_VERSION | sed 's/\(.*\)-.*/\1/')
@@ -23,6 +32,10 @@ debianization_init() {
     debug "      Package urgency:  $PACKAGE_URGENCY"
     DISTRO_SUFFIX="~1${DISTRO/-/.}"
     PACKAGE_NEW_VERSION_SUFFIX="${DISTRO_SUFFIX}${PACKAGE_VERSION_SUFFIX}"
+    if is_git_source; then
+	local PREFIX="~$(date +%s)git$(git_rev)"
+	PACKAGE_NEW_VERSION_SUFFIX="${PREFIX}${PACKAGE_NEW_VERSION_SUFFIX}"
+    fi
     PACKAGE_NEW_VERSION="${PACKAGE_VERSION}${PACKAGE_NEW_VERSION_SUFFIX}"
     debug "      New package version-release:  $PACKAGE_NEW_VERSION"
     DSC_FILE=${PACKAGE}_${PACKAGE_NEW_VERSION}.dsc
@@ -38,31 +51,11 @@ debianization_init() {
     debug "      Maintainer <email>:  $MAINTAINER <$EMAIL>"
 }
 
-debianization_git_tree_update() {
-    if test -z "${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"; then
-	debug "    (No PACKAGE_DEBZN_GIT_URL defined; not handling git tree)"
-	return
-    fi
-
-    if test ! -d $DEBZN_GIT_DIR/.git; then
-	msg "    Cloning new debianization git tree"
-	debug "      Source: ${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"
-	debug "      Dir: $DEBZN_GIT_DIR"
-	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
-	run_user git clone -o dxsbuild -b ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]} \
-	    --depth=1 ${PACKAGE_DEBZN_GIT_URL[$PACKAGE]} $DEBZN_GIT_DIR
-    else
-	msg "    Updating debianization git tree"
-	debug "      Dir: $DEBZN_GIT_DIR"
-	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
-	run_user git --git-dir=$DEBZN_GIT_DIR/.git --work-tree=$DEBZN_GIT_DIR \
-	    pull --ff-only dxsbuild ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}
-    fi
-}
-
 debianization_add_changelog() {
     # https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
     msg "    Adding new changelog entry"
+
+    debianization_init
 
     # Calculate first line of changelog entry
     PACKAGE_CHANGELOG_HEAD="$(echo "${PACKAGE}" "(${PACKAGE_NEW_VERSION})" \
@@ -83,7 +76,7 @@ debianization_add_changelog() {
 
     debug "      Full changelog:"
     run_debug cat $CHANGELOG
-    run bash -c "cat $BUILD_DIR/changelog.orig >> $CHANGELOG"
+    run bash -c "cat $BUILD_SRC_DIR/debian/changelog >> $CHANGELOG"
     run_user cp $CHANGELOG $BUILD_SRC_DIR/debian/changelog
 }
 

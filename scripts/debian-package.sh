@@ -1,3 +1,4 @@
+. $SCRIPTS_DIR/git-source.sh
 . $SCRIPTS_DIR/debian-source-package.sh
 . $SCRIPTS_DIR/debian-binary-package.sh
 
@@ -5,7 +6,8 @@
 declare PACKAGES
 
 # Package sources
-declare -A PACKAGE_TARBALL_URL
+declare -A PACKAGE_SOURCE_URL
+declare -A PACKAGE_SOURCE_GIT_BRANCH
 declare -A PACKAGE_DEBZN_GIT_URL
 declare -A PACKAGE_DEBZN_GIT_BRANCH
 declare -A PACKAGE_COMP
@@ -25,7 +27,8 @@ package_read_config() {
     PACKAGES+=" $PACKAGE"
 
     # set up defaults
-    PACKAGE_TARBALL_URL[$PACKAGE]=
+    PACKAGE_SOURCE_URL[$PACKAGE]=
+    PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]=
     PACKAGE_DEBZN_GIT_URL[$PACKAGE]=
     PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]="master"
     PACKAGE_COMP[$PACKAGE]=
@@ -40,12 +43,16 @@ package_read_config() {
 
     # Package compression
     if test -z "${PACKAGE_COMP[$PACKAGE]}"; then
-	case "${PACKAGE_TARBALL_URL[$PACKAGE]}" in
-	    ""|*.xz) PACKAGE_COMP[$PACKAGE]="xz" ;;
-	    *.bz2) PACKAGE_COMP[$PACKAGE]="bz2" ;;
-	    *.gz) PACKAGE_COMP[$PACKAGE]="gz" ;;
-	    *) error "Package $PACKAGE:  Unknown package compression format" ;;
-	esac
+	if test -n "${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]}"; then
+	    PACKAGE_COMP[$PACKAGE]="xz"
+	else
+	    case "${PACKAGE_SOURCE_URL[$PACKAGE]}" in
+		""|*.git|*.xz) PACKAGE_COMP[$PACKAGE]="xz" ;;
+		*.bz2) PACKAGE_COMP[$PACKAGE]="bz2" ;;
+		*.gz) PACKAGE_COMP[$PACKAGE]="gz" ;;
+		*) error "Package $PACKAGE:  Unknown package compression" ;;
+	    esac
+	fi
     fi
 }
 
@@ -62,7 +69,8 @@ package_read_all_configs() {
 package_debug() {
     for p in $PACKAGES; do
 	debug "package $p:"
-	debug "	tarball url: ${PACKAGE_TARBALL_URL[$p]}"
+	debug "	source url: ${PACKAGE_SOURCE_URL[$p]}"
+	debug "	source git branch: ${PACKAGE_SOURCE_GIT_BRANCH[$p]}"
 	debug "	debianization git url: ${PACKAGE_DEBZN_GIT_URL[$p]}"
 	debug "	debianization git branch: ${PACKAGE_DEBZN_GIT_BRANCH[$p]}"
 	debug "	compression: ${PACKAGE_COMP[$p]}"

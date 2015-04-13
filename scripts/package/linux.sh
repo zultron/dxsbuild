@@ -6,7 +6,7 @@ BASEURL="http://www.kernel.org/pub/linux/kernel/v3.0"
 LINUX_DISABLED_FEATURESETS=""
 
 # Package sources
-PACKAGE_TARBALL_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
+PACKAGE_SOURCE_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
 PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/linux-ipipe-deb.git"
 PACKAGE_DEBZN_GIT_BRANCH[$PKG]="${VERSION}"
 

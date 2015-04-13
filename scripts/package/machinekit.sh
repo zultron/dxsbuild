@@ -1,9 +1,7 @@
 PKG="machinekit"
-GIT_REV="357b816ae3"
-GIT_BASEURL="https://github.com/zultron/machinekit/archive"
 
 # Package sources
-PACKAGE_TARBALL_URL[$PKG]="$GIT_BASEURL/${GIT_REV}.tar.gz"
+PACKAGE_SOURCE_URL[$PKG]="https://github.com/machinekit/machinekit.git"
 
 # Source package configuration
 PACKAGE_CONFIGURE_FUNC[$PKG]="configure_machinekit"

@@ -3,7 +3,7 @@ VERSION="3.8.13"
 BASEURL="http://www.kernel.org/pub/linux/kernel/v3.0"
 
 # Package sources
-PACKAGE_TARBALL_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
+PACKAGE_SOURCE_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
 PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/linux-tools-deb.git"
 
 # Build params

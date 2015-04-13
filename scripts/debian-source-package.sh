@@ -9,25 +9,20 @@ debug "    Sourcing debian-source-package.sh"
 . $SCRIPTS_DIR/debian-debzn.sh
 
 ########################################
-# Source package init vars
-source_package_init() {
-    distro_check_package $DISTRO $PACKAGE
-
-    debug "    Saving original changelog"
-    run_user cp $BUILD_SRC_DIR/debian/changelog $BUILD_DIR/changelog.orig
-
-    debianization_init
-    source_tarball_init
-
-    debug "      Package format:  ${PACKAGE_FORMAT[$PACKAGE]}"
-}
-
-########################################
 # Source package setup
 source_package_setup() {
+    distro_check_package $DISTRO $PACKAGE
+
     msg "    Preparing source directory $BUILD_SRC_DIR"
     run_user rm -rf $BUILD_SRC_DIR
     run_user mkdir -p $BUILD_SRC_DIR/debian
+
+    msg "    Removing old files"
+    run_user rm -f \
+	$BUILD_DIR/${PACKAGE}_*.debian.tar.* \
+	$BUILD_DIR/${PACKAGE}_*.dsc \
+	$BUILD_DIR/${PACKAGE}_*.changes \
+	$BUILD_DIR/*.deb
 
     # Proxy
     if test -n "$HTTP_PROXY"; then
@@ -85,19 +80,17 @@ source_package_build() {
     # Initialize directories
     source_package_setup
 
-    # Update debianization git tree and copy to source tree
-    debianization_git_tree_update
-    debianization_git_tree_unpack
-
     # Download source tarball and unpack
     source_tarball_download
     source_tarball_unpack
 
-    # Init variables
-    source_package_init
+    # Update debianization git tree and copy to source tree
+    debianization_git_tree_update
+    debianization_git_tree_unpack
 
-    # Add new changelog
+    # Add new changelog and finalize tarball
     debianization_add_changelog
+    source_tarball_finalize
 
     # Some packages may define a configuration step
     configure_package
