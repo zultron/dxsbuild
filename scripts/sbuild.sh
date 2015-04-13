@@ -218,7 +218,7 @@ sbuild_build_package() {
 	run_user sbuild \
 	    --host=$HOST_ARCH --build=$BUILD_ARCH \
 	    -d ${DISTRO_CODENAME[$DISTRO]} $BUILD_INDEP $SBUILD_VERBOSE \
-	    $SBUILD_DEBUG $NUM_JOBS \
+	    $SBUILD_DEBUG ${PARALLEL_JOBS:+-j $PARALLEL_JOBS} \
 	    -c $SBUILD_CHROOT \
 	    $SBUILD_RESOLVER_ARG \
 	    $DSC_FILE

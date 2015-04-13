@@ -107,7 +107,7 @@ HOST_ARCH=default  # If no -a arg, gets filled out in architecture.sh
 RERUN_IN_DOCKER=true
 IN_SCHROOT=false
 FORCE_INDEP=false
-NUM_JOBS=""
+PARALLEL_JOBS=""
 BUILD_SCHROOT_SKIP_PACKAGES=false
 while getopts icrPsLSbRCfj:a:u:d ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
@@ -123,7 +123,7 @@ while getopts icrPsLSbRCfj:a:u:d ARG; do
 	R) MODE=BUILD_APT_REPO; NEEDED_ARGS=2 ;;
 	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2; IN_SCHROOT=true; IN_DOCKER=true ;;
 	f) FORCE_INDEP=true ;;
-	j) NUM_JOBS="-j $OPTARG" ;;
+	j) PARALLEL_JOBS="$OPTARG" ;;
 	a) HOST_ARCH=$OPTARG ;;
 	u) DOCKER_UID=$OPTARG; SET_DOCKER_UID=false ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;

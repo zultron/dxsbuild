@@ -23,6 +23,9 @@
 # Add repo to distro
 #DISTRO_REPOS[jessie]+=" dovetail-automata"
 
+# Run parallel jobs during build (sets `-j n`)
+#PARALLEL_JOBS=4
+
 # Use aufs on tmpfs in sbuild
 #SBUILD_USE_AUFS="true"
 
