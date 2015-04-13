@@ -48,7 +48,7 @@ deb_repo_build() {
     msg "Updating Debian Apt package repository"
     deb_repo_init	# repo config
     deb_repo_setup	# set up repo, if needed
-    source_package_init	# source pkg config
+    debianization_init	# source pkg config
     distro_check_package $DISTRO $PACKAGE
 
     # add source pkg

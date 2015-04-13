@@ -13,7 +13,11 @@ debug "    Sourcing debian-source-package.sh"
 source_package_init() {
     distro_check_package $DISTRO $PACKAGE
 
-    debianization_init  # Init vars after unpacking
+    debug "    Saving original changelog"
+    run_user cp $BUILD_SRC_DIR/debian/changelog $BUILD_DIR/changelog.orig
+
+    debianization_init
+    source_tarball_init
 
     debug "      Package format:  ${PACKAGE_FORMAT[$PACKAGE]}"
 }
@@ -85,13 +89,12 @@ source_package_build() {
     debianization_git_tree_update
     debianization_git_tree_unpack
 
-    # Init variables
-    source_package_init
-
     # Download source tarball and unpack
-    source_tarball_init
     source_tarball_download
     source_tarball_unpack
+
+    # Init variables
+    source_package_init
 
     # Add new changelog
     debianization_add_changelog

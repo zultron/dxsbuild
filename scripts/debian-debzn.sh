@@ -58,9 +58,6 @@ debianization_git_tree_update() {
 	run_user git --git-dir=$DEBZN_GIT_DIR/.git --work-tree=$DEBZN_GIT_DIR \
 	    pull --ff-only dxsbuild ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}
     fi
-
-    debug "    Saving original changelog"
-    run_user cp $DEBZN_GIT_DIR/changelog $BUILD_DIR/changelog.orig
 }
 
 debianization_add_changelog() {
@@ -75,6 +72,7 @@ debianization_add_changelog() {
     PACKAGE_CHANGELOG_TRAILER=" -- $MAINTAINER <$EMAIL>  $(date -R)"
 
     # Write changelog entry
+    debug "      Intermediate changelog file: $CHANGELOG"
     (
 	echo "$PACKAGE_CHANGELOG_HEAD"
 	echo "  * Rebuilt in mk-debuild"

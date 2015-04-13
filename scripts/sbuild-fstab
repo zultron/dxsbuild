@@ -9,5 +9,6 @@
 /dev/pts        /dev/pts        none    rw,bind         0       0
 /home           /home           none    rw,bind         0       0
 /tmp            /tmp            none    rw,bind         0       0
+tmpfs           /dev/shm        tmpfs   defaults        0       0
 # The main script/build directory
 /srv		/srv		none	rw,bind		0	0

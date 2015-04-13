@@ -15,8 +15,8 @@ DISTRO_PACKAGES[$DISTRO]="xenomai linux linux-tools linux-latest"
 DISTRO_PACKAGES[$DISTRO]+=" czmq"
 # Zultron Debian package repo
 DISTRO_PACKAGES[$DISTRO]+=" dovetail-automata-keyring"
-# FIXME testing
-DISTRO_PACKAGES[$DISTRO]+=" pyzmq"
+# Machinekit
+DISTRO_PACKAGES[$DISTRO]+=" machinekit"
 
 # Apt package repositories to configure for this distribution
 DISTRO_REPOS[$DISTRO]="raspbian-jessie"
