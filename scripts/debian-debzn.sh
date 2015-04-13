@@ -43,10 +43,12 @@ debianization_init() {
     CHANGELOG=/tmp/changelog-$PACKAGE-$DISTRO
 
     if test -z "$MAINTAINER"; then
-	MAINTAINER="$(git config user.name)" || MAINTAINER="dxsbuild user"
+	MAINTAINER="$(git --git-dir=$DEBZN_GIT_DIR/.git config user.name)" || \
+	    error "Please set 'MAINTAINER' in local-config.sh"
     fi
     if test -z "$EMAIL"; then
-	EMAIL="$(git config user.email)" || EMAIL="dxsbuild@example.com"
+	EMAIL="$(git --git-dir=$DEBZN_GIT_DIR/.git config user.email)" || \
+	    error "Please set 'EMAIL' in local-config.sh"
     fi
     debug "      Maintainer <email>:  $MAINTAINER <$EMAIL>"
 }
