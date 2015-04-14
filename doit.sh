@@ -16,6 +16,14 @@ for distro in $DISTROS; do
 	./dxsbuild -Sd $distro $package
 
 	for arch in $ARCHES; do
+	    if test $arch != amd64; then
+		# skip arch-indep packages on non-amd64
+		case $package in
+		    dovetail-automata-keyring) continue ;;
+		    linux-latest) continue ;;
+		esac
+	    fi
+
 	    if test $arch = armhf -a $package = rtai; then
 		# don't build rtai for armhf
 		continue
