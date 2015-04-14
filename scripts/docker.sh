@@ -1,10 +1,12 @@
 debug "    Sourcing docker.sh"
 
 docker_set_user() {
-    if test "$DOCKER_UID" = 0; then
-	msg "WARNING:  running as root user"
+    if $DOCKER_UID_DEFAULT && test "$DOCKER_UID" = 0; then
+	msg "WARNING:  Running as root user"
+	msg "WARNING:  Set user ID on command line or in 'local-config.sh'"
 	return
     fi
+
     debug "    Setting docker user to $DOCKER_UID"
     SBUILD_GID=$(getent group sbuild | awk -F : '{print $3}')
     test -n "$SBUILD_GID" || \

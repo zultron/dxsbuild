@@ -79,8 +79,9 @@ usage() {
     msg "    Global options:"
     msg "        -a ARCH:	Set build arch"
     msg "        -u UID:	Run as user ID UID (default $DOCKER_UID)"
-    msg "        -d:	Print verbose debug output"
-    msg "        -dd:	Print extra verbose debug output"
+    msg "        -U:		Run as root (UID 0)"
+    msg "        -d:		Print verbose debug output"
+    msg "        -dd:		Print extra verbose debug output"
     exit 1
 }
 
@@ -98,7 +99,7 @@ test -n "$IN_DOCKER" || IN_DOCKER=false
 
 # Process command line opts
 MODE=NONE
-test -n "$DOCKER_UID" || DOCKER_UID=$(id -u); SET_DOCKER_UID=true
+test -n "$DOCKER_UID" || DOCKER_UID=$(id -u); DOCKER_UID_DEFAULT=true
 DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
@@ -109,7 +110,7 @@ IN_SCHROOT=false
 FORCE_INDEP=false
 PARALLEL_JOBS=""
 BUILD_SCHROOT_SKIP_PACKAGES=false
-while getopts icrPsLSbRCfj:a:u:d ARG; do
+while getopts icrPsLSbRCfj:a:u:Ud ARG; do
     ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
@@ -125,7 +126,8 @@ while getopts icrPsLSbRCfj:a:u:d ARG; do
 	f) FORCE_INDEP=true ;;
 	j) PARALLEL_JOBS="$OPTARG" ;;
 	a) HOST_ARCH=$OPTARG ;;
-	u) DOCKER_UID=$OPTARG; SET_DOCKER_UID=false ;;
+	u) DOCKER_UID=$OPTARG; DOCKER_UID_DEFAULT=false ;;
+	U) DOCKER_UID=0; DOCKER_UID_DEFAULT=false ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;
         *) usage
     esac
@@ -133,7 +135,7 @@ done
 shift $((OPTIND-1))
 
 # User
-! $SET_DOCKER_UID || ARG_LIST+=" -u $DOCKER_UID"
+! $DOCKER_UID_DEFAULT || ARG_LIST+=" -u $DOCKER_UID"
 
 # Save non-option args before mangling
 NUM_ARGS=$#
