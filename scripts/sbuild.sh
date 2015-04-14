@@ -152,10 +152,13 @@ sbuild_chroot_setup() {
 
 sbuild_adjust_log_link() {
     debug "    Adjusting log symlink to relative"
-    local LOG=$(readlink $BUILD_DIR/${PACKAGE}_*.build | \
-	sed "s,^/srv/,../../,")
+    local LOG_LINK=$(echo \
+	$BUILD_DIR/${PACKAGE}_*~1${DISTRO}*_${HOST_ARCH}.build)
+    test -h $LOG_LINK || \
+	error "Unable to find log link from glob '$LOG_LINK'"
+    local LOG=$(readlink $LOG_LINK | sed "s,^/srv/,../../,")
     run_user rm -f $BUILD_DIR/${PACKAGE}_*.build
-    run_user ln -sf $LOG $BUILD_DIR/build.log
+    run_user ln -sf $LOG $LOG_LINK
 }
 
 sbuild_configure_package() {
