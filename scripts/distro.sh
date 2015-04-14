@@ -6,6 +6,7 @@ declare -A DISTRO_PACKAGES
 declare -A DISTRO_ARCHES
 declare -A DISTRO_REPOS
 declare -A DISTRO_CODENAME
+declare -A DISTRO_NATIVE_BUILD_ONLY
 
 # Repos
 declare REPOS
@@ -24,6 +25,7 @@ distro_read_config() {
     DISTRO_ARCHES[$DISTRO]="$ARCHES"
     DISTRO_REPOS[$DISTRO]=
     DISTRO_CODENAME[$DISTRO]=$DISTRO
+    DISTRO_NATIVE_BUILD_ONLY[$DISTRO]="false"
 
     . $DISTRO_CONFIG_DIR/$DISTRO.sh
 }
@@ -212,6 +214,7 @@ distro_debug() {
 	debug "	codename ${DISTRO_CODENAME[$d]}"
 	debug "	arches ${DISTRO_ARCHES[$d]}"
 	debug "	repos ${DISTRO_REPOS[$d]}"
+	debug " native build only ${DISTRO_NATIVE_BUILD_ONLY[$DISTRO]}"
 	for a in ${DISTRO_ARCHES[$d]}; do
 	    debug "	arch $a:"
 	    debug "	  base repo:  $(distro_base_repo $d $a)"

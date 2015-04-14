@@ -27,3 +27,9 @@ DISTRO_REPOS[$DISTRO]="debian 3rd-party-repo"
 # The default list of architectures comes from the `base-config.sh`
 # script `ARCHES` parameter.  In most cases this is unnecessary.
 #DISTRO_ARCHES[$DISTRO]="armhf"
+
+# Build options
+#
+# Don't attempt to cross-build on this distro (e.g. cross-build tools
+# unavailable)
+#DISTRO_NATIVE_BUILD_ONLY[$DISTRO]="true"

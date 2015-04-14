@@ -28,6 +28,7 @@ arch_build() {
 
     if ! mode BUILD_PACKAGE || \
 	${PACKAGE_NATIVE_BUILD_ONLY[$PACKAGE]} || \
+	${DISTRO_NATIVE_BUILD_ONLY[$DISTRO]} || \
 	! distro_base_repo $DISTRO $HOST_ARCH >/dev/null;
     then
 	echo $HOST_ARCH
