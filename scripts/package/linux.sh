@@ -22,14 +22,20 @@ PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]+=" ${linux_confdeps[*]}"
 PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_linux"
 
 configure_linux() {
-    if test $DISTRO = trusty; then
-	debug "    Setting gcc to 'gcc-4.8'"
-	sed -ie '/^compiler:/ s/gcc-.*/gcc-4.8/' debian/config/defines
-    fi
+    local GCC_VER=4.9
+    case $DISTRO in
+	trusty) GCC_VER=4.8 ;;
+	wheezy) GCC_VER=4.7 ;;
+    esac
+    debug "    Setting gcc to 'gcc-${GCC_VER}'"
+    run sed -ie "/^compiler:/ s/gcc-.*/gcc-${GCC_VER}/" \
+	debian/config/defines
+
     for featureset in $LINUX_DISABLED_FEATURESETS; do
 	debug "    Disabling featureset $featureset"
-	sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
+	run sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
     done
+
     debug "    Running configure script"
     run debian/rules debian/control NOFAIL=true
     run debian/rules clean
