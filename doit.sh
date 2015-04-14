@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 ARCHES="amd64 i386 armhf"
-DISTROS="jessie trusty"
+DISTROS="jessie trusty wheezy"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
     linux-tools czmq"
 
