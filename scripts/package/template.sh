@@ -26,13 +26,19 @@ PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/octocat/mypkg-deb.git"
 # Source package configuration
 #
 # Some packages need an extra configuration step before building the
-# source package from the debianized source tree. These configure a
-# function that will be run in the distro schroot, along with needed
-# package deps.
-
-#PACKAGE_CONFIGURE_DEPS[$PKG]="python"		# Required
+# source package from the debianized source tree. There are two
+# choices to accomplish this:
+#
+# This function will be run outside the chroot
 #PACKAGE_CONFIGURE_FUNC[$PKG]="configure_mypkg"	# Below function
-
+#
+# This function will run inside the chroot; any packages listed in
+# PACKAGE_CONFIGURE_CHROOT_DEPS will be installed in the chroot before
+# running
+#PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python"
+#PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_mypkg"	# Below function
+#
+# The function itself.  It must have a unique name.
 #configure_mypkg() {
 #    do_something
 #}

@@ -37,19 +37,26 @@ source_package_setup() {
 # Source package configuration
 
 configure_package() {
-    if test -z "${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"; then
+    if $IN_SCHROOT || test -n "${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"; then
+	run_configure_package_func	
+    elif test -n "${PACKAGE_CONFIGURE_CHROOT_FUNC[$PACKAGE]}"; then
+	run_configure_package_chroot_func
+    else
 	debug "      (No source pkg configure function defined)"
-	return
     fi
 
-    sbuild_configure_package
 }
 
 run_configure_package_func() {
-    debug "    Running configure function: ${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"
+    if test -n "${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"; then
+	local FUNC="${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}"
+    else
+	local FUNC="${PACKAGE_CONFIGURE_CHROOT_FUNC[$PACKAGE]}"
+    fi
+    debug "    Running configure function: ${FUNC}"
     (
 	cd $BUILD_SRC_DIR
-	run ${PACKAGE_CONFIGURE_FUNC[$PACKAGE]}
+	run $FUNC
     )
 }
 

@@ -161,7 +161,7 @@ sbuild_adjust_log_link() {
     run_user ln -sf $LOG $LOG_LINK
 }
 
-sbuild_configure_package() {
+run_configure_package_chroot_func() {
     sbuild_chroot_init
     sbuild_install_sbuild_conf
     sbuild_install_config
@@ -169,31 +169,31 @@ sbuild_configure_package() {
 
     # FIXME run with union-type=aufs in schroot.conf
 
-    if test -z "${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}"; then
+    if test -z "${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"; then
 	debug "      (No source pkg configure deps to install)"
 
     else
 	debug "      Installing source package configure deps in schroot:"
-	debug "        ${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}"
+	debug "        ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"
 	run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	    apt-get update
 	run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	    apt-get install --no-install-recommends -y \
-	    ${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}
+	    ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}
     fi
 
     debug "      Running configure function in schroot"
     run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	./$DXSBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
 
-    if test -z "${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}"; then
+    if test -z "${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"; then
 	debug "      (No source pkg configure deps to remove)"
 
     else
 	debug "      Removing source package configure deps"
 	run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
 	    apt-get purge -y --auto-remove \
-	    ${PACKAGE_CONFIGURE_DEPS[$PACKAGE]}
+	    ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}
     fi
 }
 

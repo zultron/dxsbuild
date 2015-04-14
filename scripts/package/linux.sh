@@ -14,12 +14,12 @@ PACKAGE_DEBZN_GIT_BRANCH[$PKG]="${VERSION}"
 PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"  # Build-Depends: gcc-4.9
 
 # Source package configuration
-PACKAGE_CONFIGURE_DEPS[$PKG]="python"
+PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python"
 # Install Xenomai and RTAI source packages, if applicable
 declare -A linux_confdeps=([xenomai]=xenomai-kernel-source [rtai]=rtai-source )
 for i in ${LINUX_DISABLED_FEATURESETS}; do linux_confdeps[$i]=; done
-PACKAGE_CONFIGURE_DEPS[$PKG]+=" ${linux_confdeps[*]}"
-PACKAGE_CONFIGURE_FUNC[$PKG]="configure_linux"
+PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]+=" ${linux_confdeps[*]}"
+PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_linux"
 
 configure_linux() {
     if test $DISTRO = trusty; then

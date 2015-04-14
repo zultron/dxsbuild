@@ -12,8 +12,8 @@ PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/linux-tools-deb.git"
 PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"
 
 # Source package configuration
-PACKAGE_CONFIGURE_DEPS[$PKG]="python debhelper"
-PACKAGE_CONFIGURE_FUNC[$PKG]="configure_linux_tools"
+PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python debhelper"
+PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_linux_tools"
 
 configure_linux_tools() {
     debian/rules debian/control || true # always fails

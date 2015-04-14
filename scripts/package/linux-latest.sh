@@ -10,8 +10,8 @@ PACKAGE_FORMAT[$PKG]='3.0 (native)'
 PACKAGE_SBUILD_RESOLVER[$PKG]="aptitude"
 
 # Source package configuration
-PACKAGE_CONFIGURE_DEPS[$PKG]="python debhelper linux-support-3.8-1"
-PACKAGE_CONFIGURE_FUNC[$PKG]="configure_linux_latest"
+PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python debhelper linux-support-3.8-1"
+PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_linux_latest"
 
 configure_linux_latest() {
     debian/rules debian/control || true # always fails
