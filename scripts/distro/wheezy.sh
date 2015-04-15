@@ -5,7 +5,7 @@ DISTRO="wheezy"
 # RT kernel packages
 DISTRO_PACKAGES[$DISTRO]="xenomai rtai linux linux-tools linux-latest"
 # ZeroMQ packages
-DISTRO_PACKAGES[$DISTRO]+=" czmq"
+DISTRO_PACKAGES[$DISTRO]+=" libsodium zeromq3 czmq pyzmq"
 # Misc
 DISTRO_PACKAGES[$DISTRO]+=" libwebsockets jansson python-pyftpdlib"
 # Zultron Debian package repo
