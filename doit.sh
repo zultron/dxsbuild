@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
 ARCHES="amd64 i386 armhf"
-DISTROS="jessie trusty wheezy"
+DISTROS="jessie wheezy trusty"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
-    linux-tools czmq"
+    linux-tools libsodium zeromq3 czmq pyzmq"
 
 for distro in $DISTROS; do
     for arch in $ARCHES; do
@@ -27,6 +27,13 @@ for distro in $DISTROS; do
 	    if test $arch = armhf -a $package = rtai; then
 		# don't build rtai for armhf
 		continue
+	    fi
+
+	    if test $distro != wheezy; then
+		# skip wheezy-only deps
+		case $package in
+		    libsodium|zeromq3|pyzmq) continue ;;
+		esac
 	    fi
 
 	    echo "########### dxsbuild binary, $distro: $package:$arch ###########"
