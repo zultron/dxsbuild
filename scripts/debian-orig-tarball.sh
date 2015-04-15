@@ -45,7 +45,7 @@ source_tarball_download() {
 	    
     else
 	if test ! -f \
-	    $SOURCE_PKG_DIR/${PACKAGE}_*.orig.tar.${PACKAGE_COMP[$PACKAGE]}
+	    $SOURCE_PKG_DIR/${PACKAGE}_vers.orig.tar.${PACKAGE_COMP[$PACKAGE]}
 	then
 	    msg "    Downloading source tarball"
 	    debug "      Source: ${PACKAGE_SOURCE_URL[$PACKAGE]}"
