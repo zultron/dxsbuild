@@ -14,7 +14,7 @@ DISTRO_PACKAGES[$DISTRO]+=" dovetail-automata-keyring"
 DISTRO_PACKAGES[$DISTRO]+=" machinekit"
 
 # Apt package repositories to configure for this distribution
-DISTRO_REPOS[$DISTRO]="debian rcn"
+DISTRO_REPOS[$DISTRO]="debian wheezy-bpo rcn"
 
 # No cross-build tools in Wheezy
 DISTRO_NATIVE_BUILD_ONLY[$DISTRO]="true"

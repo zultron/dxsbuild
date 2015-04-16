@@ -13,8 +13,10 @@ declare REPOS
 declare -A REPO_MIRROR
 declare -A REPO_ARCHES
 declare -A REPO_KEY
+declare -A REPO_CODENAME
 declare -A REPO_COMPONENTS
 declare -A REPO_IS_BASE
+declare -A REPO_PIN_PACKAGES
 
 distro_read_config() {
     local DISTRO=$1
@@ -48,8 +50,10 @@ repo_read_config() {
     REPO_MIRROR[$REPO]=
     REPO_ARCHES[$REPO]="$ARCHES"
     REPO_KEY[$REPO]=
+    REPO_CODENAME[$REPO]=
     REPO_COMPONENTS[$REPO]="main"
     REPO_IS_BASE[$REPO]="false"
+    REPO_PIN_PACKAGES[$REPO]=
 
     . $REPO_CONFIG_DIR/$REPO.sh
 }
@@ -156,14 +160,9 @@ repo_add_apt_source() {
     local REPO=$1
     local URL=${REPO_MIRROR[$REPO]}
     local ARCHES=$(echo ${REPO_ARCHES[$REPO]} | sed 's/ /,/g')
-    local CODENAME=${DISTRO_CODENAME[$DISTRO]}
+    local CODENAME=${REPO_CODENAME[$REPO]:-${DISTRO_CODENAME[$DISTRO]}}
     local COMPONENTS="${REPO_COMPONENTS[$REPO]}"
 
-    if test $REPO = local; then
-	CODENAME=$DISTRO
-    else
-	CODENAME=${DISTRO_CODENAME[$DISTRO]}
-    fi
     run bash -c "echo deb [arch=$ARCHES] $URL $CODENAME	$COMPONENTS \\
 	>> $CHROOT_DIR/etc/apt/sources.list.d/$REPO.list"
 }
@@ -177,9 +176,10 @@ repo_configure() {
 
 distro_clear_apt() {
     if test -f $CHROOT_DIR/etc/apt/sources.list; then
-	debug "    Cleaning old apt sources lists"
+	debug "    Cleaning old apt configuration"
 	run bash -c "> $CHROOT_DIR/etc/apt/sources.list"
 	run rm -f $CHROOT_DIR/etc/apt/sources.list.d/*
+	run rm -f $CHROOT_DIR/etc/apt/preferences.d/*
     fi
 }
 
@@ -191,6 +191,8 @@ distro_configure_apt() {
     for repo in ${DISTRO_REPOS[$DISTRO]} local; do
 	repo_configure $repo
     done
+
+    distro_pin_packages $DISTRO
 }
 
 distro_set_apt_proxy() {
@@ -206,6 +208,22 @@ distro_set_apt_proxy() {
 	export http_proxy="$HTTP_PROXY"
 	export https_proxy="$HTTP_PROXY"
     fi
+}
+
+distro_pin_packages() {
+    local DISTRO=$1
+    local fname=$CHROOT_DIR/etc/apt/preferences.d/pins.pref
+    run mkdir -p $(basename $fname)
+    for r in ${DISTRO_REPOS[$DISTRO]}; do
+	for p in ${REPO_PIN_PACKAGES[$r]}; do
+	    debug "    Pinning package $p from repo $r"
+	    local release=${REPO_CODENAME[$r]:-${DISTRO_CODENAME[$DISTRO]}}
+	    run bash -c "echo -e \\
+		'Package: $p\nPin: release a=$release\nPin-Priority: 999\n' \\
+		>> $fname"
+	    run_debug cat $fname
+	done
+    done
 }
 
 distro_debug() {
@@ -232,8 +250,11 @@ distro_debug() {
     for r in $REPOS; do
 	debug "repo $r:"
 	debug "	mirror ${REPO_MIRROR[$r]}"
-	debug "	components ${REPO_COMPONENTS[$r]}"
 	debug "	arches ${REPO_ARCHES[$r]}"
 	debug "	key ${REPO_KEY[$r]:-(none)}"
+	debug "	codename ${REPO_CODENAME[$r]}"
+	debug "	components ${REPO_COMPONENTS[$r]}"
+	debug " is base ${REPO_IS_BASE[$r]}"
+	debug " package pins ${REPO_PIN_PACKAGES[$r]}"
     done
 }

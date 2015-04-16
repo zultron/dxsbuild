@@ -19,6 +19,7 @@
 #
 # Custom mirror
 #DISTRO_MIRROR[jessie]="http://http.debian.net/debian"
+#DISTRO_MIRROR[jessie-bpo]="${DISTRO_MIRROR[jessie]}"
 #
 # Restrict list of arches
 #DISTRO_ARCHES[jessie]="armhf"
