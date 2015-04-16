@@ -5,6 +5,9 @@ VERSION="2.2.0"
 PACKAGE_SOURCE_URL[$PKG]="http://download.zeromq.org/czmq-${VERSION}.tar.gz"
 PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/czmq-deb.git"
 
+# Build params
+PACKAGE_QEMU_NOCHECK[$PKG]="true"  # Tests hang in qemu
+
 # Source package configuration
 PACKAGE_CONFIGURE_FUNC[$PKG]="configure_czmq"
 

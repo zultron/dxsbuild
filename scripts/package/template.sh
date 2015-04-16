@@ -20,8 +20,9 @@ PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/octocat/mypkg-deb.git"
 # These optional parameters affect when and how the package is built
 
 #PACKAGE_SBUILD_RESOLVER[$PKG]="aptitude"	# See sbuild(1)
-#PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"		# Cross-compile broken; use qemu
 #PACKAGE_EXCLUDE_ARCHES[$PKG]="armhf"		# Don't build these arches
+#PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"		# Cross-compile broken; use qemu
+#PACKAGE_QEMU_NOCHECK[$PKG]="true"		# Don't run tests in qemu
 
 # Source package configuration
 #

@@ -31,6 +31,13 @@ sbuild_chroot_init() {
 	SCHROOT_PERSONALITY=linux
     fi
 
+    if mode BUILD_PACKAGE && ${PACKAGE_QEMU_NOCHECK[$PACKAGE]} \
+	&& arch_is_emulated $HOST_ARCH
+    then
+	debug "      Skipping tests under qemu"
+	DEB_BUILD_OPTIONS+=" nocheck"
+    fi
+
     # sbuild verbosity
     if $DEBUG; then
 	SBUILD_VERBOSE=--verbose
@@ -127,10 +134,10 @@ sbuild_chroot_setup() {
     distro_clear_apt
     distro_set_apt_proxy
 
-    if arch_is_foreign $DISTRO $HOST_ARCH && test $BUILD_ARCH=armhf; then
+    if arch_is_emulated $HOST_ARCH && test $BUILD_ARCH=armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
-	mkdir -p $CHROOT_DIR/usr/bin
-	cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
+	run mkdir -p $CHROOT_DIR/usr/bin
+	run cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
     fi
 
     debug "    Running sbuild-createchroot"
@@ -218,13 +225,13 @@ sbuild_build_package() {
     debug "    Running sbuild"
     (
 	cd $BUILD_DIR
-	run_user sbuild \
-	    --host=$HOST_ARCH --build=$BUILD_ARCH \
-	    -d ${DISTRO_CODENAME[$DISTRO]} $BUILD_INDEP $SBUILD_VERBOSE \
-	    $SBUILD_DEBUG ${PARALLEL_JOBS:+-j $PARALLEL_JOBS} \
-	    -c $SBUILD_CHROOT \
-	    $SBUILD_RESOLVER_ARG \
-	    $DSC_FILE
+	run_user bash -c "'DEB_BUILD_OPTIONS=\"$DEB_BUILD_OPTIONS\" sbuild \\
+	    --host=$HOST_ARCH --build=$BUILD_ARCH \\
+	    -d ${DISTRO_CODENAME[$DISTRO]} $BUILD_INDEP $SBUILD_VERBOSE \\
+	    $SBUILD_DEBUG ${PARALLEL_JOBS:+-j $PARALLEL_JOBS} \\
+	    -c $SBUILD_CHROOT \\
+	    $SBUILD_RESOLVER_ARG \\
+	    $DSC_FILE'"
     )
 
     sbuild_adjust_log_link

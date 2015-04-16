@@ -17,6 +17,7 @@ declare -A PACKAGE_FORMAT
 declare -A PACKAGE_SBUILD_RESOLVER
 declare -A PACKAGE_NATIVE_BUILD_ONLY
 declare -A PACKAGE_EXCLUDE_ARCHES
+declare -A PACKAGE_QEMU_NOCHECK
 
 # Source package configuration
 declare -A PACKAGE_CONFIGURE_FUNC
@@ -37,6 +38,7 @@ package_read_config() {
     PACKAGE_SBUILD_RESOLVER[$PACKAGE]=
     PACKAGE_NATIVE_BUILD_ONLY[$PACKAGE]="false"
     PACKAGE_EXCLUDE_ARCHES[$PACKAGE]=
+    PACKAGE_QEMU_NOCHECK[$PACKAGE]="false"
     PACKAGE_CONFIGURE_FUNC[$PACKAGE]=
     PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]=
     PACKAGE_CONFIGURE_CHROOT_FUNC[$PACKAGE]=
@@ -80,6 +82,7 @@ package_debug() {
 	debug "	sbuild resolver: ${PACKAGE_SBUILD_RESOLVER[$p]}"
 	debug "	native build only: ${PACKAGE_NATIVE_BUILD_ONLY[$p]}"
 	debug "	excluded architectures: ${PACKAGE_EXCLUDE_ARCHES[$p]}"
+	debug "	skip tests in qemu: ${PACKAGE_QEMU_NOCHECK[$p]}"
 	debug "	local configuration function: ${PACKAGE_CONFIGURE_FUNC[$p]}"
 	debug "	chroot configuration deps: ${PACKAGE_CONFIGURE_CHROOT_DEPS[$p]}"
 	debug "	chroot configuration function: " \

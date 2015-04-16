@@ -13,3 +13,6 @@ PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/pyzmq-deb.git"
 #     'aptitude' resolver installs a bunch of amd64 pkgs
 #     'xapt' unavailable in Jessie
 PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"
+
+# Build params
+PACKAGE_QEMU_NOCHECK[$PKG]="true"  # Tests hang in qemu

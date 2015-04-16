@@ -15,6 +15,19 @@ arch_host() {
     echo $ARCH
 }
 
+arch_is_emulated() {
+    local MACHINE_ARCH=$(arch_machine)
+    local HOST_ARCH=$1
+
+    if test $MACHINE_ARCH = $HOST_ARCH; then
+	return 1
+    elif test $MACHINE_ARCH = amd64 -a $HOST_ARCH = i386; then
+	return 1
+    else
+	return 0
+    fi
+}
+
 arch_build() {
     # For non-binary pkg builds, simply return the host arch.
     #
@@ -25,25 +38,45 @@ arch_build() {
     local DISTRO=$1
     local ARCH=$2
     local HOST_ARCH=$(arch_host $DISTRO $ARCH)
+    local BUILD_ARCH=
 
-    if ! mode BUILD_PACKAGE || \
-	${PACKAGE_NATIVE_BUILD_ONLY[$PACKAGE]} || \
-	${DISTRO_NATIVE_BUILD_ONLY[$DISTRO]} || \
-	! distro_base_repo $DISTRO $HOST_ARCH >/dev/null;
-    then
+    if ! mode BUILD_PACKAGE; then
+	# When not building a package (e.g. building a schroot),
+	# always use requested host arch as build arch.
 	echo $HOST_ARCH
 	return
-    fi
 
-    # By default, the build arch is the machine arch...
-    local BUILD_ARCH=$(arch_machine)
+    elif ${PACKAGE_NATIVE_BUILD_ONLY[$PACKAGE]} || \
+	${DISTRO_NATIVE_BUILD_ONLY[$DISTRO]}
+    then
+	# When the package or distro is marked as unable to
+	# cross-build, always use requested host arch as build arch
+	# (with emulation where needed).
+	echo $HOST_ARCH
+	return
 
-    # ...But check for 'personality' compatibility
-    if test $BUILD_ARCH = amd64 -a $HOST_ARCH = i386; then
-	BUILD_ARCH=i386
+    elif ! distro_base_repo $DISTRO $(arch_machine) >/dev/null; then
+	# When the distro doesn't support the machine arch, use the
+	# requested host arch as build arch (with emulation where
+	# needed).
+	echo $HOST_ARCH
+	return
+
+    elif ! arch_is_emulated $HOST_ARCH; then
+	# If arch doesn't need emulation, then set BUILD_ARCH to
+	# HOST_ARCH.  In a case like amd64 and i386, the schroot arch
+	# and BUILD_ARCH will both be i386, where no emulation is
+	# needed.
+	BUILD_ARCH=$HOST_ARCH
+
+    else
+	# Otherwise, cross-compile:  set BUILD_ARCH to the machine
+	# arch.
+	BUILD_ARCH=$(arch_machine)
     fi
     
-    # And if the arch isn't supported, pick the first in the list
+    # Finally, if the chosen arch isn't supported by the distro, take
+    # our changes with the first arch in the supported list.
     if ! distro_has_arch $DISTRO $BUILD_ARCH; then
 	debug "      (Distro $DISTRO doesn't support arch $BUILD_ARCH)"
 	BUILD_ARCH=$(echo ${DISTRO_ARCHES[$DISTRO]} | awk '{print $1}')
@@ -56,13 +89,4 @@ arch_build() {
 arch_machine() {
     # The machine arch is the Docker host's arch
     dpkg-architecture -qDEB_BUILD_ARCH
-}
-
-arch_is_foreign() {
-    local DISTRO=$1
-    local ARCH=$2
-    local RES
-    test $(arch_host $DISTRO $ARCH) = $(arch_build $DISTRO $ARCH) && \
-	RES=0 || RES=1
-    return $RES
 }
