@@ -5,17 +5,32 @@ DISTROS="jessie wheezy trusty raspbian-jessie"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
     linux-tools libsodium zeromq3 czmq pyzmq libwebsockets jansson \
     python-pyftpdlib machinekit"
+BUILD_CHROOTS="true"
+
+##################
+#
+# Override above configuration here
+#ARCHES=""
+#DISTROS=""
+#PACKAGES=""
+#BUILD_CHROOTS="false"
+#CHROOTS_CONFIG_ONLY="-P"   # Don't install packages; just configure chroot
+#
+#
+##################
 
 for distro in $DISTROS; do
-    for arch in $ARCHES; do
-	if test $distro = raspbian-jessie -a $arch != armhf; then
-	    # Only have armhf for rpi
-	    continue
-	fi
+    if $BUILD_CHROOTS; then
+	for arch in $ARCHES; do
+	    if test $distro = raspbian-jessie -a $arch != armhf; then
+		# Only have armhf for rpi
+		continue
+	    fi
 
-	echo "########### dxsbuild schroot, $distro:  $arch ###########"
-	./dxsbuild -rda $arch $distro
-    done
+	    echo "########### dxsbuild schroot, $distro:  $arch ###########"
+	    ./dxsbuild -rda $arch $CHROOTS_CONFIG_ONLY $distro
+	done
+    fi
 
     for package in $PACKAGES; do
 	if test $distro != wheezy; then
