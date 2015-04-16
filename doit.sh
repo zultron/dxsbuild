@@ -1,9 +1,10 @@
 #!/bin/bash -e
 
 ARCHES="amd64 i386 armhf"
-DISTROS="jessie wheezy trusty"
+DISTROS="jessie wheezy trusty raspbian-jessie"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
-    linux-tools libsodium zeromq3 czmq pyzmq"
+    linux-tools libsodium zeromq3 czmq pyzmq libwebsockets jansson \
+    python-pyftpdlib machinekit"
 
 for distro in $DISTROS; do
     for arch in $ARCHES; do
@@ -21,6 +22,7 @@ for distro in $DISTROS; do
 		case $package in
 		    dovetail-automata-keyring) continue ;;
 		    linux-latest) continue ;;
+		    python-pyftpdlib) continue ;;
 		esac
 	    fi
 
@@ -33,6 +35,8 @@ for distro in $DISTROS; do
 		# skip wheezy-only deps
 		case $package in
 		    libsodium|zeromq3|pyzmq) continue ;;
+		    libwebsockets|jansson) continue ;;
+		    python-pyftpdlib) continue ;;
 		esac
 	    fi
 
