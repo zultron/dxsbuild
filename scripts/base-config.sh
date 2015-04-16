@@ -56,7 +56,7 @@ CCACHE_DIR=$CONFIG_DIR/ccache
 # Relative directories
 
 # Where the Apt package repo is built
-REPO_DIR=repo
+REPO_BASE_DIR=repo
 
 # Scripts and configs directories
 SCRIPTS_DIR=scripts
@@ -65,7 +65,7 @@ REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
 # Build log directory:  store with Apt repository
-LOG_DIR=$REPO_DIR/log
+LOG_DIR=$REPO_BASE_DIR/log
 
 ####################################
 # GPG key config
@@ -87,3 +87,8 @@ PACKAGE_VERSION_SUFFIX=~1dxs
 # Build script name
 DXSBUILD=$(basename $0)
 
+####################################
+
+# Whether to create separate directories for each distro in the local
+# apt repository, or to merge the `dists` and `pool` directories
+DISTRO_SEPARATE_REPO_DIR="false"

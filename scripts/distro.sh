@@ -7,6 +7,7 @@ declare -A DISTRO_ARCHES
 declare -A DISTRO_REPOS
 declare -A DISTRO_CODENAME
 declare -A DISTRO_NATIVE_BUILD_ONLY
+declare -A DISTRO_SEPARATE_REPO_DIR
 
 # Repos
 declare REPOS
@@ -28,6 +29,7 @@ distro_read_config() {
     DISTRO_REPOS[$DISTRO]=
     DISTRO_CODENAME[$DISTRO]=$DISTRO
     DISTRO_NATIVE_BUILD_ONLY[$DISTRO]="false"
+    DISTRO_SEPARATE_REPO_DIR[$DISTRO]="${DISTRO_SEPARATE_REPO_DIR}"
 
     . $DISTRO_CONFIG_DIR/$DISTRO.sh
 }
@@ -158,8 +160,14 @@ repo_add_apt_key() {
 
 repo_add_apt_source() {
     local REPO=$1
-    local URL=${REPO_MIRROR[$REPO]}
-    local ARCHES=$(echo ${REPO_ARCHES[$REPO]} | sed 's/ /,/g')
+    if test $REPO = local; then
+	local URL=file://${BASE_DIR}/${REPO_BASE_DIR}
+	! ${DISTRO_SEPARATE_REPO_DIR[$DISTRO]} || URL+="/${DISTRO}"
+	local ARCHES=$(echo ${DISTRO_ARCHES[$DISTRO]} | sed 's/ /,/g')
+    else
+	local URL=${REPO_MIRROR[$REPO]}
+	local ARCHES=$(echo ${REPO_ARCHES[$REPO]} | sed 's/ /,/g')
+    fi
     local CODENAME=${REPO_CODENAME[$REPO]:-${DISTRO_CODENAME[$DISTRO]}}
     local COMPONENTS="${REPO_COMPONENTS[$REPO]}"
 
@@ -233,6 +241,7 @@ distro_debug() {
 	debug "	arches ${DISTRO_ARCHES[$d]}"
 	debug "	repos ${DISTRO_REPOS[$d]}"
 	debug " native build only ${DISTRO_NATIVE_BUILD_ONLY[$DISTRO]}"
+	debug " separate apt repo dir ${DISTRO_SEPARATE_REPO_DIR[$DISTRO]}"
 	for a in ${DISTRO_ARCHES[$d]}; do
 	    debug "	arch $a:"
 	    debug "	  base repo:  $(distro_base_repo $d $a)"

@@ -2,7 +2,10 @@ debug "    Sourcing debian-pkg-repo.sh"
 
 deb_repo_init() {
     test -z "$SIGNING_KEY" || return 0
-    REPO_DIR_ABS=$(readlink -f $REPO_DIR)
+    REPO_DIR_ABS=$(readlink -f ${REPO_BASE_DIR})
+    if ${DISTRO_SEPARATE_REPO_DIR[$DISTRO]}; then
+	REPO_DIR_ABS+="/${DISTRO}"
+    fi
     debug "      Apt repo dir: $REPO_DIR_ABS"
     debug "      GPG key dir: $GNUPGHOME"
     if ! test -f $GNUPGHOME/trustdb.gpg; then
@@ -23,7 +26,7 @@ deb_repo_init() {
 
 deb_repo_setup() {
     msg "Initializing Debian Apt package repository"
-    if test ! -s ${REPO_DIR}/conf-${DISTRO}/distributions; then
+    if test ! -s ${REPO_DIR_ABS}/conf-${DISTRO}/distributions; then
 	deb_repo_init
 
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
@@ -31,12 +34,14 @@ deb_repo_setup() {
 	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \
 	    > ${REPO_DIR_ABS}/conf-${DISTRO}/distributions \
 	    -e s/@DISTRO@/${DISTRO}/g \
+	    -e s/@DISTRO_CODENAME@/${DISTRO_CODENAME[$DISTRO]}/g \
+	    -e s/@DISTRO_ARCHES@/${DISTRO_ARCHES[$DISTRO]}/g \
 	    -e s/@SIGNING_KEY@/${SIGNING_KEY}/g'"
     else
 	debug "      (Apt repo config already initialized; doing nothing)"
     fi
 
-    if test ! -s ${REPO_DIR}/dists/${DISTRO}/Release; then
+    if test ! -s ${REPO_DIR_ABS}/dists/${DISTRO}/Release; then
 	debug "    Initializing repository files"
 	${REPREPRO} export ${DISTRO}
     else

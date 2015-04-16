@@ -37,3 +37,8 @@
 # caching packages between removing and rebuilding schroots.
 #
 #HTTP_PROXY=http://192.168.0.42:3128
+
+# Whether to create separate directories for each distro in the local
+# apt repository, or to merge the `dists` and `pool` directories;
+# default 'false'
+#DISTRO_SEPARATE_REPO_DIR="true"

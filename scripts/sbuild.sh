@@ -27,8 +27,10 @@ sbuild_chroot_init() {
 
     if test $HOST_ARCH = i386; then
 	SCHROOT_PERSONALITY=linux32
-    else
+    elif test $HOST_ARCH = amd64; then
 	SCHROOT_PERSONALITY=linux
+    else
+	SCHROOT_PERSONALITY=undefined
     fi
 
     if mode BUILD_PACKAGE && ${PACKAGE_QEMU_NOCHECK[$PACKAGE]} \
@@ -159,8 +161,9 @@ sbuild_chroot_setup() {
 
 sbuild_adjust_log_link() {
     debug "    Adjusting log symlink to relative"
+    local VERSION_SUFFIX="~1${DISTRO/-/.}${PACKAGE_VERSION_SUFFIX}"
     local LOG_LINK=$(echo \
-	$BUILD_DIR/${PACKAGE}_*~1${DISTRO}*_${HOST_ARCH}.build)
+	$BUILD_DIR/${PACKAGE}_*${VERSION_SUFFIX}_${HOST_ARCH}.build)
     test -h $LOG_LINK || \
 	error "Unable to find log link from glob '$LOG_LINK'"
     local LOG=$(readlink $LOG_LINK | sed "s,^/srv/,../../,")

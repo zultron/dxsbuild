@@ -1,4 +1,4 @@
-REPO="raspbian-jessie"
+REPO="raspbian"
 
 # Mirror URL
 REPO_MIRROR[$REPO]="http://archive.raspbian.org/raspbian"

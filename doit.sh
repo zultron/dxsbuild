@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 ARCHES="amd64 i386 armhf"
-DISTROS="jessie wheezy trusty raspbian-jessie"
+DISTROS="jessie wheezy trusty rpi8"
 PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
     linux-tools libsodium zeromq3 czmq pyzmq libwebsockets jansson \
     python-pyftpdlib machinekit"
@@ -22,7 +22,7 @@ BUILD_CHROOTS="true"
 for distro in $DISTROS; do
     if $BUILD_CHROOTS; then
 	for arch in $ARCHES; do
-	    if test $distro = raspbian-jessie -a $arch != armhf; then
+	    if test $distro = rpi8 -a $arch != armhf; then
 		# Only have armhf for rpi
 		continue
 	    fi
@@ -42,7 +42,7 @@ for distro in $DISTROS; do
 	    esac
 	fi
 
-	if test $distro = raspbian-jessie; then
+	if test $distro = rpi8; then
 	    # no kernel packages on raspbian yet
 	    case $package in
 		rtai|linux|linux-latest|linux-tools) continue ;;
@@ -53,12 +53,12 @@ for distro in $DISTROS; do
 	./dxsbuild -Sd $distro $package
 
 	for arch in $ARCHES; do
-	    if test $distro = raspbian-jessie -a $arch != armhf; then
+	    if test $distro = rpi8 -a $arch != armhf; then
 		# only build raspbian for armhf
 		continue
 	    fi
 
-	    if test $arch != amd64 -a $distro != raspbian-jessie; then
+	    if test $arch != amd64 -a $distro != rpi8; then
 		# skip arch-indep packages on non-amd64, except rpi
 		case $package in
 		    dovetail-automata-keyring) continue ;;

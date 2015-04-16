@@ -7,11 +7,11 @@ Description: Machinekit dependency packages for @DISTRO@, built in dxsbuild
 #
 # (the Debian kernel packaging wants anything besides testing or
 # unstable when the release looks like '3.8.13-1mk~wheezy1')
-Suite: stable
+Suite: @DISTRO@
 # distribution; dists/<codename> & in Release files (auto-configured)
-Codename: @DISTRO@
+Codename: @DISTRO_CODENAME@
 # List of package architectures in repo
-Architectures: amd64 i386 armhf source
+Architectures: @DISTRO_ARCHES@ source
 # List of distribution components
 Components: main
 # Sbuild signing key

@@ -1,7 +1,7 @@
 REPO="local"
 
-# Mirror URL
-REPO_MIRROR[local]="file://$BASE_DIR/$REPO_DIR"
+# Mirror URL is generated
+#REPO_MIRROR[local]=
 
 # GPG key
 REPO_KEY[local]="$GNUPGHOME/sbuild-key.pub"
