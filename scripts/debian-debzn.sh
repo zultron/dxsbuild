@@ -32,7 +32,7 @@ debianization_init() {
     DISTRO_SUFFIX="~1${DISTRO/-/.}"
     PACKAGE_NEW_VERSION_SUFFIX="${DISTRO_SUFFIX}${PACKAGE_VERSION_SUFFIX}"
     if is_git_source; then
-	local PREFIX="~$(date +%s)git$(git_rev)"
+	local PREFIX="~$(date +%s)git$(git_rev $DEBZN_GIT_DIR)"
 	PACKAGE_NEW_VERSION_SUFFIX="${PREFIX}${PACKAGE_NEW_VERSION_SUFFIX}"
     fi
     PACKAGE_NEW_VERSION="${PACKAGE_VERSION}${PACKAGE_NEW_VERSION_SUFFIX}"
