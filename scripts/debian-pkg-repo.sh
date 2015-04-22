@@ -31,12 +31,12 @@ deb_repo_setup() {
 
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
 	run_user mkdir -p ${REPO_DIR_ABS}/conf-${DISTRO}
-	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \
-	    > ${REPO_DIR_ABS}/conf-${DISTRO}/distributions \
-	    -e s/@DISTRO@/${DISTRO}/g \
-	    -e s/@DISTRO_CODENAME@/${DISTRO_CODENAME[$DISTRO]}/g \
-	    -e s/@DISTRO_ARCHES@/${DISTRO_ARCHES[$DISTRO]}/g \
-	    -e s/@SIGNING_KEY@/${SIGNING_KEY}/g'"
+	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \\
+	    > ${REPO_DIR_ABS}/conf-${DISTRO}/distributions \\
+	    -e \"s/@DISTRO@/${DISTRO}/g\" \\
+	    -e \"s/@DISTRO_CODENAME@/${DISTRO_CODENAME[$DISTRO]}/g\" \\
+	    -e \"s/@DISTRO_ARCHES@/${DISTRO_ARCHES[$DISTRO]}/g\" \\
+	    -e \"s/@SIGNING_KEY@/${SIGNING_KEY}/g\"'"
     else
 	debug "      (Apt repo config already initialized; doing nothing)"
     fi
