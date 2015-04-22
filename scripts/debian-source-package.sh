@@ -1,4 +1,3 @@
-debug "    Sourcing debian-source-package.sh"
 #
 # Routines for building source packages
 #

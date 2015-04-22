@@ -1,4 +1,3 @@
-debug "    Sourcing docker.sh"
 
 docker_set_user() {
     if $DOCKER_UID_DEFAULT && test "$DOCKER_UID" = 0; then

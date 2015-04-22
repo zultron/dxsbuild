@@ -1,4 +1,3 @@
-debug "    Sourcing debian-pkg-repo.sh"
 
 deb_repo_init() {
     test -z "$SIGNING_KEY" || return 0

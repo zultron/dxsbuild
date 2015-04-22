@@ -1,4 +1,3 @@
-debug "    Sourcing distro.sh"
 
 # Distros
 declare DISTROS

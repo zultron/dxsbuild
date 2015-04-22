@@ -10,17 +10,23 @@ st() {
 }
 
 msg() {
-    echo -e "$(st)INFO : $@" >&2
+    echo -e "$(st)  INFO: $@" >&2
 }
 
 debug() {
     if $DEBUG; then
-	echo -e "$(st)DEBUG: $@" >&2
+	echo -e "$(st) DEBUG: $@" >&2
+    fi
+}
+
+ddebug() {
+    if $DDEBUG; then
+	echo -e "$(st)DDEBUG: $@" >&2
     fi
 }
 
 error() {
-    local p="$(st)ERROR:"
+    local p="$(st) ERROR:"
     echo "$p ************************** ERROR *************************" >&2
     echo "$p $@" >&2
     echo "$p ************************** ERROR *************************" >&2
@@ -185,13 +191,12 @@ test $NUM_ARGS -lt 2 -o -f $PACKAGE_CONFIG_DIR/${PACKAGE:-bogus}.sh || \
 DOCKER_CONTAINER=$DISTRO-$PACKAGE
 
 # Source scripts
-debug "Sourcing include scripts"
-. $SCRIPTS_DIR/architecture.sh
-. $SCRIPTS_DIR/docker.sh
-. $SCRIPTS_DIR/sbuild.sh
-. $SCRIPTS_DIR/distro.sh
-. $SCRIPTS_DIR/debian-package.sh
-. $SCRIPTS_DIR/debian-pkg-repo.sh
+ddebug "Sourcing include scripts"
+for script in architecture docker sbuild distro debian-package debian-pkg-repo
+do
+    ddebug "    Sourcing ${script}.sh"
+    . $SCRIPTS_DIR/${script}.sh
+done
 
 # Source distro, repo and package configs
 distro_read_all_configs

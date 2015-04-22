@@ -1,4 +1,3 @@
-debug "    Sourcing debian-binary-package.sh"
 #
 # These routines handle building the package.
 

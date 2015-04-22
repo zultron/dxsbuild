@@ -1,6 +1,5 @@
 ########################################
 # Debianization git tree operations
-debug "    Sourcing debian-debzn.sh"
 
 parse_changelog() {
     dpkg-parsechangelog --file $BUILD_SRC_DIR/debian/changelog --show-field $1

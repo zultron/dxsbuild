@@ -1,6 +1,5 @@
 ########################################
 # Debian orig tarball operations
-debug "    Sourcing debian-orig-tarball.sh"
 
 source_tarball_init() {
     local VERSION=${PACKAGE_VER:-vers}

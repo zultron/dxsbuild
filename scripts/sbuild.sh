@@ -1,4 +1,3 @@
-debug "    Sourcing sbuild.sh"
 
 sbuild_chroot_init() {
     # By default, only build arch-indep packages on build arch
