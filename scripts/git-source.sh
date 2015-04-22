@@ -28,19 +28,20 @@ git_tree_update() {
 	debug "      Git URL: $GIT_URL"
 	debug "      Git branch:  $GIT_BRANCH"
 	run_user mkdir -p $GIT_DIR
-	run_user git clone -o dxsbuild -b $GIT_BRANCH \
-	    --depth=1 $GIT_URL $GIT_DIR
-    else
-	msg "    Updating git tree"
-	debug "      Git dir: $GIT_DIR"
-	debug "      Git branch:  $GIT_BRANCH"
-	run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	    fetch dxsbuild
-	run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	    checkout $GIT_BRANCH
-	run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	    reset --hard $GIT_BRANCH
+	run_user git clone -o dxsbuild \
+	    ${PACKAGE_SOURCE_GIT_DEPTH[$PACKAGE]} \
+	    $GIT_URL $GIT_DIR
     fi
+
+    msg "    Updating git tree"
+    debug "      Git dir: $GIT_DIR"
+    debug "      Git branch:  $GIT_BRANCH"
+    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
+	fetch dxsbuild
+    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
+	checkout $GIT_BRANCH
+    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
+	reset --hard $GIT_BRANCH
 }
 
 git_tree_source_tarball() {
