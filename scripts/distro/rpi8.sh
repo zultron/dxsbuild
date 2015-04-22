@@ -13,6 +13,8 @@ DISTRO="rpi8"
 DISTRO_PACKAGES[$DISTRO]="xenomai"
 # ZeroMQ packages
 DISTRO_PACKAGES[$DISTRO]+=" czmq"
+# Misc
+DISTRO_PACKAGES[$DISTRO]+=" libwebsockets"
 # Zultron Debian package repo
 DISTRO_PACKAGES[$DISTRO]+=" dovetail-automata-keyring"
 # Machinekit

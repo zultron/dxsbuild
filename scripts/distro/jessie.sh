@@ -6,6 +6,8 @@ DISTRO="jessie"
 DISTRO_PACKAGES[$DISTRO]="xenomai rtai linux linux-tools linux-latest"
 # ZeroMQ packages
 DISTRO_PACKAGES[$DISTRO]+=" czmq"
+# Misc
+DISTRO_PACKAGES[$DISTRO]+=" libwebsockets"
 # Zultron Debian package repo
 DISTRO_PACKAGES[$DISTRO]+=" dovetail-automata-keyring"
 # Machinekit
