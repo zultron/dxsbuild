@@ -60,6 +60,7 @@ sbuild_install_sbuild_conf() {
 	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
 	-e "s,@CCACHE_DIR@,$CCACHE_DIR," \
 	-e "s,@LOG_DIR@,$BASE_DIR/$LOG_DIR," \
+	-e "s/@SBUILD_LOG_COLOUR@/$SBUILD_LOG_COLOUR/" \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf
@@ -210,12 +211,13 @@ run_configure_package_chroot_func() {
 sbuild_build_package() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
-    local DSC_FILE=$BUILD_DIR/${PACKAGE}_*.dsc
-    debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
-    debug "      Build dir: $BUILD_DIR"
-    debug "      Source package .dsc file: $DSC_FILE"
+    local DSC_FILE=$(readlink -e $BUILD_DIR/${PACKAGE}_*.dsc)
 
     test -f $DSC_FILE || error "No .dsc file '$DSC_FILE'"
+
+    debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
+    debug "      Build dir: $BUILD_DIR"
+    debug "      Source package .dsc file: $(basename $DSC_FILE)"
 
     sbuild_chroot_init
     sbuild_install_sbuild_conf

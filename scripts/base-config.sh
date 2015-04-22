@@ -2,9 +2,15 @@
 # Default arch list
 ARCHES="amd64 i386 armhf"
 
+####################################
+# Sbuild/schroot configuration
+
 # Use aufs on tmpfs in sbuild
 SBUILD_USE_AUFS="false"
 
+# Enable/disable color output in sbuild: 1 or 0.  Color can be
+# annoying in dumb terminals that don't interpret escape characters.
+SBUILD_LOG_COLOUR="1"
 
 ####################################
 # Docker configuration

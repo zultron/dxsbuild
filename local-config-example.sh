@@ -42,3 +42,8 @@
 # apt repository, or to merge the `dists` and `pool` directories;
 # default 'false'
 #DISTRO_SEPARATE_REPO_DIR="true"
+
+# Enable/disable color output in sbuild: 1 or 0.  Color can be
+# annoying in dumb terminals that don't interpret escape characters.
+#SBUILD_LOG_COLOUR="0"
+
