@@ -46,6 +46,7 @@ sbuild_chroot_init() {
     fi
     if $DDEBUG; then
 	SBUILD_DEBUG=-D
+	SCHROOT_DEBUG=--verbose
     fi
 }
 
@@ -185,15 +186,15 @@ run_configure_package_chroot_func() {
     else
 	debug "      Installing source package configure deps in schroot:"
 	debug "        ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"
-	run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
+	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
 	    apt-get update
-	run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
+	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
 	    apt-get install --no-install-recommends -y \
 	    ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}
     fi
 
     debug "      Running configure function in schroot"
-    run schroot -u user -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
+    run schroot -u user -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
 	./$DXSBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
 
     if test -z "${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"; then
@@ -201,7 +202,7 @@ run_configure_package_chroot_func() {
 
     else
 	debug "      Removing source package configure deps"
-	run schroot -c $SBUILD_CHROOT $SBUILD_VERBOSE -- \
+	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
 	    apt-get purge -y --auto-remove \
 	    ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}
     fi
