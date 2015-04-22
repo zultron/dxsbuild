@@ -11,7 +11,7 @@ is_git_source() {
 
 git_rev() {
     local GIT_DIR=$1
-    local GIT_BRANCH=${2:-master}
+    local GIT_BRANCH=${2:-${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}}
 
     run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
 	rev-parse --short $GIT_BRANCH
@@ -35,7 +35,11 @@ git_tree_update() {
 	debug "      Git dir: $GIT_DIR"
 	debug "      Git branch:  $GIT_BRANCH"
 	run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	    pull --ff-only dxsbuild $GIT_BRANCH
+	    fetch dxsbuild
+	run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
+	    checkout $GIT_BRANCH
+	run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
+	    reset --hard $GIT_BRANCH
     fi
 }
 
