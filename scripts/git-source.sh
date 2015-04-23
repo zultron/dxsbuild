@@ -41,7 +41,7 @@ git_tree_update() {
     run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
 	checkout $GIT_BRANCH
     run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	reset --hard $GIT_BRANCH
+	reset --hard dxsbuild/$GIT_BRANCH
 }
 
 git_tree_source_tarball() {
