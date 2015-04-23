@@ -6,6 +6,9 @@ PACKAGE_SOURCE_URL[$PKG]="https://github.com/machinekit/machinekit.git"
 # Source package configuration
 PACKAGE_CONFIGURE_FUNC[$PKG]="configure_machinekit"
 
+# Build params
+PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"		# Cross-compile broken; use qemu
+
 configure_machinekit() {
 
     case $DISTRO in
