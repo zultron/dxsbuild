@@ -37,7 +37,7 @@ for distro in $DISTROS; do
 	    # except for wheezy, skip some packages
 	    case $package in
 		libsodium|zeromq3|pyzmq) continue ;;
-		jansson|libwebsockets) continue ;;
+		jansson) continue ;;
 		python-pyftpdlib) continue ;;
 	    esac
 	fi
@@ -76,7 +76,7 @@ for distro in $DISTROS; do
 		# skip wheezy-only deps
 		case $package in
 		    libsodium|zeromq3|pyzmq) continue ;;
-		    libwebsockets|jansson) continue ;;
+		    jansson) continue ;;
 		    python-pyftpdlib) continue ;;
 		esac
 	    fi
