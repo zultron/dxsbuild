@@ -69,9 +69,25 @@ sbuild_install_sbuild_conf() {
     run cp $SCRIPTS_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
 }
 
-sbuild_install_log_dir() {
+sbuild_init_logs() {
     debug "    Creating log directory"
     run_user mkdir -p $LOG_DIR
+    debug "    Removing stale log symlinks"
+    local VERSION_SUFFIX="~1${DISTRO/-/.}${PACKAGE_VERSION_SUFFIX}"
+    run_user rm -f $BUILD_DIR/${PACKAGE}_*${VERSION_SUFFIX}_${HOST_ARCH}.build
+
+}
+
+sbuild_adjust_log_link() {
+    debug "    Adjusting log symlink to relative"
+    local VERSION_SUFFIX="~1${DISTRO/-/.}${PACKAGE_VERSION_SUFFIX}"
+    local LOG_LINK=$(echo \
+	$BUILD_DIR/${PACKAGE}_*${VERSION_SUFFIX}_${HOST_ARCH}.build)
+    test -h $LOG_LINK || \
+	error "Unable to find log link from glob '$LOG_LINK'"
+    local LOG=$(readlink $LOG_LINK | sed "s,^/srv/,../../,")
+    run_user rm -f $BUILD_DIR/${PACKAGE}_*.build
+    run_user ln -sf $LOG $LOG_LINK
 }
 
 sbuild_install_keys() {
@@ -160,18 +176,6 @@ sbuild_chroot_setup() {
     deb_repo_setup
 }
 
-sbuild_adjust_log_link() {
-    debug "    Adjusting log symlink to relative"
-    local VERSION_SUFFIX="~1${DISTRO/-/.}${PACKAGE_VERSION_SUFFIX}"
-    local LOG_LINK=$(echo \
-	$BUILD_DIR/${PACKAGE}_*${VERSION_SUFFIX}_${HOST_ARCH}.build)
-    test -h $LOG_LINK || \
-	error "Unable to find log link from glob '$LOG_LINK'"
-    local LOG=$(readlink $LOG_LINK | sed "s,^/srv/,../../,")
-    run_user rm -f $BUILD_DIR/${PACKAGE}_*.build
-    run_user ln -sf $LOG $LOG_LINK
-}
-
 run_configure_package_chroot_func() {
     sbuild_chroot_init
     sbuild_install_sbuild_conf
@@ -221,7 +225,7 @@ sbuild_build_package() {
 
     sbuild_chroot_init
     sbuild_install_sbuild_conf
-    sbuild_install_log_dir
+    sbuild_init_logs
     sbuild_install_keys
     sbuild_install_config
 
