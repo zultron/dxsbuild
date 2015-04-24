@@ -6,6 +6,7 @@ PACKAGES="dovetail-automata-keyring rtai xenomai linux linux-latest \
     linux-tools libsodium zeromq3 czmq pyzmq libwebsockets jansson \
     python-pyftpdlib machinekit"
 BUILD_CHROOTS="true"
+BUILD_SOURCE_PKGS="true"
 
 ##################
 #
@@ -15,6 +16,7 @@ BUILD_CHROOTS="true"
 #PACKAGES=""
 #BUILD_CHROOTS="false"
 #CHROOTS_CONFIG_ONLY="-P"   # Don't install packages; just configure chroot
+#BUILD_SOURCE_PKGS="false"
 #
 #
 ##################
@@ -49,8 +51,10 @@ for distro in $DISTROS; do
 	    esac
 	fi
 
-	echo "########### dxsbuild source, $distro: $package ###########"
-	./dxsbuild -Sd $distro $package
+	if $BUILD_SOURCE_PKGS; then
+	    echo "########### dxsbuild source, $distro: $package ###########"
+	    ./dxsbuild -Sd $distro $package
+	fi
 
 	for arch in $ARCHES; do
 	    if test $distro = rpi8 -a $arch != armhf; then
