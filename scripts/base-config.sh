@@ -40,8 +40,9 @@ BUILD_BASE_DIR=$BASE_DIR/build/$PACKAGE
 # Where source packages live
 SOURCE_PKG_DIR=$BUILD_BASE_DIR
 
-# Where debianization git sources live
+# Where source and debianization git trees live
 DEBZN_GIT_DIR=$BUILD_BASE_DIR/debzn-git
+SOURCE_GIT_DIR=$BUILD_BASE_DIR/source-git
 
 # Build directory for a distro codename
 BUILD_DIR=$BUILD_BASE_DIR

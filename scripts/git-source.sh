@@ -10,11 +10,22 @@ is_git_source() {
     esac
 }
 
-git_rev() {
-    local GIT_DIR=$1
+debzn_git_rev() {
     local GIT_BRANCH=${2:-${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}}
 
-    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
+    run_user git --git-dir=$DEBZN_GIT_DIR/.git --work-tree=$DEBZN_GIT_DIR \
+	rev-parse --short $GIT_BRANCH
+}
+
+source_git_rev() {
+    local GIT_BRANCH=${2:-${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]:-master}}
+
+    if test -n "${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}"; then
+	echo ${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}
+	return
+    fi
+
+    run_user git --git-dir=$SOURCE_GIT_DIR/.git --work-tree=$SOURCE_GIT_DIR \
 	rev-parse --short $GIT_BRANCH
 }
 
