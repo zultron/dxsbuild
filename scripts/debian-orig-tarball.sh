@@ -36,7 +36,8 @@ source_tarball_download() {
 	git_tree_update \
 	    $SOURCE_PKG_DIR/source-git \
 	    ${PACKAGE_SOURCE_URL[$PACKAGE]} \
-	    ${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]:-master}
+	    ${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]:-master} \
+	    ${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}
 	git_tree_source_tarball \
 	    $SOURCE_PKG_DIR/source-git \
 	    ${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]:-master} \

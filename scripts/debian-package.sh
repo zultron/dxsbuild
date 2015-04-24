@@ -8,6 +8,7 @@ declare PACKAGES
 # Package sources
 declare -A PACKAGE_SOURCE_URL
 declare -A PACKAGE_SOURCE_GIT_BRANCH
+declare -A PACKAGE_SOURCE_GIT_COMMIT
 declare -A PACKAGE_SOURCE_GIT_DEPTH
 declare -A PACKAGE_DEBZN_GIT_URL
 declare -A PACKAGE_DEBZN_GIT_BRANCH
@@ -32,6 +33,7 @@ package_read_config() {
     # set up defaults
     PACKAGE_SOURCE_URL[$PACKAGE]=
     PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]=
+    PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]=
     PACKAGE_SOURCE_GIT_DEPTH[$PACKAGE]="1"
     PACKAGE_DEBZN_GIT_URL[$PACKAGE]=
     PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]="master"
@@ -85,6 +87,7 @@ package_debug() {
 	debug "package $p:"
 	debug "	source url: ${PACKAGE_SOURCE_URL[$p]}"
 	debug "	source git branch: ${PACKAGE_SOURCE_GIT_BRANCH[$p]}"
+	debug "	source git commit: ${PACKAGE_SOURCE_GIT_COMMIT[$p]}"
 	debug "	source git depth: ${PACKAGE_SOURCE_GIT_DEPTH[$p]}"
 	debug "	debianization git url: ${PACKAGE_DEBZN_GIT_URL[$p]}"
 	debug "	debianization git branch: ${PACKAGE_DEBZN_GIT_BRANCH[$p]}"

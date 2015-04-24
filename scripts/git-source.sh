@@ -1,5 +1,6 @@
 is_git_source() {
-    if test -n "${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]}"; then
+    if test -n "${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]}" -a \
+	 -n "${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}"; then
 	return 0
     fi
 
@@ -21,12 +22,14 @@ git_tree_update() {
     local GIT_DIR=$1
     local GIT_URL=$2
     local GIT_BRANCH=$3
+    local GIT_COMMIT=$4
 
     if test ! -d $GIT_DIR/.git; then
 	msg "    Cloning new git tree"
 	debug "      Git dir: $GIT_DIR"
 	debug "      Git URL: $GIT_URL"
 	debug "      Git branch:  $GIT_BRANCH"
+	debug "      Git commit:  $GIT_COMMIT"
 	run_user mkdir -p $GIT_DIR
 	run_user git clone -o dxsbuild \
 	    ${PACKAGE_SOURCE_GIT_DEPTH[$PACKAGE]} \
@@ -41,7 +44,7 @@ git_tree_update() {
     run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
 	checkout $GIT_BRANCH
     run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	reset --hard dxsbuild/$GIT_BRANCH
+	reset --hard ${GIT_COMMIT:-dxsbuild/$GIT_BRANCH}
 }
 
 git_tree_source_tarball() {
