@@ -13,7 +13,7 @@ configure_machinekit() {
 
     case $DISTRO in
 	wheezy) TCL_VER=8.5 ;;
-	jessie|trusty) TCL_VER=8.6 ;;
+	jessie|trusty|rpi8) TCL_VER=8.6 ;;
     esac
 
     run debian/configure -prxt $TCL_VER
