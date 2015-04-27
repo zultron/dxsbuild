@@ -35,14 +35,14 @@ git_tree_update() {
     local GIT_BRANCH=$3
     local GIT_COMMIT=$4
 
-    if test ! -d $GIT_DIR/.git; then
+    if test ! -f $GIT_DIR/HEAD; then
 	msg "    Cloning new git tree"
 	debug "      Git dir: $GIT_DIR"
 	debug "      Git URL: $GIT_URL"
 	debug "      Git branch:  $GIT_BRANCH"
 	debug "      Git commit:  $GIT_COMMIT"
 	run_user mkdir -p $GIT_DIR
-	run_user git clone -o dxsbuild \
+	run_user git clone --bare \
 	    ${PACKAGE_SOURCE_GIT_DEPTH[$PACKAGE]} \
 	    $GIT_URL $GIT_DIR
     fi
@@ -50,12 +50,10 @@ git_tree_update() {
     msg "    Updating git tree"
     debug "      Git dir: $GIT_DIR"
     debug "      Git branch:  $GIT_BRANCH"
-    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	fetch dxsbuild
-    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	checkout $GIT_BRANCH
-    run_user git --git-dir=$GIT_DIR/.git --work-tree=$GIT_DIR \
-	reset --hard ${GIT_COMMIT:-dxsbuild/$GIT_BRANCH}
+    run_user git --git-dir=$GIT_DIR \
+	fetch ${PACKAGE_SOURCE_GIT_DEPTH[$PACKAGE]} \
+	$GIT_URL \
+	+$GIT_BRANCH:dxsbuild_branch
 }
 
 git_tree_source_tarball() {
@@ -70,7 +68,7 @@ git_tree_source_tarball() {
 	*) error "Unknown compression $COMP" ;;
     esac
 
-    run_user bash -c "'git --git-dir=$GIT_DIR/.git archive \\
-	--prefix=$PACKAGE/ $GIT_BRANCH | \\
+    run_user bash -c "'git --git-dir=$GIT_DIR archive \\
+	--prefix=$PACKAGE/ dxsbuild_branch | \\
 	$COMP_CMD > $TARBALL'"
 }
