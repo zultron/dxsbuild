@@ -34,13 +34,19 @@ error() {
 }
 
 run() {
-    ! $DEBUG || debug "      Command:  $@"
-    "$@"
+    (
+	debug "Running command as root:"
+	! $DEBUG || set -x
+	"$@"
+    )
 }
 
 run_user() {
-    ! $DEBUG || debug "      Command (as 'user'):  $@"
-    su -c "$*" user
+    (
+	debug "Running command as user:"
+	! $DEBUG || set -x
+	su -c "$*" user
+    )
 }
 
 run_debug() {
@@ -104,12 +110,12 @@ mode() {
 test -n "$IN_DOCKER" || IN_DOCKER=false
 
 # Process command line opts
+declare -a ARG_LIST  # For saving modified command line opts
 MODE=NONE
 test -n "$DOCKER_UID" || DOCKER_UID=$(id -u); DOCKER_UID_DEFAULT=true
 DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
-ARG_LIST=""
 HOST_ARCH=default  # If no -a arg, gets filled out in architecture.sh
 RERUN_IN_DOCKER=true
 IN_SCHROOT=false
@@ -117,7 +123,7 @@ FORCE_INDEP=false
 PARALLEL_JOBS=""
 BUILD_SCHROOT_SKIP_PACKAGES=false
 while getopts icrPsLSbRCfj:a:u:Ud ARG; do
-    ARG_LIST+=" -${ARG}${OPTARG:+ $OPTARG}"
+    ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
 	c) MODE=DOCKER_SHELL; RERUN_IN_DOCKER=false ;;
@@ -141,11 +147,11 @@ done
 shift $((OPTIND-1))
 
 # User
-! $DOCKER_UID_DEFAULT || ARG_LIST+=" -u $DOCKER_UID"
+! $DOCKER_UID_DEFAULT || ARG_LIST+=(-u $DOCKER_UID)
 
 # Save non-option args before mangling
 NUM_ARGS=$#
-ARG_LIST+=" $*"
+ARG_LIST+=("$@")
 
 # CL args
 DISTRO="$1"; shift || true
@@ -159,7 +165,7 @@ mode && test $NEEDED_ARGS = $NUM_ARGS || usage
 
 # Debug info
 if ! $IN_DOCKER && ! $IN_SCHROOT; then
-    debug "Running '$0 $ARG_LIST' at $(date)"
+    debug "Running '$0 ${ARG_LIST[@]}' at $(date)"
     debug "      Mode: $MODE"
     debug "      ([_] = top level script; [S] = in schroot; [D] = in Docker)"
     debug "      Running with user ID $DOCKER_UID"
@@ -171,10 +177,10 @@ if ! $IN_DOCKER && $RERUN_IN_DOCKER; then
     debug "    Re-running command in Docker container"
     if mode DOCKER_SHELL SBUILD_SHELL; then
 	debug "      Allocating tty in Docker container"
-	DOCKER_TTY=-t docker_run $0 $ARG_LIST
+	DOCKER_TTY=-t docker_run $0 "${ARG_LIST[@]}"
     else
 	debug "      Not allocating tty in Docker container"
-	docker_run $0 $ARG_LIST
+	docker_run $0 "${ARG_LIST[@]}"
     fi
     wrap_up $?
 fi
