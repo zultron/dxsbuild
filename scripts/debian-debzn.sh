@@ -42,11 +42,11 @@ debianization_init() {
     CHANGELOG=/tmp/changelog-$PACKAGE-$DISTRO
 
     if test -z "$MAINTAINER"; then
-	MAINTAINER="$(git --git-dir=$DEBZN_GIT_DIR/.git config user.name)" || \
+	MAINTAINER="$(git --git-dir=$DEBZN_GIT_DIR config user.name)" || \
 	    error "Please set 'MAINTAINER' in local-config.sh"
     fi
     if test -z "$EMAIL"; then
-	EMAIL="$(git --git-dir=$DEBZN_GIT_DIR/.git config user.email)" || \
+	EMAIL="$(git --git-dir=$DEBZN_GIT_DIR config user.email)" || \
 	    error "Please set 'EMAIL' in local-config.sh"
     fi
     debug "      Maintainer <email>:  $MAINTAINER <$EMAIL>"
@@ -87,8 +87,8 @@ debianization_git_tree_unpack() {
 	debug "      Debzn git dir: $DEBZN_GIT_DIR"
 	debug "      Dest dir: $BUILD_SRC_DIR/debian"
 	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
-	run_user bash -c "'git --git-dir=$DEBZN_GIT_DIR/.git archive \\
-	    --prefix=debian/ ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]} | \\
+	run_user bash -c "'git --git-dir=$DEBZN_GIT_DIR archive \\
+	    --prefix=debian/ dxsbuild_branch | \\
 	    tar xCf $BUILD_SRC_DIR -'"
     else
 	debug "      (No PACKAGE_DEBZN_GIT_URL defined; not unpacking from git)"

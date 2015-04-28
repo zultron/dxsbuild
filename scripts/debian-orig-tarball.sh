@@ -41,7 +41,8 @@ source_tarball_download() {
 	git_tree_source_tarball \
 	    $SOURCE_GIT_DIR \
 	    ${PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]:-master} \
-	    $SOURCE_PKG_DIR/$INTERMEDIATE_TARBALL
+	    $SOURCE_PKG_DIR/$INTERMEDIATE_TARBALL \
+	    ${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}
 	    
     else
 	if test ! -f \
