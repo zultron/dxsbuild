@@ -61,6 +61,7 @@ sbuild_install_sbuild_conf() {
 	-e "s,@CCACHE_DIR@,$CCACHE_DIR," \
 	-e "s,@LOG_DIR@,$BASE_DIR/$LOG_DIR," \
 	-e "s/@SBUILD_LOG_COLOUR@/$SBUILD_LOG_COLOUR/" \
+	-e "s/@DEB_BUILD_OPTIONS@/$DEB_BUILD_OPTIONS/" \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf
@@ -234,12 +235,15 @@ sbuild_build_package() {
     debug "    Running sbuild"
     (
 	cd $BUILD_DIR
-	run_user bash -c "'DEB_BUILD_OPTIONS=\"$DEB_BUILD_OPTIONS\" sbuild \\
+	run_user bash -c "'sbuild \\
 	    --host=$HOST_ARCH --build=$BUILD_ARCH \\
-	    -d ${DISTRO_CODENAME[$DISTRO]} $BUILD_INDEP $SBUILD_VERBOSE \\
-	    $SBUILD_DEBUG ${PARALLEL_JOBS:+-j $PARALLEL_JOBS} \\
+	    --dist=${DISTRO_CODENAME[$DISTRO]} \\
 	    -c $SBUILD_CHROOT \\
+	    $BUILD_INDEP \\
+	    $SBUILD_VERBOSE $SBUILD_DEBUG \\
+	    ${PARALLEL_JOBS:+-j $PARALLEL_JOBS} \\
 	    $SBUILD_RESOLVER_ARG \\
+	    $SBUILD_EXTRA_OPTIONS \\
 	    $DSC_FILE'"
     )
 

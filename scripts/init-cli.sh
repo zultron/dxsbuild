@@ -74,26 +74,28 @@ trap 'wrap_up 1 from_trap_err' ERR
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"
-    msg "    $0 -i | -c [-d]"
-    msg "        -i:		Build docker image"
-    msg "        -c:		Spawn interactive shell in docker container"
-    msg "    $0 -r [-P] | -s | -L [-d] [-a ARCH] DISTRO"
-    msg "        -r:		Create sbuild chroot"
-    msg "        -P:		Don't install packages; just configure chroot"
-    msg "        -s:		Spawn interactive shell in sbuild chroot"
-    msg "        -L:		List apt package repository contents"
-    msg "    $0 -S | -b [-j n] | -R [-f] [-d] DISTRO PACKAGE"
-    msg "        -S:		Build source package"
-    msg "        -b:		Run package build (build source pkg if needed)"
-    msg "        -R:		Build apt package repository"
-    msg "        -f:		Force indep package build when build != host"
-    msg "        -j n:		(-b only) Number of parallel jobs"
-    msg "    Global options:"
-    msg "        -a ARCH:	Set build arch"
-    msg "        -u UID:	Run as user ID UID (default $DOCKER_UID)"
-    msg "        -U:		Run as root (UID 0)"
-    msg "        -d:		Print verbose debug output"
-    msg "        -dd:		Print extra verbose debug output"
+    msg "  $0 -i | -c [-d]"
+    msg "     -i:            Build docker image"
+    msg "     -c:            Spawn interactive shell in docker container"
+    msg "  $0 -r [-P] | -s | -L [-d] [-a ARCH] DISTRO"
+    msg "     -r:            Create sbuild chroot"
+    msg "     -P:            Don't install packages; just configure chroot"
+    msg "     -s:            Spawn interactive shell in sbuild chroot"
+    msg "     -L:            List apt package repository contents"
+    msg "  $0 -S | -b [-j n] [-O \"opts\"] | -R [-f] [-d] DISTRO PACKAGE"
+    msg "     -S:            Build source package"
+    msg "     -b:            Run package build (build source pkg if needed)"
+    msg "     -R:            Build apt package repository"
+    msg "     -f:            Force indep package build when build != host"
+    msg "     -j n:          (-b only) Number of parallel jobs"
+    msg "     -O \"opt ...\":  (-b only) Set DEB_BUILD_OPTIONS"
+    msg "  Global options:"
+    msg "     -a ARCH:       Set build arch"
+    msg "     -u UID:        Run as user ID UID (default $DOCKER_UID)"
+    msg "     -U:            Run as root (UID 0)"
+    msg "     -d:            Print verbose debug output"
+    msg "     -dd:           Print extra verbose debug output"
+    msg "     -o \"opt ...\":  Set extra sbuild options"
     exit 1
 }
 
@@ -122,7 +124,7 @@ IN_SCHROOT=false
 FORCE_INDEP=false
 PARALLEL_JOBS=""
 BUILD_SCHROOT_SKIP_PACKAGES=false
-while getopts icrPsLSbRCfj:a:u:Ud ARG; do
+while getopts icrPsLSbRCfj:O:a:u:Udo: ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
@@ -137,10 +139,12 @@ while getopts icrPsLSbRCfj:a:u:Ud ARG; do
 	C) MODE=CONFIGURE_PKG; NEEDED_ARGS=2; IN_SCHROOT=true; IN_DOCKER=true ;;
 	f) FORCE_INDEP=true ;;
 	j) PARALLEL_JOBS="$OPTARG" ;;
+	O) DEB_BUILD_OPTIONS+=" $OPTARG" ;;
 	a) HOST_ARCH=$OPTARG ;;
 	u) DOCKER_UID=$OPTARG; DOCKER_UID_DEFAULT=false ;;
 	U) DOCKER_UID=0; DOCKER_UID_DEFAULT=false ;;
 	d) ! $DEBUG || DDEBUG=true; DEBUG=true ;;
+	o) SBUILD_EXTRA_OPTIONS+=" $OPTARG" ;;
         *) usage
     esac
 done
