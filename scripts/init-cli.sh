@@ -77,11 +77,13 @@ usage() {
     msg "  $0 -i | -c [-d]"
     msg "     -i:            Build docker image"
     msg "     -c:            Spawn interactive shell in docker container"
-    msg "  $0 -r [-P] | -s | -L [-d] [-a ARCH] DISTRO"
+    msg "  $0 -r [-P] | -L [-d] [-a ARCH] DISTRO"
     msg "     -r:            Create sbuild chroot"
     msg "     -P:            Don't install packages; just configure chroot"
-    msg "     -s:            Spawn interactive shell in sbuild chroot"
     msg "     -L:            List apt package repository contents"
+    msg "  $0 -s [-a ARCH] DISTRO [COMMAND ARGS ...]"
+    msg "     -s:            Spawn interactive shell in sbuild chroot"
+    msg "                    With COMMAND, execute and exit"
     msg "  $0 -S | -b [-j n] [-O \"opts\"] | -R [-f] [-d] DISTRO PACKAGE"
     msg "     -S:            Build source package"
     msg "     -b:            Run package build (build source pkg if needed)"
@@ -118,6 +120,7 @@ test -n "$DOCKER_UID" || DOCKER_UID=$(id -u); DOCKER_UID_DEFAULT=true
 DEBUG=false
 DDEBUG=false
 NEEDED_ARGS=0
+MORE_ARGS_OK=false
 HOST_ARCH=default  # If no -a arg, gets filled out in architecture.sh
 RERUN_IN_DOCKER=true
 IN_SCHROOT=false
@@ -131,7 +134,7 @@ while getopts icrPsLSbRCfj:O:a:u:Udo: ARG; do
 	c) MODE=DOCKER_SHELL; RERUN_IN_DOCKER=false ;;
 	r) MODE=BUILD_SBUILD_CHROOT; NEEDED_ARGS=1 ;;
 	P) BUILD_SCHROOT_SKIP_PACKAGES=true ;;
-	s) MODE=SBUILD_SHELL; NEEDED_ARGS=1 ;;
+	s) MODE=SBUILD_SHELL; NEEDED_ARGS=1; MORE_ARGS_OK=true ;;
 	L) MODE=LIST_APT_REPO; NEEDED_ARGS=1 ;;
 	S) MODE=BUILD_SOURCE_PACKAGE; NEEDED_ARGS=2 ;;
 	b) MODE=BUILD_PACKAGE; NEEDED_ARGS=2 ;;
@@ -159,10 +162,17 @@ ARG_LIST+=("$@")
 
 # CL args
 DISTRO="$1"; shift || true
-PACKAGE="$*"
+if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO; then
+    PACKAGE="$*"
+else
+    declare -a OTHER_ARGS=("$@")
+fi
 
 # Mode and possible non-flag args must be set
-mode && test $NEEDED_ARGS = $NUM_ARGS || usage
+mode && test \
+    $NEEDED_ARGS = $NUM_ARGS -o \
+    \( $NEEDED_ARGS -le $NUM_ARGS -a $MORE_ARGS_OK = true \) \
+    || usage
 
 # Init variables
 . scripts/base-config.sh
@@ -194,8 +204,11 @@ test $NUM_ARGS -lt 1 -o -f $DISTRO_CONFIG_DIR/${DISTRO:-bogus}.sh || \
     usage "Distro name '$DISTRO' not valid"
 
 # Check package
-test $NUM_ARGS -lt 2 -o -f $PACKAGE_CONFIG_DIR/${PACKAGE:-bogus}.sh || \
+if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO && \
+    ! test -f $PACKAGE_CONFIG_DIR/${PACKAGE:-bogus}.sh
+then
     usage "Package '$PACKAGE' not valid"
+fi
 
 # Set variables
 DOCKER_CONTAINER=$DISTRO-$PACKAGE

@@ -256,10 +256,16 @@ sbuild_shell() {
     sbuild_chroot_init
     sbuild_install_sbuild_conf
     sbuild_install_config
-    if test $DOCKER_UID = 0; then
-	run sbuild-shell $SBUILD_CHROOT
+    if test -n "${OTHER_ARGS[*]}"; then
+	# Execute command in schroot
+	run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
+	    "${OTHER_ARGS[@]}"
     else
-	run_user sbuild-shell $SBUILD_CHROOT
+	if test $DOCKER_UID = 0; then
+	    run sbuild-shell $SBUILD_CHROOT
+	else
+	    run_user sbuild-shell $SBUILD_CHROOT
+	fi
     fi
 }
 

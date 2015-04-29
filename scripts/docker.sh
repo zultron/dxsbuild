@@ -1,3 +1,10 @@
+docker_user() {
+    if test $DOCKER_UID = 0; then
+	echo root
+    else
+	echo user
+    fi
+}
 
 docker_set_user() {
     if $DOCKER_UID_DEFAULT && test "$DOCKER_UID" = 0; then
