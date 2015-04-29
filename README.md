@@ -126,3 +126,18 @@ Start an **schroot shell**:
     # Foreign arch chroot
     ./dxsbuild -sa i386 jessie
 
+## Debuggering with `gdb` in `qemu`
+
+The `qemu` environment won't allow direct use of `gdb`. Instead, in
+the `qemu` chroot environment, run the program using ` qemu-arm-static
+-g PORT` and attach `gdb` from the Docker container.
+
+    ./dxsbuild -c
+    ./dxsbuild -sda armhf jessie \
+        qemu-arm-static -g 1234 /usr/bin/msgfmt &
+    arm-none-eabi-gdb \
+        -directory chroots/jessie-amd64/build/gettext-kJWpdX/gettext-0.18.3.1 \
+        -ex 'set sysroot chroots/jessie-armhf' \
+        -ex 'target remote localhost:1234' \
+        chroots/jessie-armhf/usr/bin/msgfmt
+

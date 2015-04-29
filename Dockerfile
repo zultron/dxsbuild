@@ -22,8 +22,8 @@ RUN	apt-get install -y aufs-tools
 RUN	apt-get install -y git ca-certificates openssh-client
 # - reprepro
 RUN	apt-get install -y reprepro
-# - qemu
-RUN	apt-get install -y qemu-user-static binfmt-support
+# - qemu and gdb
+RUN	apt-get install -y qemu-user-static binfmt-support gdb-arm-none-eabi
 # - Debian signing keys
 #     Fixes "W: Cannot check Release signature; keyring file not available
 #                /usr/share/keyrings/debian-archive-keyring.gpg"
