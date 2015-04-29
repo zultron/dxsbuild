@@ -216,9 +216,9 @@ run_configure_package_chroot_func() {
 sbuild_build_package() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
-    local DSC_FILE=$(readlink -e $BUILD_DIR/${PACKAGE}_*.dsc)
+    local DSC_FILE=$(readlink -e $BUILD_DIR/${PACKAGE}_*${DISTRO}*.dsc)
 
-    test -f $DSC_FILE || error "No .dsc file '$DSC_FILE'"
+    test -f "$DSC_FILE" || error "No .dsc file '${PACKAGE}_*${DISTRO}*.dsc'"
 
     debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
     debug "      Build dir: $BUILD_DIR"
