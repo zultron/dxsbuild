@@ -74,8 +74,9 @@ trap 'wrap_up 1 from_trap_err' ERR
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"
-    msg "  $0 -i | -c [-d]"
+    msg "  $0 -i [-N] | -c [-d]"
     msg "     -i:            Build docker image"
+    msg "     -N:            Do not use cache when building image"
     msg "     -c:            Spawn interactive shell in docker container"
     msg "  $0 -r [-P] | -L [-d] [-a ARCH] DISTRO"
     msg "     -r:            Create sbuild chroot"
@@ -127,10 +128,11 @@ IN_SCHROOT=false
 FORCE_INDEP=false
 PARALLEL_JOBS=""
 BUILD_SCHROOT_SKIP_PACKAGES=false
-while getopts icrPsLSbRCfj:O:a:u:Udo: ARG; do
+while getopts iNcrPsLSbRCfj:O:a:u:Udo: ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
 	i) MODE=BUILD_DOCKER_IMAGE; RERUN_IN_DOCKER=false ;;
+	N) DOCKER_NO_CACHE=--no-cache=true ;;
 	c) MODE=DOCKER_SHELL; RERUN_IN_DOCKER=false ;;
 	r) MODE=BUILD_SBUILD_CHROOT; NEEDED_ARGS=1 ;;
 	P) BUILD_SCHROOT_SKIP_PACKAGES=true ;;

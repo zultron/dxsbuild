@@ -29,7 +29,7 @@ docker_set_user() {
 
 docker_build() {
     msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
-    run bash -c "docker build -t $DOCKER_IMAGE - < Dockerfile"
+    run bash -c "docker build $DOCKER_NO_CACHE -t $DOCKER_IMAGE - < Dockerfile"
 }
 
 docker_run() {
