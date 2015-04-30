@@ -47,3 +47,8 @@
 # annoying in dumb terminals that don't interpret escape characters.
 #SBUILD_LOG_COLOUR="0"
 
+# Enable distcc
+#DISTCC_ENABLE="true"
+#DISTCC_HOSTS="localhost 127.0.0.1"
+#DISTCC_VERBOSE="1"
+#DISTCC_LOG_LEVEL="info"

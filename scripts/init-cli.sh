@@ -217,7 +217,8 @@ DOCKER_CONTAINER=$DISTRO-$PACKAGE
 
 # Source scripts
 ddebug "Sourcing include scripts"
-for script in architecture docker sbuild distro debian-package debian-pkg-repo
+for script in architecture docker sbuild distcc distro \
+    debian-package debian-pkg-repo
 do
     ddebug "    Sourcing ${script}.sh"
     . $SCRIPTS_DIR/${script}.sh

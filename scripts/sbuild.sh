@@ -51,6 +51,7 @@ sbuild_chroot_init() {
 
 sbuild_install_sbuild_conf() {
     debug "    Installing sbuild.conf into /etc/sbuild/sbuild.conf"
+    distcc_init  # Set up distcc environment
     run cp $SCRIPTS_DIR/sbuild.conf /etc/sbuild
     run sed -i /etc/sbuild/sbuild.conf \
 	-e "s/@CODENAME@/${DISTRO_CODENAME[$DISTRO]}/" \
@@ -62,6 +63,10 @@ sbuild_install_sbuild_conf() {
 	-e "s,@LOG_DIR@,$BASE_DIR/$LOG_DIR," \
 	-e "s/@SBUILD_LOG_COLOUR@/$SBUILD_LOG_COLOUR/" \
 	-e "s/@DEB_BUILD_OPTIONS@/$DEB_BUILD_OPTIONS/" \
+	-e "s/@DISTCC_HOSTS@/$DISTCC_HOSTS/" \
+	-e "s,@DISTCC_DIR@,$DISTCC_DIR," \
+	-e "s,@DISTCC_VERBOSE@,$DISTCC_VERBOSE," \
+	-e "s/@CCACHE_PREFIX@/$CCACHE_PREFIX/" \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf
@@ -164,7 +169,7 @@ sbuild_chroot_setup() {
     run sbuild-createchroot $SBUILD_VERBOSE \
 	--components=$(distro_base_components $DISTRO $BUILD_ARCH) \
 	--arch=$BUILD_ARCH \
-	--include=ccache \
+	--include=ccache,distcc${SCHROOT_INCLUDE:+,$SCHROOT_INCLUDE} \
 	$BUILD_SCHROOT_SETUP_ONLY \
 	${DISTRO_CODENAME[$DISTRO]} $CHROOT_DIR \
 	$(distro_base_mirror $DISTRO $BUILD_ARCH)
@@ -229,7 +234,7 @@ sbuild_build_package() {
     sbuild_init_logs
     sbuild_install_keys
     sbuild_install_config
-
+    distcc_start
     test -d "$CHROOT_DIR" || error "Absent chroot directory:  $CHROOT_DIR"
 
     debug "    Running sbuild"

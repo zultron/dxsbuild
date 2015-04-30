@@ -95,7 +95,15 @@ PACKAGE_VERSION_SUFFIX=~1dxs
 DXSBUILD=$(basename $0)
 
 ####################################
+# distcc
+DISTCC_ENABLE="false"
+DISTCC_HOSTS="localhost 127.0.0.1"
+DISTCC_VERBOSE=""
+DISTCC_LOG_LEVEL="warning"
+
+####################################
 
 # Whether to create separate directories for each distro in the local
 # apt repository, or to merge the `dists` and `pool` directories
 DISTRO_SEPARATE_REPO_DIR="false"
+

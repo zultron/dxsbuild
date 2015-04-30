@@ -13,9 +13,11 @@ RUN	echo "APT::Install-Recommends \"0\";\nAPT::Install-Suggests \"0\";" \
 ############################
 # Install packages:
 # - build tools
-RUN	apt-get install -y build-essential fakeroot devscripts
+RUN	apt-get install -y build-essential fakeroot devscripts sbuild
 # - cross-build tools
-RUN	apt-get install -y xdeb sbuild pdebuild-cross
+RUN	apt-get install -y g++-arm-linux-gnueabihf gcc-arm-linux-gnueabihf
+# - misc. utils
+RUN	apt-get install -y wget
 # - aufs tools for sbuild
 RUN	apt-get install -y aufs-tools
 # - git
@@ -24,6 +26,13 @@ RUN	apt-get install -y git ca-certificates openssh-client
 RUN	apt-get install -y reprepro
 # - qemu and gdb
 RUN	apt-get install -y qemu-user-static binfmt-support gdb-arm-none-eabi
+# - distcc
+RUN	apt-get install -y distcc
+RUN	sed -i  /etc/default/distcc \
+	    -e '/^STARTDISTCC/ s/false/true/' \
+	    -e '$ a #' \
+	    -e '$ a DAEMON_ARGS="--pid-file=/var/run/$NAME.pid \\\
+	          --log-file=/srv/repo/log/$NAME.log --daemon"'
 # - Debian signing keys
 #     Fixes "W: Cannot check Release signature; keyring file not available
 #                /usr/share/keyrings/debian-archive-keyring.gpg"
