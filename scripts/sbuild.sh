@@ -176,8 +176,16 @@ sbuild_chroot_setup() {
 	${DISTRO_CODENAME[$DISTRO]} $CHROOT_DIR \
 	$(distro_base_mirror $DISTRO $BUILD_ARCH)
 
+    # Clean generated schroot.conf
+    run rm -f /etc/schroot/chroot.d/$SBUILD_CHROOT-*
+
     # Set up apt configuration
     distro_configure_apt $DISTRO
+    if test $(arch_machine) = $BUILD_ARCH; then
+	# Add foreign architecture for native schroot
+	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
+	    dpkg --add-architecture armhf
+    fi
 
     # Set up local repo
     deb_repo_init  # Set up variables
