@@ -7,6 +7,7 @@ PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/czmq-deb.git"
 
 # Build params
 PACKAGE_QEMU_NOCHECK[$PKG]="true"  # Tests hang in qemu
+PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"
 
 # Source package configuration
 PACKAGE_CONFIGURE_FUNC[$PKG]="configure_czmq"
