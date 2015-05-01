@@ -1,23 +1,39 @@
 #							-*-conf-*-
-FROM ubuntu:trusty
+FROM debian:jessie
 MAINTAINER John Morris <john@zultron.com>
 
 ############################
 # Apt:
-# - update package index
-RUN	apt-get update
+# - set jessie mirror
+RUN	sed -i /etc/apt/sources.list \
+	    -e 's,http://httpredir[^ ]*,http://http.debian.net/debian,'
 # - don't install recommended packages
 RUN	echo "APT::Install-Recommends \"0\";\nAPT::Install-Suggests \"0\";" \
 	    > /etc/apt/apt.conf.d/10local
+# - update package index
+RUN	apt-get update
+# - install utilities
+RUN	apt-get install -y wget
+# - configure emdebian repo
+RUN	echo 'deb http://emdebian.org/tools/debian jessie main' > \
+	    /etc/apt/sources.list.d/emdebian.list
+RUN	wget -O - -q \
+	    http://emdebian.org/tools/debian/emdebian-toolchain-archive.key \
+	    | apt-key --keyring /etc/apt/trusted.gpg.d/sbuild-extra.gpg add -
+# - add foreign architectures
+RUN	dpkg --add-architecture armhf
+RUN	sed -i /etc/apt/sources.list \
+	    -e 's/^deb /deb [arch=amd64,i386,armhf] /'
+# - update package index again for emdebian and cross-build packages
+RUN	apt-get update
 
 ############################
 # Install packages:
 # - build tools
-RUN	apt-get install -y build-essential fakeroot devscripts sbuild
+RUN	apt-get install -y build-essential fakeroot devscripts \
+	    sbuild debootstrap
 # - cross-build tools
-RUN	apt-get install -y g++-arm-linux-gnueabihf gcc-arm-linux-gnueabihf
-# - misc. utils
-RUN	apt-get install -y wget
+RUN	apt-get install -y crossbuild-essential-armhf
 # - aufs tools for sbuild
 RUN	apt-get install -y aufs-tools
 # - git
