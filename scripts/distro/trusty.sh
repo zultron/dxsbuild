@@ -5,7 +5,7 @@ DISTRO="trusty"
 # RT kernel packages
 DISTRO_PACKAGES[$DISTRO]="xenomai rtai linux linux-tools linux-latest"
 # ZeroMQ packages
-DISTRO_PACKAGES[$DISTRO]+=" czmq"
+DISTRO_PACKAGES[$DISTRO]+=" zeromq3 czmq pyzmq"
 # Misc
 DISTRO_PACKAGES[$DISTRO]+=" libwebsockets"
 # Zultron Debian package repo
