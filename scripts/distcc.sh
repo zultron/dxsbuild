@@ -7,8 +7,8 @@ distcc_init() {
 	local HOST_MULTIARCH=$(dpkg-architecture \
 	    -a$HOST_ARCH -qDEB_HOST_MULTIARCH)
 	debug "      CC/CXX:  using 'distcc ${HOST_MULTIARCH}-g{cc,++}'"
-	CC="distcc ${HOST_MULTIARCH}-gcc"
-	CXX="distcc ${HOST_MULTIARCH}-g++"
+	CC="${HOST_MULTIARCH}-gcc"
+	CXX="${HOST_MULTIARCH}-g++"
     else
 	debug "      CC/CXX:  using 'distcc g{cc,++}'"
 	CC="distcc gcc"

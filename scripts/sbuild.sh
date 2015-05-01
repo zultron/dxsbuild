@@ -66,6 +66,8 @@ sbuild_install_sbuild_conf() {
 	-e "s/@DISTCC_HOSTS@/$DISTCC_HOSTS/" \
 	-e "s,@DISTCC_DIR@,$DISTCC_DIR," \
 	-e "s,@DISTCC_VERBOSE@,$DISTCC_VERBOSE," \
+	-e "s,@CC@,$CC," \
+	-e "s,@CXX@,$CXX," \
 	-e "s/@CCACHE_PREFIX@/$CCACHE_PREFIX/" \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
