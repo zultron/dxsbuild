@@ -1,25 +1,34 @@
+distcc_wanted() {
+    if $DISTCC_ENABLE && arch_is_emulated $HOST_ARCH; then
+	true
+    else
+	if test "$1" = -v; then
+	    if $DISTCC_ENABLE; then
+		debug "      (Not starting distcc:  native architecture)"
+	    else
+		debug "      (Not starting distcc:  disabled)"
+	    fi
+	fi
+	false
+    fi
+}
+
 distcc_init() {
-    $DISTCC_ENABLE || return 0
+    distcc_wanted || return 0
 
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
-    if arch_is_emulated $HOST_ARCH; then
-	# use cross-gcc
-	local HOST_MULTIARCH=$(dpkg-architecture \
-	    -a$HOST_ARCH -qDEB_HOST_MULTIARCH)
-	debug "      CC/CXX:  using 'distcc ${HOST_MULTIARCH}-g{cc,++}'"
-	CC="${HOST_MULTIARCH}-gcc"
-	CXX="${HOST_MULTIARCH}-g++"
-    else
-	debug "      CC/CXX:  using 'distcc g{cc,++}'"
-	CC="distcc gcc"
-	CXX="distcc g++"
-    fi
+    # use cross-gcc
+    local HOST_MULTIARCH=$(dpkg-architecture \
+	-a$HOST_ARCH -qDEB_HOST_MULTIARCH)
+    debug "      CC/CXX:  using '${HOST_MULTIARCH}-g{cc,++}'"
+    CC="${HOST_MULTIARCH}-gcc"
+    CXX="${HOST_MULTIARCH}-g++"
     CCACHE_PREFIX="distcc"
     DISTCC_DIR="$CONFIG_DIR/distcc"
 }
 
 distcc_start() {
-    $DISTCC_ENABLE || return 0
+    distcc_wanted -v || return 0
 
     debug "    Starting distcc service"
     run mkdir -p $DISTCC_DIR
