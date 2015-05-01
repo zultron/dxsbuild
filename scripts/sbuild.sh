@@ -171,7 +171,7 @@ sbuild_chroot_setup() {
     run sbuild-createchroot $SBUILD_VERBOSE \
 	--components=$(distro_base_components $DISTRO $BUILD_ARCH) \
 	--arch=$BUILD_ARCH \
-	--include=ccache,distcc${SCHROOT_INCLUDE:+,$SCHROOT_INCLUDE} \
+	--include=ccache,distcc \
 	$BUILD_SCHROOT_SETUP_ONLY \
 	${DISTRO_CODENAME[$DISTRO]} $CHROOT_DIR \
 	$(distro_base_mirror $DISTRO $BUILD_ARCH)
