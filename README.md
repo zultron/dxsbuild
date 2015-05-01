@@ -141,3 +141,24 @@ the `qemu` chroot environment, run the program using ` qemu-arm-static
         -ex 'target remote localhost:1234' \
         chroots/jessie-armhf/usr/bin/msgfmt
 
+## Maintenance
+
+After running a zillion builds, Docker may fill up the root filesystem
+with old images.  Use the following to clean them out:
+
+    # Clean up all containers
+    docker rm $(docker ps -a -q)
+    # Clean up all images not associated with a container
+    docker rmi $(docker images | awk '/^<none>/ { print $3 }')
+
+## `binfmt_misc`
+
+On Debian, simply install the `binfmt-support` package to enable
+transparent qemu emulation in foreign-arch schroots.
+
+On systems where this must be done manually, if
+`/proc/sys/fs/binfmt_misc` doesn't exist, load the `binfmt_misc`
+module, and then:
+
+    echo ':qemu-arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:' \
+        > /proc/sys/fs/binfmt_misc/register
