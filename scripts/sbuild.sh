@@ -161,7 +161,7 @@ sbuild_chroot_setup() {
     distro_clear_apt
     distro_set_apt_proxy
 
-    if arch_is_emulated $HOST_ARCH && test $BUILD_ARCH=armhf; then
+    if arch_is_emulated $HOST_ARCH && test $BUILD_ARCH = armhf; then
 	debug "    Pre-seeding chroot with qemu-arm-static binary"
 	run mkdir -p $CHROOT_DIR/usr/bin
 	run cp /usr/bin/qemu-arm-static $CHROOT_DIR/usr/bin
