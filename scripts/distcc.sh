@@ -20,9 +20,13 @@ distcc_init() {
     # use cross-gcc
     local HOST_MULTIARCH=$(dpkg-architecture \
 	-a$HOST_ARCH -qDEB_HOST_MULTIARCH)
+    local BUILD_MULTIARCH=$(dpkg-architecture \
+	-a$(arch_build $DISTRO $BUILD_ARCH $HOST_ARCH) \
+	-qDEB_HOST_MULTIARCH)
     debug "      CC/CXX:  using '${HOST_MULTIARCH}-g{cc,++}'"
     CC="${HOST_MULTIARCH}-gcc"
     CXX="${HOST_MULTIARCH}-g++"
+    CC_FOR_BUILD="${BUILD_MULTIARCH}-gcc"
     CCACHE_PREFIX="distcc"
     DISTCC_DIR="$CONFIG_DIR/distcc"
 }
