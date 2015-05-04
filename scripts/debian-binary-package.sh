@@ -30,7 +30,15 @@ ccache_setup() {
     if ! test -d $CCACHE_DIR; then
 	debug "    Creating ccache directory $CCACHE_DIR"
 	run_user mkdir -p $CCACHE_DIR
+	debug "    Zeroing ccache stats"
+	run_user env CCACHE_DIR=$CCACHE_DIR ccache -z
     fi
+}
+
+ccache_stats() {
+    msg "    ccache stats:"
+    run_user env CCACHE_DIR=$CCACHE_DIR \
+	ccache -s
 }
 
 binary_package_build() {
@@ -38,5 +46,6 @@ binary_package_build() {
     binary_package_init
     ccache_setup
     sbuild_build_package
+    ccache_stats
 }
 

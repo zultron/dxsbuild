@@ -57,3 +57,10 @@
 
 # Set DH_VERBOSE for package builds
 #DH_VERBOSE="1"
+
+# Disable ccache
+#CCACHE_DISABLE="disable"
+# Debug ccache problems
+#CCACHE_LOGFILE=$CCACHE_DIR/ccache.log
+# Ccache max cache size; default 1G
+#CCACHE_MAXSIZE=2G

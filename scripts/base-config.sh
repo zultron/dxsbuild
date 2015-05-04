@@ -58,6 +58,9 @@ CONFIG_DIR=$BASE_DIR/configs
 
 # ccache directory
 CCACHE_DIR=$CONFIG_DIR/ccache
+CCACHE_DISABLE=""
+#CCACHE_LOGFILE=
+CCACHE_MAXSIZE="1G"
 
 ####################################
 # Relative directories

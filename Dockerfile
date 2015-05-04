@@ -42,8 +42,8 @@ RUN	apt-get install -y git ca-certificates openssh-client
 RUN	apt-get install -y reprepro
 # - qemu and gdb
 RUN	apt-get install -y qemu-user-static binfmt-support gdb-arm-none-eabi
-# - distcc
-RUN	apt-get install -y distcc
+# - distcc and ccache
+RUN	apt-get install -y distcc ccache
 RUN	sed -i  /etc/default/distcc \
 	    -e '/^STARTDISTCC/ s/false/true/' \
 	    -e '$ a #' \
