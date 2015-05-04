@@ -220,7 +220,7 @@ distro_set_apt_proxy() {
 distro_pin_packages() {
     local DISTRO=$1
     local fname=$CHROOT_DIR/etc/apt/preferences.d/pins.pref
-    run mkdir -p $(basename $fname)
+    run mkdir -p $(dirname $fname)
     for r in ${DISTRO_REPOS[$DISTRO]}; do
 	for p in ${REPO_PIN_PACKAGES[$r]}; do
 	    debug "    Pinning package $p from repo $r"
