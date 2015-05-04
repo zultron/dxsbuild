@@ -42,6 +42,7 @@ sbuild_chroot_init() {
     # sbuild verbosity
     if $DEBUG; then
 	SBUILD_VERBOSE=--verbose
+	DH_VERBOSE=1
     fi
     if $DDEBUG; then
 	SBUILD_DEBUG=-D
@@ -70,6 +71,7 @@ sbuild_install_sbuild_conf() {
 	-e "s,@CXX@,$CXX," \
 	-e "s,@CC_FOR_BUILD@,$CC_FOR_BUILD," \
 	-e "s/@CCACHE_PREFIX@/$CCACHE_PREFIX/" \
+	-e "s/@DH_VERBOSE@/$DH_VERBOSE/" \
 	-e "s/@/\\\\@/g"
     debug "      Contents of /etc/sbuild/sbuild.conf:"
     run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf

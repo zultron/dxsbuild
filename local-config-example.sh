@@ -54,3 +54,6 @@
 # Setting this can cause autoconf -fPIC tests to fail, since they scrape
 # compiler output
 #DISTCC_VERBOSE="1"
+
+# Set DH_VERBOSE for package builds
+#DH_VERBOSE="1"
