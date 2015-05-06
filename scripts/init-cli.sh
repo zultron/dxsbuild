@@ -1,72 +1,5 @@
-# Print info messages
-st() {
-    if $IN_SCHROOT; then
-	echo -n '[S]'
-    elif $IN_DOCKER; then
-	echo -n '[D]'
-    else
-	echo -n '[_]'
-    fi
-}
-
-msg() {
-    echo -e "$(st)  INFO: $@" >&2
-}
-
-debug() {
-    if $DEBUG; then
-	echo -e "$(st) DEBUG: $@" >&2
-    fi
-}
-
-ddebug() {
-    if $DDEBUG; then
-	echo -e "$(st)DDEBUG: $@" >&2
-    fi
-}
-
-error() {
-    local p="$(st) ERROR:"
-    echo "$p ************************** ERROR *************************" >&2
-    echo "$p $@" >&2
-    echo "$p ************************** ERROR *************************" >&2
-    wrap_up 1
-}
-
-run() {
-    (
-	debug "Running command as root:"
-	! $DEBUG || set -x
-	"$@"
-    )
-}
-
-run_user() {
-    (
-	debug "Running command as user:"
-	! $DEBUG || set -x
-	su -c "$*" user
-    )
-}
-
-run_debug() {
-    "$@" | while read l; do debug "        $l"; done
-}
-
-wrap_up() {
-    RES=${1:-100}
-
-    if $IN_SCHROOT; then
-	debug "    Exiting ($RES) schroot"
-    elif $IN_DOCKER; then
-	debug "    Exiting ($RES) Docker container"
-    else
-	debug "Finished with exit status $RES at $(date)"
-    fi
-
-    trap - EXIT ERR  # clear traps
-    exit $RES
-}
+# debug, log functions
+. scripts/utils.sh
 
 trap 'wrap_up $? from_exit_trap' EXIT
 trap 'wrap_up 1 from_trap_err' ERR
@@ -111,20 +44,14 @@ mode() {
     return 1  # MODE != cmdline arg:  error
 }
 
-# When not IN_DOCKER, don't do anything distro-specific
-test -n "$IN_DOCKER" || IN_DOCKER=false
-
 # Process command line opts
 declare -a ARG_LIST  # For saving modified command line opts
 MODE=NONE
 test -n "$DOCKER_UID" || DOCKER_UID=$(id -u); DOCKER_UID_DEFAULT=true
-DEBUG=false
-DDEBUG=false
 NEEDED_ARGS=0
 MORE_ARGS_OK=false
 HOST_ARCH=default  # If no -a arg, gets filled out in architecture.sh
 RERUN_IN_DOCKER=true
-IN_SCHROOT=false
 FORCE_INDEP=false
 PARALLEL_JOBS=""
 BUILD_SCHROOT_SKIP_PACKAGES=false
@@ -211,9 +138,6 @@ if mode BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO && \
 then
     usage "Package '$PACKAGE' not valid"
 fi
-
-# Set variables
-DOCKER_CONTAINER=$DISTRO-$PACKAGE
 
 # Source scripts
 ddebug "Sourcing include scripts"
