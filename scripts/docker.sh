@@ -7,17 +7,28 @@ docker_user() {
 }
 
 docker_set_user() {
-    if $DOCKER_UID_DEFAULT && test "$DOCKER_UID" = 0; then
-	msg "WARNING:  Running as root user"
-	msg "WARNING:  Set user ID on command line or in 'local-config.sh'"
-	return
+    if ! $IN_DOCKER || $IN_SCHROOT; then
+	# Only set up user in Docker container
+	return 0
     fi
 
-    debug "    Setting docker user to $DOCKER_UID"
-    SBUILD_GID=$(getent group sbuild | awk -F : '{print $3}')
+    if test "$DOCKER_UID" = 0; then
+	error "Set user ID on command line or in 'local-config.sh'"
+	return 0
+    fi
+
+    if id -u user >/dev/null 2>&1; then
+	# /etc/passwd already configured; do nothing
+	return 0
+    fi
+
+    # Get `sbuild` group ID
+    SBUILD_GID=$(id -g sbuild)
     test -n "$SBUILD_GID" || \
 	error "Unable to look up group 'sbuild'"
-    debug "      Group 'sbuild' GID = $SBUILD_GID"
+
+    debug "    Setting docker user to $DOCKER_UID:$SBUILD_GID"
+
     DOCKER_PASSWD_ENTRY="user:*:$DOCKER_UID:$SBUILD_GID:User:/srv:/bin/bash"
     debug "      User ID:  $DOCKER_UID"
     echo "$DOCKER_PASSWD_ENTRY" >> /etc/passwd
@@ -33,6 +44,18 @@ docker_build() {
 }
 
 docker_run() {
+    if $IN_DOCKER; then
+	if test -z "${OTHER_ARGS[*]}"; then
+	    OTHER_ARGS=(bash -i)
+	fi
+	if $RUN_AS_USER; then
+	    run_user "${OTHER_ARGS[@]}"
+	else
+	    run "${OTHER_ARGS[@]}"
+	fi
+	return
+    fi
+
     DOCKER_BIND_MOUNTS="-v `pwd`:/srv"
     if $DOCKER_ALWAYS_ALLOCATE_TTY || test -z "$*"; then
 	msg "Starting interactive shell in Docker container '$DOCKER_IMAGE'"
@@ -40,6 +63,6 @@ docker_run() {
     fi
     run docker run --privileged -i -e IN_DOCKER=true $DOCKER_TTY \
 	$DOCKER_BIND_MOUNTS \
-	$DOCKER_IMAGE "$@"
+	$DOCKER_IMAGE $0 "${ARG_LIST[@]}"
 }
 

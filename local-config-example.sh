@@ -12,7 +12,7 @@
 #MAINTAINER="John Doe"
 #EMAIL="jdoe@example.com"
 
-# User ID to use in Docker containers.  Defaults to `id -u`.
+# User ID to use in Docker containers.  Try `id -u`.
 #DOCKER_UID=1000
 
 # Override distro settings

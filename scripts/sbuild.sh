@@ -282,10 +282,10 @@ sbuild_shell() {
 	run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
 	    "${OTHER_ARGS[@]}"
     else
-	if test $DOCKER_UID = 0; then
-	    run sbuild-shell $SBUILD_CHROOT
-	else
+	if $RUN_AS_USER; then
 	    run_user sbuild-shell $SBUILD_CHROOT
+	else
+	    run sbuild-shell $SBUILD_CHROOT
 	fi
     fi
 }

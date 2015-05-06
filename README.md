@@ -34,6 +34,8 @@ Below, the most common work flows are described.
 
 - Install Docker
 - Check out this source
+- Copy `local-config-example.sh` to `local-config.sh` and edit at least
+  `MAINTAINER`, `EMAIL` and `DOCKER_UID`.
 - Get command line usage
 
 		./dxsbuild
