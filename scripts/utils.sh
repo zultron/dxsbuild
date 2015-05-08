@@ -108,6 +108,24 @@ foreach_distro_arch() {
     done
 }
 
+modes() {
+    test "$MODES" != " " || return 1  # MODES not set:  error
+    test -n "$*" || return 0  # no args && MODE != NONE:  success
+    # Otherwise, all args must match
+    for m in $*; do
+    	case "$MODES" in
+	    " $m ") : ;;
+	    *) return 1 ;;
+	esac
+    done
+    return 0
+}
+
+
 trap 'wrap_up $? from_exit_trap' EXIT
 trap 'wrap_up 1 from_trap_err' ERR
 
+
+# Silence some errors: functions overridden by include scripts when
+# applicable
+package_version_suffix() { :; }

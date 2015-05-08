@@ -1,0 +1,84 @@
+#!/bin/bash -e
+
+SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
+
+. $SCRIPTS_DIR/utils.sh
+
+# Source scripts
+ddebug "Sourcing include scripts"
+for script in architecture docker sbuild distcc distro; do
+    ddebug "    Sourcing ${script}.sh"
+    . $SCRIPTS_DIR/${script}.sh
+done
+
+# Init variables
+. $SCRIPTS_DIR/base-config.sh
+
+# Source distro, repo and package configs
+distro_read_all_configs
+repo_read_all_configs
+
+# Source optional config override file
+if test -f $BASE_DIR/local-config.sh; then
+    debug "    Sourcing local config"
+    . $BASE_DIR/local-config.sh
+fi
+
+# Set up Docker container
+docker_setup
+
+usage() {
+    test -z "$1" || msg "$1"
+    msg "Usage:"
+    msg "  $0 [ option ... ] distro [ command [ args ...] ]"
+    msg "  options:"
+    msg "     -a arch:       Use chroot for specified arch"
+    msg "  general options:"
+    msg "     -u UID:        Use user ID UID for non-root operations"
+    msg "     -U:            Run shell as user (default root)"
+    msg "     -d:            Print verbose debug output"
+    msg "     -dd:           Print extra verbose debug output"
+    exit 1
+}
+
+MODES=" SBUILD_SHELL "
+
+# Process command line opts
+declare -a ARG_LIST  # For saving modified command line opts
+test -n "$DOCKER_UID" || DOCKER_UID=0
+HOST_ARCH=""
+RUN_AS_USER=false
+while getopts a:u:Ud ARG; do
+    ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
+    case $ARG in
+	a) HOST_ARCH="$OPTARG" ;;
+	# general options
+	u) DOCKER_UID=$OPTARG ;;
+	U) RUN_AS_USER=true ;;
+	d) $DEBUG && DDEBUG=true || DEBUG=true ;;
+        *) usage
+    esac
+done
+shift $((OPTIND-1))
+
+# User
+ARG_LIST+=(-u $DOCKER_UID)
+
+# Save non-option args before mangling
+ARG_LIST+=("$@")
+
+DISTRO="$1"; shift
+
+declare -a OTHER_ARGS=("$@")
+
+arch_check "$HOST_ARCH" || usage "Valid arches:  $ARCHES"
+test -n "$DISTRO" || usage "No distro(s) specified"
+
+# Debug
+! $DDEBUG || set -x
+
+# Set default arch if needed
+HOST_ARCH=${HOST_ARCH:-$(arch_default $DISTRO)}
+BUILD_ARCH=$HOST_ARCH
+
+sbuild_shell
