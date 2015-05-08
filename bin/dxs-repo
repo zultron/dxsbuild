@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
+$IN_DOCKER || error "This script must be run in a Docker container"
 
 . $SCRIPTS_DIR/utils.sh
 

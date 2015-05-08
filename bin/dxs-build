@@ -3,6 +3,7 @@
 SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
 
 . $SCRIPTS_DIR/utils.sh
+$IN_DOCKER || error "This script must be run in a Docker container"
 
 # Source scripts
 ddebug "Sourcing include scripts"
