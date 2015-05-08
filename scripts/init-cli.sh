@@ -1,9 +1,6 @@
 # debug, log functions
 . scripts/utils.sh
 
-trap 'wrap_up $? from_exit_trap' EXIT
-trap 'wrap_up 1 from_trap_err' ERR
-
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"

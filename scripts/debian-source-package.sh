@@ -7,21 +7,24 @@
 # Routines for cloning/copying the Debianization files
 . $SCRIPTS_DIR/debian-debzn.sh
 
+source_package_dsc_glob() {
+    echo $(readlink -e $(build_dir)/${PACKAGE}_*$(package_version_suffix).dsc)
+}
+source_package_dir() { echo $(build_dir)/tree-$DISTRO; }
+
 ########################################
 # Source package setup
 source_package_setup() {
     distro_check_package $DISTRO $PACKAGE
 
-    msg "    Preparing source directory $BUILD_SRC_DIR"
-    run_user rm -rf $BUILD_SRC_DIR
-    run_user mkdir -p $BUILD_SRC_DIR/debian
+    msg "    Preparing source directory $(source_package_dir)"
+    run_user rm -rf $(source_package_dir)
+    run_user mkdir -p $(source_package_dir)/debian
 
     msg "    Removing old files"
     run_user rm -f \
-	$BUILD_DIR/${PACKAGE}_*.debian.tar.* \
-	$BUILD_DIR/${PACKAGE}_*.dsc \
-	$BUILD_DIR/${PACKAGE}_*.changes \
-	$BUILD_DIR/*.deb
+	$(debzn_tarball_glob) \
+	$(source_package_dsc_glob)
 
     # Proxy
     if test -n "$HTTP_PROXY"; then
@@ -54,7 +57,7 @@ run_configure_package_func() {
     fi
     debug "    Running configure function: ${FUNC}"
     (
-	cd $BUILD_SRC_DIR
+	cd $(source_package_dir)
 	run $FUNC
     )
 }
@@ -64,9 +67,9 @@ run_configure_package_func() {
 
 source_package_build_from_tree() {
     msg "    Building source package"
-    debug "      Debianized source tree: $BUILD_SRC_DIR"
+    debug "      Debianized source tree: $(source_package_dir)"
     (
-	cd $BUILD_SRC_DIR
+	cd $(source_package_dir)
 	run_user dpkg-source -b \
 	    --format="'${PACKAGE_FORMAT[$PACKAGE]}'" .
     )
@@ -75,8 +78,8 @@ source_package_build_from_tree() {
 ########################################
 # Source package clean up
 source_package_cleanup() {
-    msg "    Cleaning up source tree $BUILD_SRC_DIR"
-    run_user rm -rf $BUILD_SRC_DIR
+    msg "    Cleaning up source tree $(source_package_dir)"
+    run_user rm -rf $(source_package_dir)
 }
 
 ########################################

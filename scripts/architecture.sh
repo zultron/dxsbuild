@@ -1,3 +1,14 @@
+arch_check() {
+    local a
+    for a in $*; do
+	case " $ARCHES " in
+	    *" $a "*) continue ;;
+	    *) return 1 ;;
+	esac
+    done
+    return 0
+}
+
 arch_default() {
     # The default architecture is the first in the $DISTRO_ARCHES list
     local DISTRO=$1
@@ -40,7 +51,7 @@ arch_build() {
     local HOST_ARCH=$(arch_host $DISTRO $ARCH)
     local BUILD_ARCH=
 
-    if ! mode BUILD_PACKAGE; then
+    if ! modes BUILD_PACKAGE; then
 	# When not building a package (e.g. building a schroot),
 	# always use requested host arch as build arch.
 	echo $HOST_ARCH

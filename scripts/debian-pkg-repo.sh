@@ -1,11 +1,14 @@
+deb_repo_dir() {
+    if ${DISTRO_SEPARATE_REPO_DIR[$DISTRO]}; then
+	echo ${REPO_BASE_DIR}/${DISTRO}
+    else
+	echo ${REPO_BASE_DIR}
+    fi
+}
 
 deb_repo_init() {
     test -z "$SIGNING_KEY" || return 0
-    REPO_DIR_ABS=$(readlink -f ${REPO_BASE_DIR})
-    if ${DISTRO_SEPARATE_REPO_DIR[$DISTRO]}; then
-	REPO_DIR_ABS+="/${DISTRO}"
-    fi
-    debug "      Apt repo dir: $REPO_DIR_ABS"
+    debug "      Apt repo dir: $(deb_repo_dir)"
     debug "      GPG key dir: $GNUPGHOME"
     if ! test -f $GNUPGHOME/trustdb.gpg; then
 	debug "    Setting up GPG package signing keys"
@@ -18,20 +21,20 @@ deb_repo_init() {
 	awk '/Key fingerprint/ { print $12 $13; }')
     debug "      GPG package signing key fingerprint:  $SIGNING_KEY"
 
-    REPREPRO="run_user reprepro -VV -b ${REPO_DIR_ABS} \
+    REPREPRO="run_user reprepro -VV -b $(deb_repo_dir) \
         --confdir +b/conf-${DISTRO} --dbdir +b/db-${DISTRO} \
 	--gnupghome $GNUPGHOME"
 }
 
 deb_repo_setup() {
     msg "Initializing Debian Apt package repository"
-    if test ! -s ${REPO_DIR_ABS}/conf-${DISTRO}/distributions; then
+    if test ! -s $(deb_repo_dir)/conf-${DISTRO}/distributions; then
 	deb_repo_init
 
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
-	run_user mkdir -p ${REPO_DIR_ABS}/conf-${DISTRO}
+	run_user mkdir -p $(deb_repo_dir)/conf-${DISTRO}
 	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \\
-	    > ${REPO_DIR_ABS}/conf-${DISTRO}/distributions \\
+	    > $(deb_repo_dir)/conf-${DISTRO}/distributions \\
 	    -e \"s/@DISTRO@/${DISTRO}/g\" \\
 	    -e \"s/@DISTRO_CODENAME@/${DISTRO_CODENAME[$DISTRO]}/g\" \\
 	    -e \"s/@DISTRO_ARCHES@/${DISTRO_ARCHES[$DISTRO]}/g\" \\
@@ -40,7 +43,7 @@ deb_repo_setup() {
 	debug "      (Apt repo config already initialized; doing nothing)"
     fi
 
-    if test ! -s ${REPO_DIR_ABS}/dists/${DISTRO}/Release; then
+    if test ! -s $(deb_repo_dir)/dists/${DISTRO}/Release; then
 	debug "    Initializing repository files"
 	${REPREPRO} export ${DISTRO}
     else
@@ -59,7 +62,7 @@ deb_repo_build() {
     ${REPREPRO} \
 	removesrc ${DISTRO} ${PACKAGE}
 
-    local DSC_FILE=$BUILD_DIR/${PACKAGE}_*.dsc
+    local DSC_FILE=$(source_package_dsc_glob)
     debug "    Adding source package '$DSC_FILE'"
     ${REPREPRO} -C main \
 	includedsc ${DISTRO} \
@@ -74,7 +77,7 @@ deb_repo_build() {
 	    # 	$$(if $$(filter-out $$(ARCH),$$(BUILD_INDEP_ARCH)),-A $$(ARCH)) \
 	    # 	remove ${DISTRO} $$(call REPREPRO_PKGS,$(1),$$(ARCH))
 
-    for CHANGES in $BUILD_DIR/*.changes; do
+    for CHANGES in $(build_dir)/*.changes; do
 	debug "    Adding changes file '$CHANGES'"
 	${REPREPRO} -C main \
 	    include ${DISTRO} \

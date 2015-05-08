@@ -1,6 +1,19 @@
 #
 # These routines handle building the package.
 
+binary_package_glob() {
+    for i in $(build_dir)/*_*$(package_version_suffix)_$HOST_ARCH.deb; do
+	echo -n "$(readlink -e $i) "
+    done
+    echo
+}
+
+binary_package_changes_glob() {
+    echo $(readlink -e $(build_dir
+	    )/${PACKAGE}_*$(package_version_suffix
+	    )_$(arch_build $DISTRO $HOST_ARCH).changes)
+}
+
 binary_package_check_arch() {
     local ARCH=$(arch_host $DISTRO $HOST_ARCH)
 
@@ -15,6 +28,10 @@ binary_package_check_arch() {
 binary_package_init() {
     distro_check_package $DISTRO $PACKAGE
     binary_package_check_arch
+
+    run_user rm -f \
+	$(binary_package_changes_glob) \
+	$(binary_package_glob)
 
     source_tarball_init
 

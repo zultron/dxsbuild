@@ -1,3 +1,7 @@
+# FIXME
+docker run --privileged -i -e IN_DOCKER=true -t -v /d/mock/dxsbuild:/srv \
+       docker-sbuild
+
 # *dxsbuild*: Docker cross-sbuild scripts
 
 These scripts build Debian packages in a Docker container (Ubuntu
@@ -38,23 +42,23 @@ Below, the most common work flows are described.
   `MAINTAINER`, `EMAIL` and `DOCKER_UID`.
 - Get command line usage
 
-		./dxsbuild
+    ./dxsbuild
 
 - Set up and edit a local configuration as needed
 
-		cp local-config-example.sh local-config.sh
-		$EDITOR local-config.sh
+    cp local-config-example.sh local-config.sh
+    $EDITOR local-config.sh
 
 - Build the Docker container image
 
-		./dxsbuild -i
+    ./dxsbuild -i
 
 - Set up chroots; for cross-building `armhf`, set up an `amd64` chroot
 
-		# amd64 (default) chroot
-		./dxsbuild -r jessie
-		# armhf chroot
-		./dxsbuild -ra armhf jessie
+    # amd64 (default) chroot
+    ./dxsbuild -r jessie
+    # armhf chroot
+    ./dxsbuild -ra armhf jessie
 
 ### Build a package
 
@@ -64,17 +68,21 @@ Apt package repository is in `/repo`.
 
 - Build a source package.
 
-		./dxsbuild -S jessie xenomai
+    bin/dxs-build -s jessie xenomai
 
 - Build binary packages.
 
-		# amd64 and armhf binary packages; 16 parallel jobs
-		./dxsbuild -b -j 16 jessie xenomai
-		./dxsbuild -ba armhf -j 16 jessie xenomai
+    # amd64 and armhf binary packages; 16 parallel jobs
+    bin/dxs-build -b -j 16 jessie xenomai
+    bin/dxs-build -ba armhf -j 16 jessie xenomai
 
 - Add source and binary packages to Apt package repository.
 
-		./dxsbuild -R jessie xenomai
+    bin/dxs-build -r jessie xenomai
+
+- Do all in one step
+  
+    bin/dxs-build -sbrj 16 jessie xenomai
 
 ## Use cases
 
@@ -89,8 +97,8 @@ To configure `dxsbuild` to build against dependencies in the released
 distribution, edit `local-config.sh` and add the Apt repository to the
 distribution.
 
-	# Add Dovetail Automata Machinekit Jessie repo
-	DISTRO_REPOS[jessie]+=" dovetail-automata"
+    # Add Dovetail Automata Machinekit Jessie repo
+    DISTRO_REPOS[jessie]+=" dovetail-automata"
 
 Then build as usual.  Apt will search for package dependencies in the
 added repository.

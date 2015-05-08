@@ -1,0 +1,148 @@
+#!/bin/bash -e
+
+SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
+
+. $SCRIPTS_DIR/utils.sh
+
+# Source scripts
+ddebug "Sourcing include scripts"
+for script in architecture docker sbuild distcc distro \
+    debian-package debian-pkg-repo
+do
+    ddebug "    Sourcing ${script}.sh"
+    . $SCRIPTS_DIR/${script}.sh
+done
+
+# Init variables
+. $SCRIPTS_DIR/base-config.sh
+
+# Source distro, repo and package configs
+distro_read_all_configs
+repo_read_all_configs
+package_read_all_configs
+
+# Source optional config override file
+if test -f $BASE_DIR/local-config.sh; then
+    debug "    Sourcing local config"
+    . $BASE_DIR/local-config.sh
+fi
+
+# Set up Docker container
+docker_setup
+
+usage() {
+    test -z "$1" || msg "$1"
+    msg "Usage:"
+    msg "  $0 [-s] [-b] [-r] [ option ... ] distro[,...] pkg[,...]"
+    msg "  modes:"
+    msg "     -s:            Build source package"
+    msg "     -b:            Build binary packages"
+    msg "     -r:            Add source and binary packages to repository"
+    msg "     (none):        Same as '-sbr'"
+    msg "  arguments:"
+    msg "     distro[,...]:  Perform for distro(s) (comma-separated)"
+    msg "     pkg [...]:    Perform for package(s) (space-separated)"
+    msg "  options to '-b':"
+    msg "     -j n:          Number of parallel jobs"
+    msg "     -O \"opt ...\":  Set DEB_BUILD_OPTIONS"
+    msg "     -a arch[,...]: Restrict to specified arch(es) (default all)"
+    msg "     -f:            Force indep package build when build != host"
+    msg "     -o \"opt ...\":  Set extra sbuild options"
+    msg "  general options:"
+    msg "     -u UID:        Use user ID UID for non-root operations"
+    msg "     -d:            Print verbose debug output"
+    msg "     -dd:           Print extra verbose debug output"
+    exit 1
+}
+
+modes() {
+    test "$MODES" != " " || return 1  # MODES not set:  error
+    test -n "$*" || return 0  # no args && MODE != NONE:  success
+    # Otherwise, all args must match
+    for m in $*; do
+    	case "$MODES" in
+	    " $m ") : ;;
+	    *) return 1 ;;
+	esac
+    done
+    return 0
+}
+
+# Process command line opts
+declare -a ARG_LIST  # For saving modified command line opts
+MODES=" "
+test -n "$DOCKER_UID" || DOCKER_UID=0
+HOST_ARCHES=""
+FORCE_INDEP=false
+PARALLEL_JOBS=""
+while getopts sbrCj:O:a:fo:u:d ARG; do
+    ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
+    case $ARG in
+	s) MODES+="BUILD_SOURCE_PACKAGE " ;;
+	b) MODES+="BUILD_PACKAGE " ;;
+	r) MODES+="BUILD_APT_REPO " ;;
+	C) MODES+="CONFIGURE_PKG " ;;
+	# -b options
+	j) PARALLEL_JOBS="$OPTARG" ;;
+	O) DEB_BUILD_OPTIONS+=" $OPTARG" ;;
+	a) HOST_ARCHES="$HOST_ARCHES $(uncomma $OPTARG)" ;;
+	f) FORCE_INDEP=true ;;
+	o) SBUILD_EXTRA_OPTIONS+=" $OPTARG" ;;
+	# general options
+	u) DOCKER_UID=$OPTARG ;;
+	d) $DEBUG && DDEBUG=true || DEBUG=true ;;
+        *) usage
+    esac
+done
+shift $((OPTIND-1))
+
+# User
+ARG_LIST+=(-u $DOCKER_UID)
+
+# Save non-option args before mangling
+ARG_LIST+=("$@")
+
+DISTROS="${1//, }"
+PACKAGES="${2//, }"
+
+modes || error "No mode(s) specified"
+arch_check $HOST_ARCHES || error "Valid arches:  $ARCHES"
+test -n "$DISTROS" || error "No distro(s) specified"
+test -n "$PACKAGES" || error "No package(s) specified"
+
+# Debug
+! $DDEBUG || set -x
+
+#FIXME
+echo $MODES
+case "$MODES" in
+    CONFIGURE_PKG)  # -C:  (Internal use)  Pre-build configure script
+	configure_package
+	;;
+
+    *\ BUILD_SOURCE_PACKAGE\ *) # -s:  Build source package
+	echo foo
+	for PACKAGE in $PACKAGES; do
+	    foreach_distro \
+		"Building source package '$PACKAGE'" \
+		source_package_build
+	done
+	;;&
+
+    *\ BUILD_PACKAGE\ *) # -b:  Build package in sbuild chroot
+	# Build binary packages
+	for PACKAGE in $PACKAGES; do
+	    foreach_distro_arch \
+		"Building binary package '$PACKAGE'" \
+		binary_package_build
+	done
+	;;&
+
+    *\ BUILD_APT_REPO\ *) # -r:  Build apt package repository
+	for PACKAGE in $PACKAGES; do
+	    foreach_distro \
+		"Reprepro adding package '$PACKAGE'" \
+		deb_repo_build
+	done
+	;;&
+esac

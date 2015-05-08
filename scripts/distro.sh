@@ -160,7 +160,7 @@ repo_add_apt_key() {
 repo_add_apt_source() {
     local REPO=$1
     if test $REPO = local; then
-	local URL=file://${BASE_DIR}/${REPO_BASE_DIR}
+	local URL=file://$(deb_repo_dir)
 	! ${DISTRO_SEPARATE_REPO_DIR[$DISTRO]} || URL+="/${DISTRO}"
 	local ARCHES=$(echo ${DISTRO_ARCHES[$DISTRO]} | sed 's/ /,/g')
     else

@@ -35,23 +35,10 @@ BASE_DIR=/srv
 SBUILD_CHROOT_DIR=$BASE_DIR/chroots
 
 # Top-level directory for builds
-BUILD_BASE_DIR=$BASE_DIR/build/$PACKAGE
-
-# Where source packages live
-SOURCE_PKG_DIR=$BUILD_BASE_DIR
-
-# Where source and debianization git trees live
-DEBZN_GIT_DIR=$BUILD_BASE_DIR/debzn-git
-SOURCE_GIT_DIR=$BUILD_BASE_DIR/source-git
+build_base_dir() { echo $BASE_DIR/build/$PACKAGE; }
 
 # Build directory for a distro codename
-BUILD_DIR=$BUILD_BASE_DIR
-
-# Where sources are built
-BUILD_SRC_DIR=$BUILD_DIR/tree-$DISTRO
-
-# Where the Docker context is built
-DOCKER_DIR=$BUILD_BASE_DIR/docker
+build_dir() { echo $(build_base_dir); }
 
 # Generated config directory
 CONFIG_DIR=$BASE_DIR/configs
@@ -63,13 +50,14 @@ CCACHE_DISABLE=""
 CCACHE_MAXSIZE="1G"
 
 ####################################
-# Relative directories
+# Local apt package repository
 
 # Where the Apt package repo is built
-REPO_BASE_DIR=repo
+REPO_BASE_DIR=$BASE_DIR/repo
 
+####################################
 # Scripts and configs directories
-SCRIPTS_DIR=scripts
+SCRIPTS_DIR=$BASE_DIR/scripts
 DISTRO_CONFIG_DIR=$SCRIPTS_DIR/distro
 REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
@@ -87,9 +75,6 @@ GPG_KEY_SERVER=hkp://keys.gnupg.net
 GNUPGHOME=$CONFIG_DIR/gpg
 
 ####################################
-
-# Debianization tarball
-DEBZN_TARBALL=$PACKAGE.debian.tar.gz
 
 # Suffix for package version
 PACKAGE_VERSION_SUFFIX=~1dxs

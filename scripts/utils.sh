@@ -42,6 +42,13 @@ error() {
     wrap_up 1
 }
 
+announce() {
+    local p="$(st) ************************************************************"
+    echo "$p" >&2
+    printf "$(st)    $@\n" >&2
+    echo "$p" >&2
+}
+
 run() {
     (
 	debug "Running command as root:"
@@ -76,4 +83,31 @@ wrap_up() {
     trap - EXIT ERR  # clear traps
     exit $RES
 }
+
+uncomma() {
+    echo ${*//,/ }
+}
+
+foreach_distro() {
+    msg="$1"; shift
+    for DISTRO in $DISTROS; do
+	announce "$DISTRO:  $msg"
+	"$@"
+    done
+}
+
+foreach_distro_arch() {
+    msg="$1"; shift
+    for DISTRO in $DISTROS; do
+	for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
+	    if distro_has_arch $DISTRO $HOST_ARCH; then
+		announce "$DISTRO:$HOST_ARCH:  $msg"
+		"$@"
+	    fi
+	done
+    done
+}
+
+trap 'wrap_up $? from_exit_trap' EXIT
+trap 'wrap_up 1 from_trap_err' ERR
 

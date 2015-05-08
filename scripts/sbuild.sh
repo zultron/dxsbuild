@@ -1,3 +1,6 @@
+sbuild_log_glob() {
+    echo $(build_dir)/${PACKAGE}_*$(package_version_suffix)_${HOST_ARCH}.build
+}
 
 sbuild_chroot_init() {
     # By default, only build arch-indep packages on build arch
@@ -12,7 +15,7 @@ sbuild_chroot_init() {
     CHROOT_DIR=$SBUILD_CHROOT_DIR/$DISTRO-$(arch_build $DISTRO $HOST_ARCH)
     debug "      Sbuild chroot dir: $CHROOT_DIR"
 
-    if $BUILD_SCHROOT_SKIP_PACKAGES; then
+    if modes BUILD_SBUILD_CHROOT && $BUILD_SCHROOT_SKIP_PACKAGES; then
 	debug "      Running in setup-only mode"
 	BUILD_SCHROOT_SETUP_ONLY=--setup-only
     fi
@@ -32,7 +35,7 @@ sbuild_chroot_init() {
 	SCHROOT_PERSONALITY=undefined
     fi
 
-    if mode BUILD_PACKAGE && ${PACKAGE_QEMU_NOCHECK[$PACKAGE]} \
+    if modes BUILD_PACKAGE && ${PACKAGE_QEMU_NOCHECK[$PACKAGE]} \
 	&& arch_is_emulated $HOST_ARCH
     then
 	debug "      Skipping tests under qemu"
@@ -59,12 +62,12 @@ sbuild_install_sbuild_conf() {
 	-e "s/@DISTRO@/$DISTRO/" \
 	-e "s/@MAINTAINER@/$MAINTAINER/" \
 	-e "s/@EMAIL@/$EMAIL/" \
-	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$PACKAGE_NEW_VERSION_SUFFIX/" \
+	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$(package_version_suffix)/" \
 	-e "s,@CCACHE_DISABLE@,$CCACHE_DISABLE," \
 	-e "s,@CCACHE_DIR@,$CCACHE_DIR," \
 	-e "s,@CCACHE_LOGFILE@,$CCACHE_LOGFILE," \
 	-e "s/@CCACHE_MAXSIZE@/$CCACHE_MAXSIZE/" \
-	-e "s,@LOG_DIR@,$BASE_DIR/$LOG_DIR," \
+	-e "s,@LOG_DIR@,$LOG_DIR," \
 	-e "s/@SBUILD_LOG_COLOUR@/$SBUILD_LOG_COLOUR/" \
 	-e "s/@DEB_BUILD_OPTIONS@/$DEB_BUILD_OPTIONS/" \
 	-e "s/@DISTCC_HOSTS@/$DISTCC_HOSTS/" \
@@ -87,20 +90,17 @@ sbuild_init_logs() {
     debug "    Creating log directory"
     run_user mkdir -p $LOG_DIR
     debug "    Removing stale log symlinks"
-    local VERSION_SUFFIX="~1${DISTRO/-/.}${PACKAGE_VERSION_SUFFIX}"
-    run_user rm -f $BUILD_DIR/${PACKAGE}_*${VERSION_SUFFIX}_${HOST_ARCH}.build
+    local VERSION_SUFFIX="~1${DISTRO/-/.}$(package_version_suffix)"
+    run_user rm -f $(sbuild_log_glob)
 
 }
 
 sbuild_adjust_log_link() {
-    debug "    Adjusting log symlink to relative"
-    local VERSION_SUFFIX="~1${DISTRO/-/.}${PACKAGE_VERSION_SUFFIX}"
-    local LOG_LINK=$(echo \
-	$BUILD_DIR/${PACKAGE}_*${VERSION_SUFFIX}_${HOST_ARCH}.build)
-    test -h $LOG_LINK || \
-	error "Unable to find log link from glob '$LOG_LINK'"
+    local LOG_LINK=$(sbuild_log_glob)
+    debug "    Adjusting log symlink '$LOG_LINK' to relative"
+    test -h "$LOG_LINK" || \
+	error "Unable to find log link"
     local LOG=$(readlink $LOG_LINK | sed "s,^/srv/,../../,")
-    run_user rm -f $BUILD_DIR/${PACKAGE}_*.build
     run_user ln -sf $LOG $LOG_LINK
 }
 
@@ -237,12 +237,12 @@ run_configure_package_chroot_func() {
 sbuild_build_package() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
-    local DSC_FILE=$(readlink -e $BUILD_DIR/${PACKAGE}_*${DISTRO}*.dsc)
+    local DSC_FILE=$(source_package_dsc_glob)
 
     test -f "$DSC_FILE" || error "No .dsc file '${PACKAGE}_*${DISTRO}*.dsc'"
 
     debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
-    debug "      Build dir: $BUILD_DIR"
+    debug "      Build dir: $(build_dir)"
     debug "      Source package .dsc file: $(basename $DSC_FILE)"
 
     sbuild_chroot_init
@@ -255,7 +255,7 @@ sbuild_build_package() {
 
     debug "    Running sbuild"
     (
-	cd $BUILD_DIR
+	cd $(build_dir)
 	run_user bash -c "'sbuild \\
 	    --host=$HOST_ARCH --build=$BUILD_ARCH \\
 	    --dist=${DISTRO_CODENAME[$DISTRO]} \\

@@ -1,5 +1,6 @@
 distcc_wanted() {
-    if $DISTCC_ENABLE && arch_is_emulated $HOST_ARCH; then
+    if modes BUILD_PACKAGE && $DISTCC_ENABLE && \arch_is_emulated $HOST_ARCH
+    then
 	true
     else
 	if test "$1" = -v; then

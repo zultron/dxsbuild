@@ -38,6 +38,15 @@ docker_set_user() {
     debug "      'sbuild' group entry:  $(getent group sbuild)"
 }
 
+docker_setup() {
+    if ! $IN_DOCKER || $IN_SCHROOT; then
+	# Only set up in Docker container
+	return 0
+    fi
+
+    docker_set_user
+}
+
 docker_build() {
     msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
     run bash -c "docker build $DOCKER_NO_CACHE -t $DOCKER_IMAGE - < Dockerfile"

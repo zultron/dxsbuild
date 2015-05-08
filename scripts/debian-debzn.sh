@@ -1,8 +1,18 @@
 ########################################
 # Debianization git tree operations
 
+debzn_git_dir() { echo $(build_base_dir)/debzn-git; }
+debzn_git_rev() { $(git_rev "$(debzn_git_dir)" \
+    "${2:-${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}}"); }
+
+debzn_tarball_glob() { \
+    echo $(
+	readlink -e $(build_dir)/${PACKAGE}_*$(package_version_suffix
+	    ).debian.tar.*); }
+
 parse_changelog() {
-    dpkg-parsechangelog --file $BUILD_SRC_DIR/debian/changelog --show-field $1
+    dpkg-parsechangelog --file $(source_package_dir)/debian/changelog \
+	--show-field $1
 }
 
 debianization_git_tree_update() {
@@ -12,7 +22,7 @@ debianization_git_tree_update() {
     fi
 
     git_tree_update \
-	$DEBZN_GIT_DIR \
+	$(debzn_git_dir) \
 	${PACKAGE_DEBZN_GIT_URL[$PACKAGE]} \
 	${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}
 }
@@ -20,8 +30,8 @@ debianization_git_tree_update() {
 debianization_init() {
     PACKAGE_VERSION=$(parse_changelog version)
     debug "      Upstream package version-release:  $PACKAGE_VERSION"
-    PACKAGE_VER=$(echo $PACKAGE_VERSION | sed 's/\(.*\)-.*/\1/')
-    debug "      Package version:  $PACKAGE_VER"
+    PACKAGE_UPSTREAM_VERSION=$(echo $PACKAGE_VERSION | sed 's/\(.*\)-.*/\1/')
+    debug "      Package version:  $PACKAGE_UPSTREAM_VERSION"
     PACKAGE_RELEASE=$(echo $PACKAGE_VERSION | \
 	sed -e 's/^\([^-]*\)$/\1-/' -e 's/[^-]*-//')
     debug "      Upstream package release:  $PACKAGE_RELEASE"
@@ -29,24 +39,18 @@ debianization_init() {
     debug "      Package distribution:  $PACKAGE_DISTRIBUTION"
     PACKAGE_URGENCY=$(parse_changelog urgency)
     debug "      Package urgency:  $PACKAGE_URGENCY"
-    DISTRO_SUFFIX="~1${DISTRO/-/.}"
-    PACKAGE_NEW_VERSION_SUFFIX="${DISTRO_SUFFIX}${PACKAGE_VERSION_SUFFIX}"
-    if is_git_source; then
-	local PREFIX="~$(date +%s)git$(source_git_rev)"
-	PACKAGE_NEW_VERSION_SUFFIX="${PREFIX}${PACKAGE_NEW_VERSION_SUFFIX}"
-    fi
-    PACKAGE_NEW_VERSION="${PACKAGE_VERSION}${PACKAGE_NEW_VERSION_SUFFIX}"
+    PACKAGE_NEW_VERSION="${PACKAGE_VERSION}$(package_version_suffix)"
     debug "      New package version-release:  $PACKAGE_NEW_VERSION"
-    DSC_FILE=${PACKAGE}_${PACKAGE_NEW_VERSION}.dsc
-    debug "      .dsc file name:  $DSC_FILE"
+    DSC_FILE=$(source_package_dsc_glob)
+    debug "      .dsc file name:  $(basename '$DSC_FILE')"
     CHANGELOG=/tmp/changelog-$PACKAGE-$DISTRO
 
     if test -z "$MAINTAINER"; then
-	MAINTAINER="$(git --git-dir=$DEBZN_GIT_DIR config user.name)" || \
+	MAINTAINER="$(git --git-dir=$(debzn_git_dir) config user.name)" || \
 	    error "Please set 'MAINTAINER' in local-config.sh"
     fi
     if test -z "$EMAIL"; then
-	EMAIL="$(git --git-dir=$DEBZN_GIT_DIR config user.email)" || \
+	EMAIL="$(git --git-dir=$(debzn_git_dir) config user.email)" || \
 	    error "Please set 'EMAIL' in local-config.sh"
     fi
     debug "      Maintainer <email>:  $MAINTAINER <$EMAIL>"
@@ -77,19 +81,19 @@ debianization_add_changelog() {
 
     debug "      Full changelog:"
     run_debug cat $CHANGELOG
-    run bash -c "cat $BUILD_SRC_DIR/debian/changelog >> $CHANGELOG"
-    run_user cp $CHANGELOG $BUILD_SRC_DIR/debian/changelog
+    run bash -c "cat $(source_package_dir)/debian/changelog >> $CHANGELOG"
+    run_user cp $CHANGELOG $(source_package_dir)/debian/changelog
 }
 
 debianization_git_tree_unpack() {
     if test -n "${PACKAGE_DEBZN_GIT_URL[$PACKAGE]}"; then
 	msg "    Copying debianization from git tree"
-	debug "      Debzn git dir: $DEBZN_GIT_DIR"
-	debug "      Dest dir: $BUILD_SRC_DIR/debian"
+	debug "      Debzn git dir: $(debzn_git_dir)"
+	debug "      Dest dir: $(source_package_dir)/debian"
 	debug "      Git branch:  ${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]}"
-	run_user bash -c "'git --git-dir=$DEBZN_GIT_DIR archive \\
+	run_user bash -c "'git --git-dir=$(debzn_git_dir) archive \\
 	    --prefix=debian/ dxsbuild_branch | \\
-	    tar xCf $BUILD_SRC_DIR -'"
+	    tar xCf $(source_package_dir) -'"
     else
 	debug "      (No PACKAGE_DEBZN_GIT_URL defined; not unpacking from git)"
     fi

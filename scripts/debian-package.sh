@@ -26,6 +26,15 @@ declare -A PACKAGE_CONFIGURE_FUNC
 declare -A PACKAGE_CONFIGURE_CHROOT_DEPS
 declare -A PACKAGE_CONFIGURE_CHROOT_FUNC
 
+package_distro_suffix() { echo "~1${DISTRO/-/.}"; }
+package_version_suffix() {
+    local SUFFIX="$(package_distro_suffix)${PACKAGE_VERSION_SUFFIX}"
+    if is_git_source; then
+	echo "~$(date +%s)git$(source_git_rev)$SUFFIX"
+    else
+	echo "$SUFFIX"
+    fi
+}
 package_read_config() {
     local PACKAGE=$1
     PACKAGES+=" $PACKAGE"
