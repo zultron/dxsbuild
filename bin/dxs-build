@@ -105,10 +105,10 @@ ARG_LIST+=("$@")
 DISTROS="${1//, }"
 PACKAGES="${2//, }"
 
-modes || error "No mode(s) specified"
-arch_check $HOST_ARCHES || error "Valid arches:  $ARCHES"
-test -n "$DISTROS" || error "No distro(s) specified"
-test -n "$PACKAGES" || error "No package(s) specified"
+modes || usage "No mode(s) specified"
+arch_check $HOST_ARCHES || usage "Valid arches:  $ARCHES"
+test -n "$DISTROS" || usage "No distro(s) specified"
+test -n "$PACKAGES" || usage "No package(s) specified"
 
 # Debug
 ! $DDEBUG || set -x

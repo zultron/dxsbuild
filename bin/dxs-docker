@@ -1,0 +1,78 @@
+#!/bin/bash -e
+
+SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
+
+. $SCRIPTS_DIR/utils.sh
+
+# Source scripts
+ddebug "Sourcing include scripts"
+for script in docker; do
+    ddebug "    Sourcing ${script}.sh"
+    . $SCRIPTS_DIR/${script}.sh
+done
+
+# Init variables
+. $SCRIPTS_DIR/base-config.sh
+
+# Source optional config override file
+if test -f $BASE_DIR/local-config.sh; then
+    debug "    Sourcing local config"
+    . $BASE_DIR/local-config.sh
+fi
+
+# Set up Docker container
+docker_setup
+
+usage() {
+    test -z "$1" || msg "$1"
+    msg "Usage:"
+    msg "  $0 -i | -s [ option ... ]"
+    msg "  modes:"
+    msg "     -i:            Build Docker container image"
+    msg "     -s:            Run shell in Docker container"
+    msg "  options:"
+    msg "     -n:            Disable cache while building image"
+    msg "  general options:"
+    msg "     -d:            Print verbose debug output"
+    msg "     -dd:           Print extra verbose debug output"
+    exit 1
+}
+
+
+# Process command line opts
+declare -a ARG_LIST  # For saving modified command line opts
+test -n "$DOCKER_UID" || DOCKER_UID=0
+MODES=" "
+RUN_AS_USER=false
+while getopts isnd ARG; do
+    ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
+    case $ARG in
+	i) MODES+="BUILD_DOCKER_IMAGE " ;;
+	s) MODES+="DOCKER_SHELL " ;;
+	# general options
+	n) DOCKER_NO_CACHE=--no-cache=true ;;
+	d) $DEBUG && DDEBUG=true || DEBUG=true ;;
+        *) usage
+    esac
+done
+shift $((OPTIND-1))
+
+# Save non-option args before mangling
+ARG_LIST+=("$@")
+declare -a OTHER_ARGS=("$@")
+
+modes || usage "No mode(s) specified"
+$IN_DOCKER && error "Attempt to run $0 inside Docker container"
+
+# Debug
+! $DDEBUG || set -x
+
+case "$MODES" in
+    *" BUILD_DOCKER_IMAGE"*)
+	docker_build
+	;;
+
+    *" DOCKER_SHELL "*)
+	docker_run
+	;;
+esac

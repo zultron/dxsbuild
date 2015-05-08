@@ -53,18 +53,6 @@ docker_build() {
 }
 
 docker_run() {
-    if $IN_DOCKER; then
-	if test -z "${OTHER_ARGS[*]}"; then
-	    OTHER_ARGS=(bash -i)
-	fi
-	if $RUN_AS_USER; then
-	    run_user "${OTHER_ARGS[@]}"
-	else
-	    run "${OTHER_ARGS[@]}"
-	fi
-	return
-    fi
-
     DOCKER_BIND_MOUNTS="-v `pwd`:/srv"
     if $DOCKER_ALWAYS_ALLOCATE_TTY || test -z "$*"; then
 	msg "Starting interactive shell in Docker container '$DOCKER_IMAGE'"
@@ -72,6 +60,6 @@ docker_run() {
     fi
     run docker run --privileged -i -e IN_DOCKER=true $DOCKER_TTY \
 	$DOCKER_BIND_MOUNTS \
-	$DOCKER_IMAGE $0 "${ARG_LIST[@]}"
+	$DOCKER_IMAGE "${OTHER_ARGS[@]}"
 }
 
