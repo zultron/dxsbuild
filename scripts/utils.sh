@@ -108,6 +108,16 @@ foreach_distro_arch() {
     done
 }
 
+foreach_arch() {
+    msg="$1"; shift
+    for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
+	if distro_has_arch $DISTRO $HOST_ARCH; then
+	    announce "$DISTRO:$HOST_ARCH:  $msg"
+	    "$@"
+	fi
+    done
+}
+
 modes() {
     test "$MODES" != " " || return 1  # MODES not set:  error
     test -n "$*" || return 0  # no args && MODE != NONE:  success

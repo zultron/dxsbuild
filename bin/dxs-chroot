@@ -3,10 +3,11 @@
 SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
 
 . $SCRIPTS_DIR/utils.sh
+$IN_DOCKER || error "This script must be run in a Docker container"
 
 # Source scripts
 ddebug "Sourcing include scripts"
-for script in architecture docker sbuild distcc distro; do
+for script in architecture docker sbuild distcc distro debian-pkg-repo; do
     ddebug "    Sourcing ${script}.sh"
     . $SCRIPTS_DIR/${script}.sh
 done
@@ -30,8 +31,9 @@ docker_setup
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"
-    msg "  $0 [ option ... ] distro [ command [ args ...] ]"
+    msg "  $0 -i | -s [ option ... ] distro [ command [ args ...] ]"
     msg "  options:"
+    msg "     -n:            No package install; configure existing chroot only"
     msg "     -a arch:       Use chroot for specified arch"
     msg "  general options:"
     msg "     -u UID:        Use user ID UID for non-root operations"
@@ -46,12 +48,18 @@ MODES=" SBUILD_SHELL "
 # Process command line opts
 declare -a ARG_LIST  # For saving modified command line opts
 test -n "$DOCKER_UID" || DOCKER_UID=0
-HOST_ARCH=""
+HOST_ARCHES=""
 RUN_AS_USER=false
-while getopts a:u:Ud ARG; do
+BUILD_SCHROOT_SKIP_PACKAGES=false
+while getopts isna:u:Ud ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
-	a) HOST_ARCH="$OPTARG" ;;
+	# modes
+	i) MODES+="BUILD_SBUILD_CHROOT " ;;
+	s) MODES+="SBUILD_SHELL " ;;
+	# options
+	n) BUILD_SCHROOT_SKIP_PACKAGES=true ;;
+	a) HOST_ARCHES="$HOST_ARCHES $(uncomma $OPTARG)" ;;
 	# general options
 	u) DOCKER_UID=$OPTARG ;;
 	U) RUN_AS_USER=true ;;
@@ -71,7 +79,8 @@ DISTRO="$1"; shift
 
 declare -a OTHER_ARGS=("$@")
 
-arch_check "$HOST_ARCH" || usage "Valid arches:  $ARCHES"
+modes || usage "No mode(s) specified"
+arch_check $HOST_ARCHES || usage "Valid arches:  $ARCHES"
 test -n "$DISTRO" || usage "No distro(s) specified"
 
 # Debug
@@ -81,4 +90,20 @@ test -n "$DISTRO" || usage "No distro(s) specified"
 HOST_ARCH=${HOST_ARCH:-$(arch_default $DISTRO)}
 BUILD_ARCH=$HOST_ARCH
 
-sbuild_shell
+case "$MODES" in
+    *" BUILD_SBUILD_CHROOT "*)
+	foreach_arch "Creating chroot" sbuild_chroot_setup
+	;;
+
+    *" SBUILD_SHELL "*)
+	ARCH_FOUND=false
+	for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
+	    if distro_has_arch $DISTRO $HOST_ARCH; then
+		ARCH_FOUND=true
+		sbuild_shell
+		break
+	    fi
+	done
+	$ARCH_FOUND || usage "Valid arches:  $ARCHES"
+	;;
+esac
