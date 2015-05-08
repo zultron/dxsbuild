@@ -114,7 +114,7 @@ modes() {
     # Otherwise, all args must match
     for m in $*; do
     	case "$MODES" in
-	    " $m ") : ;;
+	    *" $m "*) : ;;
 	    *) return 1 ;;
 	esac
     done
