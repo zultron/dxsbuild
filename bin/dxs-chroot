@@ -75,7 +75,7 @@ ARG_LIST+=(-u $DOCKER_UID)
 # Save non-option args before mangling
 ARG_LIST+=("$@")
 
-DISTRO="$1"; shift
+DISTRO="$1"; shift || true
 
 declare -a OTHER_ARGS=("$@")
 
