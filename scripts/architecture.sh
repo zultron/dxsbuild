@@ -20,7 +20,7 @@ arch_host() {
     local DISTRO=$1
     local ARCH=$2
 
-    if test $ARCH = 'default'; then
+    if test -z "$ARCH"; then
 	ARCH=$(arch_default $DISTRO)
     fi
     echo $ARCH
