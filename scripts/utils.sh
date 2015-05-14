@@ -91,6 +91,7 @@ uncomma() {
 foreach_distro() {
     msg="$1"; shift
     for DISTRO in $DISTROS; do
+	HOST_ARCH=$(arch_default $DISTRO) # Use default arch
 	announce "$DISTRO:  $msg"
 	"$@"
     done
