@@ -221,7 +221,7 @@ run_configure_package_chroot_func() {
 
     debug "      Running configure function in schroot"
     run schroot -u user -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
-	./$DXSBUILD -C $(! $DEBUG || echo -d) $DISTRO $PACKAGE
+	bin/dxs-chroot-helper $(! $DEBUG || echo -d) $DISTRO $PACKAGE
 
     if test -z "${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"; then
 	debug "      (No source pkg configure deps to remove)"

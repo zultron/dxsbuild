@@ -79,9 +79,6 @@ GNUPGHOME=$CONFIG_DIR/gpg
 # Suffix for package version
 PACKAGE_VERSION_SUFFIX=~1dxs
 
-# Build script name
-DXSBUILD=$(basename $0)
-
 ####################################
 # distcc
 DISTCC_ENABLE="false"

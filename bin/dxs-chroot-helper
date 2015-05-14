@@ -1,0 +1,59 @@
+#!/bin/bash -e
+
+SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
+
+. $SCRIPTS_DIR/utils.sh
+test -n "$SCHROOT_CHROOT_NAME" || \
+    error "This script must be run in a schroot"
+
+# Source scripts
+ddebug "Sourcing include scripts"
+for script in distro debian-package; do
+    ddebug "    Sourcing ${script}.sh"
+    . $SCRIPTS_DIR/${script}.sh
+done
+
+# Init variables
+. $SCRIPTS_DIR/base-config.sh
+
+# Source distro and package configs
+distro_read_all_configs
+package_read_all_configs
+
+# Source optional config override file
+if test -f $BASE_DIR/local-config.sh; then
+    debug "    Sourcing local config"
+    . $BASE_DIR/local-config.sh
+fi
+
+usage() {
+    test -z "$1" || msg "$1"
+    msg "Usage:"
+    msg "  $0 [-d] distro package"
+    exit 1
+}
+
+MODES=" CONFIGURE_PKG "
+
+# Process command line opts
+RUN_AS_USER=true
+while getopts du: ARG; do
+    case $ARG in
+	# general options
+	d) $DEBUG && DDEBUG=true || DEBUG=true ;;
+        *) usage
+    esac
+done
+shift $((OPTIND-1))
+
+DISTRO="${1:?No distro specified}"
+PACKAGE="${2:?No package specified}"
+HOST_ARCH=$(arch_default $DISTRO)
+
+# Debug
+! $DDEBUG || set -x
+
+FUNC="${PACKAGE_CONFIGURE_CHROOT_FUNC[$PACKAGE]}"
+debug "    Running configure function: ${FUNC}"
+cd $(source_package_dir)
+$FUNC
