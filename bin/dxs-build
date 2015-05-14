@@ -43,6 +43,8 @@ usage() {
     msg "  arguments:"
     msg "     distro[,...]:  Perform for distro(s) (comma-separated)"
     msg "     pkg [...]:    Perform for package(s) (space-separated)"
+    msg "  options to '-s':"
+    msg "     -N:            Do not clean up source tree"
     msg "  options to '-b':"
     msg "     -j n:          Number of parallel jobs"
     msg "     -O \"opt ...\":  Set DEB_BUILD_OPTIONS"
@@ -76,13 +78,16 @@ test -n "$DOCKER_UID" || DOCKER_UID=0
 HOST_ARCHES=""
 FORCE_INDEP=false
 PARALLEL_JOBS=""
-while getopts sbrCj:O:a:fo:u:d ARG; do
+SOURCE_CLEAN=true
+while getopts sbrCNj:O:a:fo:u:d ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
 	s) MODES+="BUILD_SOURCE_PACKAGE " ;;
 	b) MODES+="BUILD_PACKAGE " ;;
 	r) MODES+="BUILD_APT_REPO " ;;
 	C) MODES+="CONFIGURE_PKG " ;;
+	# -s options
+	N) SOURCE_CLEAN=false ;;
 	# -b options
 	j) PARALLEL_JOBS="$OPTARG" ;;
 	O) DEB_BUILD_OPTIONS+=" $OPTARG" ;;
@@ -120,7 +125,6 @@ case "$MODES" in
 	;;
 
     *\ BUILD_SOURCE_PACKAGE\ *) # -s:  Build source package
-	echo foo
 	for PACKAGE in $PACKAGES; do
 	    foreach_distro \
 		"Building source package '$PACKAGE'" \

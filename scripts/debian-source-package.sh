@@ -78,8 +78,12 @@ source_package_build_from_tree() {
 ########################################
 # Source package clean up
 source_package_cleanup() {
-    msg "    Cleaning up source tree $(source_package_dir)"
-    run_user rm -rf $(source_package_dir)
+    if $SOURCE_CLEAN; then
+	msg "    Cleaning up source tree $(source_package_dir)"
+	run_user rm -rf $(source_package_dir)
+    else
+	debug "      (Not cleaning source tree in $(source_package_dir))"
+    fi
 }
 
 ########################################
