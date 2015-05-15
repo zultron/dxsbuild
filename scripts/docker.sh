@@ -58,7 +58,7 @@ docker_run() {
 	msg "Starting interactive shell in Docker container '$DOCKER_IMAGE'"
 	DOCKER_TTY=-t
     fi
-    run docker run --privileged -i -e IN_DOCKER=true $DOCKER_TTY \
+    run docker run --privileged -i -e IN_DOCKER=true $DOCKER_TTY --rm=true \
 	$DOCKER_BIND_MOUNTS \
 	$DOCKER_IMAGE "${OTHER_ARGS[@]}"
 }
