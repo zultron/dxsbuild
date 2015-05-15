@@ -34,16 +34,12 @@ Below, the most common work flows are described.
 [1]: http://deb.dovetail-automata.com
 [2]: http://machinekit.io
 
-### Setting up
+### Set up Docker
 
 - Install Docker
 - Check out this source
 - Copy `local-config-example.sh` to `local-config.sh` and edit at least
   `MAINTAINER`, `EMAIL` and `DOCKER_UID`.
-- Get command line usage
-
-    ./dxsbuild
-
 - Set up and edit a local configuration as needed
 
     cp local-config-example.sh local-config.sh
@@ -51,14 +47,22 @@ Below, the most common work flows are described.
 
 - Build the Docker container image
 
-    ./dxsbuild -i
+    bin/dxs-docker -i
+
+- Run a shell in the Docker container
+
+    bin/dxs-docker -s
+
+Except for `dxs-docker`, all commands must be run in Docker.
+
+### Set up chroots
 
 - Set up chroots; for cross-building `armhf`, set up an `amd64` chroot
 
     # amd64 (default) chroot
-    ./dxsbuild -r jessie
+    dxs-chroot -i jessie
     # armhf chroot
-    ./dxsbuild -ra armhf jessie
+    dxs-chroot -ra armhf jessie
 
 ### Build a package
 
@@ -68,21 +72,21 @@ Apt package repository is in `/repo`.
 
 - Build a source package.
 
-    bin/dxs-build -s jessie xenomai
+    dxs-build -s jessie xenomai
 
 - Build binary packages.
 
     # amd64 and armhf binary packages; 16 parallel jobs
-    bin/dxs-build -b -j 16 jessie xenomai
-    bin/dxs-build -ba armhf -j 16 jessie xenomai
+    dxs-build -b -j 16 jessie xenomai
+    dxs-build -ba armhf -j 16 jessie xenomai
 
 - Add source and binary packages to Apt package repository.
 
-    bin/dxs-build -r jessie xenomai
+    dxs-build -r jessie xenomai
 
 - Do all in one step
   
-    bin/dxs-build -sbrj 16 jessie xenomai
+    dxs-build -sbrj 16 jessie xenomai
 
 ## Use cases
 
@@ -111,9 +115,9 @@ repositories as above.
 
 ## Configuration
 
-All configuration is in the `/scripts/base-config.sh`,
-`/scripts/package/*.sh`, `/scripts/distro/*.sh` and
-`/scripts/repo/*.sh` files. Before customizing that configuration for
+All configuration is in the `scripts/base-config.sh`,
+`scripts/package/*.sh`, `scripts/distro/*.sh` and
+`scripts/repo/*.sh` files. Before customizing that configuration for
 your local site, consider overriding configuration in
 `local-config.sh` first.
 
@@ -125,16 +129,12 @@ To add a new package, repo or distro, see the corresponding
 Turn on **debug output** with the `-d` argument.  Turn on script tracing
 and other very verbose output with `-dd`.
 
-Start a **Docker shell**:
-
-    ./dxsbuild -c
-
 Start an **schroot shell**:
 
     # Machine arch chroot
-    ./dxsbuild -s jessie
+    dxs-chroot -s jessie
     # Foreign arch chroot
-    ./dxsbuild -sa i386 jessie
+    dxs-chroot -sa i386 jessie
 
 ## Debuggering with `gdb` in `qemu`
 
@@ -142,8 +142,7 @@ The `qemu` environment won't allow direct use of `gdb`. Instead, in
 the `qemu` chroot environment, run the program using ` qemu-arm-static
 -g PORT` and attach `gdb` from the Docker container.
 
-    ./dxsbuild -c
-    ./dxsbuild -sda armhf jessie \
+    dxs-chroot -sda armhf jessie \
         qemu-arm-static -g 1234 /usr/bin/msgfmt &
     arm-none-eabi-gdb \
         -directory chroots/jessie-amd64/build/gettext-kJWpdX/gettext-0.18.3.1 \
