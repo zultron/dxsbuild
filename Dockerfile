@@ -53,11 +53,18 @@ RUN	sed -i  /etc/default/distcc \
 #     Fixes "W: Cannot check Release signature; keyring file not available
 #                /usr/share/keyrings/debian-archive-keyring.gpg"
 RUN	apt-get install -y debian-archive-keyring
+# - RCN signing keys
+RUN	wget -O - -q \
+	    http://repos.rcn-ee.net/debian/conf/repos.rcn-ee.net.gpg.key | \
+	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg \
+	        add -
 # - Raspbian signing keys
 #   - Put in sbuild default keyring
 RUN	wget -O - -q http://archive.raspbian.org/raspbian.public.key | \
 	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg \
 	        add -
+# - update package index YET again for updated keys
+RUN	apt-get update
 
 ############################
 # Monkey patches
