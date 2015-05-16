@@ -119,7 +119,9 @@ sbuild_install_keys() {
 	run_user cp /tmp/sbuild-key.* $GNUPGHOME
     fi
 
-    if test -f $SBUILD_KEY_DIR/sbuild-key.sec; then
+    if test -f $SBUILD_KEY_DIR/sbuild-key.sec && \
+	test "$(stat -c %U $SBUILD_KEY_DIR/sbuild-key.sec)" = user
+    then
 	debug "      (sbuild package keys installed; doing nothing)"
     else
 	debug "    Installing signing keys from $GNUPGHOME into sbuild"
