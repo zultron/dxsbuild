@@ -77,7 +77,6 @@ RUN	sed -i /usr/sbin/sbuild-createchroot -e '/set_conf..FOREIGN/ s/0/1/'
 ENV	DEBUG true
 
 # List apt keys
-RUN	! $DEBUG || { echo "System apt keys:"; apt-key list; }
 RUN	! $DEBUG || { echo "Debootstrap apt keys:"; \
 	    apt-key --keyring /usr/share/keyrings/debian-archive-keyring.gpg \
 	        list; }
