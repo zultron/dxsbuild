@@ -1,6 +1,6 @@
 # Defaults
-DEBUG=false
-DDEBUG=false
+DEBUG=${DEBUG:-false}
+DDEBUG=${DDEBUG:-false}
 IN_SCHROOT=false
 
 # When not IN_DOCKER, don't do anything distro-specific
