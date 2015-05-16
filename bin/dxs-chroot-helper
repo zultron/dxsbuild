@@ -8,7 +8,7 @@ test -n "$SCHROOT_CHROOT_NAME" || \
 
 # Source scripts
 ddebug "Sourcing include scripts"
-for script in distro debian-package; do
+for script in architecture distro debian-package; do
     ddebug "    Sourcing ${script}.sh"
     . $SCRIPTS_DIR/${script}.sh
 done
