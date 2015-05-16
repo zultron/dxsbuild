@@ -40,9 +40,6 @@ usage() {
     msg "     -b:            Build binary packages"
     msg "     -r:            Add source and binary packages to repository"
     msg "     (none):        Same as '-sbr'"
-    msg "  arguments:"
-    msg "     distro[,...]:  Perform for distro(s) (comma-separated)"
-    msg "     pkg [...]:    Perform for package(s) (space-separated)"
     msg "  options to '-s':"
     msg "     -N:            Do not clean up source tree"
     msg "  options to '-b':"
@@ -55,6 +52,9 @@ usage() {
     msg "     -u UID:        Use user ID UID for non-root operations"
     msg "     -d:            Print verbose debug output"
     msg "     -dd:           Print extra verbose debug output"
+    msg "  arguments (comma-separated):"
+    msg "     distro[,...]:  Perform for distro(s)"
+    msg "     pkg[,...]:    Perform for package(s)"
     exit 1
 }
 
@@ -108,8 +108,10 @@ ARG_LIST+=(-u $DOCKER_UID)
 # Save non-option args before mangling
 ARG_LIST+=("$@")
 
-DISTROS="${1//, }"
-PACKAGES="${2//, }"
+DISTROS="$(uncomma $1)"
+debug "      Distros: $DISTROS"
+PACKAGES="$(uncomma $2)"
+debug "      Packages: $PACKAGES"
 
 modes || usage "No mode(s) specified"
 arch_check $HOST_ARCHES || usage "Valid arches:  $ARCHES"
