@@ -26,6 +26,15 @@ DOCKER_IMAGE=docker-sbuild
 DOCKER_ALWAYS_ALLOCATE_TTY=true
 
 ####################################
+# Outside directory configuration
+#
+# For paths that may differ outside and inside the Docker container
+
+OUTSIDE_BASE_DIR="${OUTSIDE_BASE_DIR:-$(readlink -f $(dirname $0)/..)}"
+OUTSIDE_SCRIPTS_DIR="${OUTSIDE_SCRIPTS_DIR:-$OUTSIDE_BASE_DIR/scripts}"
+OUTSIDE_SBUILD_CHROOT_DIR="${OUTSIDE_SCRIPTS_DIR:-$OUTSIDE_BASE_DIR/chroots}"
+
+####################################
 # Docker container directory configuration
 
 # Base directory of this tree in Docker container

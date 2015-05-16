@@ -15,9 +15,9 @@ done
 . $SCRIPTS_DIR/base-config.sh
 
 # Source optional config override file
-if test -f $BASE_DIR/local-config.sh; then
+if test -f $OUTSIDE_BASE_DIR/local-config.sh; then
     debug "    Sourcing local config"
-    . $BASE_DIR/local-config.sh
+    . $OUTSIDE_BASE_DIR/local-config.sh
 fi
 
 # Set up Docker container
