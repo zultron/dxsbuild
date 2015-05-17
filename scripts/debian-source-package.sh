@@ -58,7 +58,7 @@ run_configure_package_func() {
     debug "    Running configure function: ${FUNC}"
     (
 	cd $(source_package_dir)
-	run $FUNC
+	$FUNC
     )
 }
 
