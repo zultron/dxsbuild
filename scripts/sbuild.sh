@@ -281,8 +281,13 @@ sbuild_shell() {
     sbuild_install_config
     if test -n "${OTHER_ARGS[*]}"; then
 	# Execute command in schroot
-	run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
-	    "${OTHER_ARGS[@]}"
+	if $RUN_AS_USER; then
+	    run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
+		"${OTHER_ARGS[@]}"
+	else
+	    run schroot $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
+		"${OTHER_ARGS[@]}"
+	fi
     else
 	if $RUN_AS_USER; then
 	    run_user sbuild-shell $SBUILD_CHROOT
