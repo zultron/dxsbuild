@@ -191,7 +191,7 @@ sbuild_chroot_setup() {
     distro_configure_apt $DISTRO
     if test $(arch_machine) = $BUILD_ARCH; then
 	# Add foreign architecture for native schroot
-	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
+	run schroot -c $SBUILD_CHROOT $SCHROOT_DEBUG -- \
 	    dpkg --add-architecture armhf
     fi
 
