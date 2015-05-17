@@ -290,7 +290,8 @@ sbuild_shell() {
 	fi
     else
 	if $RUN_AS_USER; then
-	    run_user sbuild-shell $SBUILD_CHROOT
+	    run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
+		bash -i
 	else
 	    run sbuild-shell $SBUILD_CHROOT
 	fi
