@@ -39,7 +39,7 @@ debianization_init() {
     debug "      Package distribution:  $PACKAGE_DISTRIBUTION"
     PACKAGE_URGENCY=$(parse_changelog urgency)
     debug "      Package urgency:  $PACKAGE_URGENCY"
-    PACKAGE_NEW_VERSION="${PACKAGE_VERSION}$(package_version_suffix)"
+    PACKAGE_NEW_VERSION="${PACKAGE_VERSION}$(package_version_suffix -d)"
     debug "      New package version-release:  $PACKAGE_NEW_VERSION"
     DSC_FILE=$(source_package_dsc_glob)
     debug "      .dsc file name:  $(basename '$DSC_FILE')"
