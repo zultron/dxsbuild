@@ -74,11 +74,9 @@ modes() {
 # Process command line opts
 declare -a ARG_LIST  # For saving modified command line opts
 MODES=" "
-test -n "$DOCKER_UID" || DOCKER_UID=0
-HOST_ARCHES=""
-FORCE_INDEP=false
-PARALLEL_JOBS=""
-SOURCE_CLEAN=true
+DOCKER_UID=${DOCKER_UID:-0}
+FORCE_INDEP=${FORCE_INDEP:-false}
+SOURCE_CLEAN=${SOURCE_CLEAN:-true}
 while getopts sbrCNj:O:a:fo:u:d ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
