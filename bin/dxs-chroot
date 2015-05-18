@@ -31,19 +31,21 @@ docker_setup
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"
-    msg "  $0 -i | -s [ option ... ] distro [ command [ args ...] ]"
-    msg "  options:"
-    msg "     -n:            No package install; configure existing chroot only"
-    msg "     -a arch:       Use chroot for specified arch"
+    msg "  Run command or start shell in chroot:"
+    msg "    $0 [-s] [ option ... ] distro [ command [ args ...] ]"
+    msg "      -U:           Run shell as user (default root)"
+    msg "  Build chroot image:"
+    msg "    $0 -i [ option ... ] distro"
+    msg "      -n:           No package install; configure existing chroot only"
     msg "  general options:"
-    msg "     -u UID:        Use user ID UID for non-root operations"
-    msg "     -U:            Run shell as user (default root)"
-    msg "     -d:            Print verbose debug output"
-    msg "     -dd:           Print extra verbose debug output"
+    msg "      -a arch:      Use chroot for specified arch"
+    msg "      -u UID:       Use user ID UID for non-root operations"
+    msg "      -d:           Print verbose debug output"
+    msg "      -dd:          Print extra verbose debug output"
     exit 1
 }
 
-MODES=" SBUILD_SHELL "
+MODES=" "
 
 # Process command line opts
 declare -a ARG_LIST  # For saving modified command line opts
@@ -79,7 +81,8 @@ DISTRO="$1"; shift || true
 
 declare -a OTHER_ARGS=("$@")
 
-modes || usage "No mode(s) specified"
+# Run shell by default
+modes || MODES=" SBUILD_SHELL "
 arch_check $HOST_ARCHES || usage "Valid arches:  $ARCHES"
 test -n "$DISTRO" || usage "No distro(s) specified"
 
