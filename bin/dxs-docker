@@ -26,15 +26,14 @@ docker_setup
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"
-    msg "  $0 -i | -s [ option ... ]"
-    msg "  modes:"
-    msg "     -i:            Build Docker container image"
-    msg "     -s:            Run shell in Docker container"
-    msg "  options:"
-    msg "     -n:            Disable cache while building image"
+    msg "  Run command or start shell in Docker container:"
+    msg "    $0 [-s] [command [args ...]]"
+    msg "  Build Docker container image:"
+    msg "    $0 -i [ option ... ]"
+    msg "      -n:           Disable cache while building image"
     msg "  general options:"
-    msg "     -d:            Print verbose debug output"
-    msg "     -dd:           Print extra verbose debug output"
+    msg "      -d:           Print verbose debug output"
+    msg "      -dd:          Print extra verbose debug output"
     exit 1
 }
 
@@ -61,7 +60,7 @@ shift $((OPTIND-1))
 ARG_LIST+=("$@")
 declare -a OTHER_ARGS=("$@")
 
-modes || usage "No mode(s) specified"
+modes || MODES=" DOCKER_SHELL "
 $IN_DOCKER && error "Attempt to run $0 inside Docker container"
 
 # Debug
