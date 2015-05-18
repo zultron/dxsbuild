@@ -140,3 +140,14 @@ trap 'wrap_up 1 from_trap_err' ERR
 # Silence some errors: functions overridden by include scripts when
 # applicable
 package_version_suffix() { :; }
+
+render_template() {
+    if test "$1" = -s; then
+	shift; echo "$@" | render_template
+    elif test "$1" = -f; then
+	shift; cat "$@" | render_template
+    else
+	sed \
+	    -e "s/@PACKAGE@/$PACKAGE/"
+    fi
+}

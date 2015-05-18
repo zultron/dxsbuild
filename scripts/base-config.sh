@@ -44,10 +44,12 @@ BASE_DIR=/srv
 SBUILD_CHROOT_DIR=$BASE_DIR/chroots
 
 # Top-level directory for builds
-build_base_dir() { echo $BASE_DIR/build/$PACKAGE; }
+BUILD_BASE_DIR_PATTERN="$BASE_DIR/build/@PACKAGE@"
+build_base_dir() { render_template -s $BUILD_BASE_DIR_PATTERN; }
 
 # Build directory for a distro codename
-build_dir() { echo $(build_base_dir); }
+BUILD_DIR_PATTERN="$BUILD_BASE_DIR_PATTERN"
+build_dir() { render_template -s $BUILD_DIR_PATTERN; }
 
 # Generated config directory
 CONFIG_DIR=$BASE_DIR/configs
