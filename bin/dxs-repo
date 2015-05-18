@@ -34,13 +34,15 @@ docker_setup
 usage() {
     test -z "$1" || msg "$1"
     msg "Usage:"
-    msg "  $0 [ option ... ] distro"
+    msg "  $0 [ option ... ] distro[,distro...]"
     msg "  modes:"
     msg "     -l:            List packages in repo"
     msg "  general options:"
     msg "     -u UID:        Use user ID UID for non-root operations"
     msg "     -d:            Print verbose debug output"
     msg "     -dd:           Print extra verbose debug output"
+    msg "  arguments (comma-separated):"
+    msg "     distro[,...]:  Perform for distro(s)"
     exit 1
 }
 
@@ -53,7 +55,7 @@ RUN_AS_USER=false
 while getopts lu:Ud ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
-	l) MODES+="$OPTARG " ;;
+	l) MODES+="REPO_LIST " ;;
 	# general options
 	u) DOCKER_UID=$OPTARG ;;
 	U) RUN_AS_USER=true ;;
@@ -69,11 +71,16 @@ ARG_LIST+=(-u $DOCKER_UID)
 # Save non-option args before mangling
 ARG_LIST+=("$@")
 
-DISTRO="$1"; shift || :
+DISTROS="$1"; shift || :
 
-test -n "$DISTRO" || usage "No distro specified"
+test -n "$DISTROS" || usage "No distros specified"
+modes || usage "No mode(s) specified"
 
 # Debug
 ! $DDEBUG || set -x
 
-deb_repo_list
+case "$MODES" in
+    *\ REPO_LIST\ *)  # -l:  list contents of repos
+	foreach_distro '' deb_repo_list
+	;;
+esac

@@ -92,7 +92,7 @@ foreach_distro() {
     msg="$1"; shift
     for DISTRO in $DISTROS; do
 	HOST_ARCH=$(arch_default $DISTRO) # Use default arch
-	announce "$DISTRO:  $msg"
+	test -z "$msg" || announce "$DISTRO:  $msg"
 	"$@"
     done
 }
@@ -102,7 +102,7 @@ foreach_distro_arch() {
     for DISTRO in $DISTROS; do
 	for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
 	    if distro_has_arch $DISTRO $HOST_ARCH; then
-		announce "$DISTRO:$HOST_ARCH:  $msg"
+		test -z "$msg" || announce "$DISTRO:$HOST_ARCH:  $msg"
 		"$@"
 	    fi
 	done
@@ -113,7 +113,7 @@ foreach_arch() {
     msg="$1"; shift
     for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
 	if distro_has_arch $DISTRO $HOST_ARCH; then
-	    announce "$DISTRO:$HOST_ARCH:  $msg"
+	    test -z "$msg" || announce "$DISTRO:$HOST_ARCH:  $msg"
 	    "$@"
 	fi
     done
