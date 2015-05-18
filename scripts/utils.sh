@@ -148,6 +148,7 @@ render_template() {
 	shift; cat "$@" | render_template
     else
 	sed \
-	    -e "s/@PACKAGE@/$PACKAGE/"
+	    -e "s/@PACKAGE@/$PACKAGE/" \
+	    -e "s/@DISTRO@/$DISTRO/"
     fi
 }

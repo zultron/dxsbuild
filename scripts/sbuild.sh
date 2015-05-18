@@ -74,7 +74,7 @@ sbuild_install_sbuild_conf() {
 	-e "s/@EMAIL@/$EMAIL/" \
 	-e "s/@PACKAGE_NEW_VERSION_SUFFIX@/$(package_version_suffix)/" \
 	-e "s,@CCACHE_DISABLE@,$CCACHE_DISABLE," \
-	-e "s,@CCACHE_DIR@,$CCACHE_DIR," \
+	-e "s,@CCACHE_DIR@,$(ccache_dir)," \
 	-e "s,@CCACHE_LOGFILE@,$CCACHE_LOGFILE," \
 	-e "s/@CCACHE_MAXSIZE@/$CCACHE_MAXSIZE/" \
 	-e "s,@LOG_DIR@,$LOG_DIR," \

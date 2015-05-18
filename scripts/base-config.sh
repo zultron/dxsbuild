@@ -55,7 +55,8 @@ build_dir() { render_template -s $BUILD_DIR_PATTERN; }
 CONFIG_DIR=$BASE_DIR/configs
 
 # ccache directory
-CCACHE_DIR=$CONFIG_DIR/ccache
+CCACHE_DIR_PATTERN="$BUILD_BASE_DIR_PATTERN/ccache/@DISTRO@"
+ccache_dir() { render_template -s $CCACHE_DIR_PATTERN; }
 CCACHE_DISABLE=""
 #CCACHE_LOGFILE=
 CCACHE_MAXSIZE="1G"

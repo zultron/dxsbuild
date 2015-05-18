@@ -44,17 +44,17 @@ binary_package_init() {
 }
 
 ccache_setup() {
-    if ! test -d $CCACHE_DIR; then
-	debug "    Creating ccache directory $CCACHE_DIR"
-	run_user mkdir -p $CCACHE_DIR
+    if ! test -d $(ccache_dir); then
+	debug "    Creating ccache directory $(ccache_dir)"
+	run_user mkdir -p $(ccache_dir)
     fi
     debug "    Zeroing ccache stats"
-    run_user env CCACHE_DIR=$CCACHE_DIR ccache -z
+    run_user env CCACHE_DIR=$(ccache_dir) ccache -z
 }
 
 ccache_stats() {
     msg "    ccache stats:"
-    run_user env CCACHE_DIR=$CCACHE_DIR \
+    run_user env CCACHE_DIR=$(ccache_dir) \
 	ccache -s
 }
 
