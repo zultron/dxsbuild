@@ -29,7 +29,7 @@ distcc_init() {
     CXX="${HOST_MULTIARCH}-g++"
     CC_FOR_BUILD="${BUILD_MULTIARCH}-gcc"
     CCACHE_PREFIX="distcc"
-    DISTCC_DIR="$CONFIG_DIR/distcc"
+    DISTCC_DIR="$GENERATED_DIR/distcc"
 }
 
 distcc_start() {

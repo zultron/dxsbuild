@@ -4,8 +4,8 @@
 /packages/
 # package build directory
 /build/
-# generated configs
-/configs/
+# generated files
+/generated/
 # docker context dir (empty)
 /docker/
 # apt package repository

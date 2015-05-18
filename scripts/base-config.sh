@@ -51,8 +51,8 @@ build_base_dir() { render_template -s $BUILD_BASE_DIR_PATTERN; }
 BUILD_DIR_PATTERN="$BUILD_BASE_DIR_PATTERN"
 build_dir() { render_template -s $BUILD_DIR_PATTERN; }
 
-# Generated config directory
-CONFIG_DIR=$BASE_DIR/configs
+# Directory for general build-time generated artifacts
+GENERATED_DIR=$BASE_DIR/generated
 
 # ccache directory
 CCACHE_DIR_PATTERN="$BUILD_BASE_DIR_PATTERN/ccache/@DISTRO@"
@@ -84,7 +84,7 @@ LOG_DIR=$REPO_BASE_DIR/log
 GPG_KEY_SERVER=hkp://keys.gnupg.net
 
 # Key directory
-GNUPGHOME=$CONFIG_DIR/gpg
+GNUPGHOME=$GENERATED_DIR/gpg
 
 ####################################
 
