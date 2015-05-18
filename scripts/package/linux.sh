@@ -2,7 +2,7 @@ PKG="linux"
 VERSION="3.8.13"
 BASEURL="http://www.kernel.org/pub/linux/kernel/v3.0"
 
-# Disable 'xenomai' or 'rtai' build
+# Disable 'xenomai.x86', 'xenomai.beaglebone' or 'rtai.x86' builds
 LINUX_DISABLED_FEATURESETS=""
 
 # Package sources
@@ -16,7 +16,11 @@ PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"  # Build-Depends: gcc-4.9
 # Source package configuration
 PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python python-six"
 # Install Xenomai and RTAI source packages, if applicable
-declare -A linux_confdeps=([xenomai]=xenomai-kernel-source [rtai]=rtai-source )
+declare -A linux_confdeps=(
+    [xenomai.x86]=xenomai-kernel-source
+    [xenomai.beaglebone]=xenomai-kernel-source
+    [rtai.x86]=rtai-source
+)
 for i in ${LINUX_DISABLED_FEATURESETS}; do linux_confdeps[$i]=; done
 PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]+=" ${linux_confdeps[*]}"
 PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_linux"
@@ -31,9 +35,12 @@ configure_linux() {
     run sed -ie "/^compiler:/ s/gcc-.*/gcc-${GCC_VER}/" \
 	debian/config/defines
 
+    # Disable featuresets
     for featureset in $LINUX_DISABLED_FEATURESETS; do
 	debug "    Disabling featureset $featureset"
-	run sed -i 's/^\( *'$featureset'$\)/#\1/' debian/config/defines
+	run sed -i debian/config/defines \
+	    -e "/\[featureset-${featureset}_base\]/,/^\[/ \
+		    s/enabled: true/enabled: false/"
     done
 
     debug "    Running configure script"
