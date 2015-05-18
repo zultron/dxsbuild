@@ -66,7 +66,7 @@ sbuild_chroot_init() {
 sbuild_install_sbuild_conf() {
     debug "    Installing sbuild.conf into /etc/sbuild/sbuild.conf"
     distcc_init  # Set up distcc environment
-    run cp $SCRIPTS_DIR/sbuild.conf /etc/sbuild
+    run cp $SHARE_DIR/sbuild.conf /etc/sbuild
     run sed -i /etc/sbuild/sbuild.conf \
 	-e "s/@CODENAME@/${DISTRO_CODENAME[$DISTRO]}/" \
 	-e "s/@DISTRO@/$DISTRO/" \
@@ -93,7 +93,7 @@ sbuild_install_sbuild_conf() {
     run_debug grep -v -e '^$' -e '^ *#' /etc/sbuild/sbuild.conf
 
     debug "    Installing fstab into /etc/schroot/sbuild/fstab"
-    run cp $SCRIPTS_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
+    run cp $SHARE_DIR/sbuild-fstab /etc/schroot/sbuild/fstab
 }
 
 sbuild_init_logs() {
@@ -149,14 +149,14 @@ sbuild_install_config() {
 
     if $SBUILD_USE_AUFS; then
 	debug "    Installing aufs on tmpfs config"
-	run install -m 755 $SCRIPTS_DIR/schroot-04tmpfs \
+	run install -m 755 $SHARE_DIR/schroot-04tmpfs \
 	    /etc/schroot/setup.d/04tmpfs
 	SCHROOT_UNION_TYPE="aufs"
     else
 	SCHROOT_UNION_TYPE="none"
     fi
 
-    run bash -c "sed $SCRIPTS_DIR/schroot.conf \\
+    run bash -c "sed $SHARE_DIR/schroot.conf \\
 	-e 's/@DISTRO@/$DISTRO/g' \\
 	-e 's/@BUILD_ARCH@/$BUILD_ARCH/g' \\
 	-e 's/@SCHROOT_PERSONALITY@/$SCHROOT_PERSONALITY/g' \\

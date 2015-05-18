@@ -74,6 +74,9 @@ DISTRO_CONFIG_DIR=$SCRIPTS_DIR/distro
 REPO_CONFIG_DIR=$SCRIPTS_DIR/repo
 PACKAGE_CONFIG_DIR=$SCRIPTS_DIR/package
 
+# `share` directory
+SHARE_DIR=$BASE_DIR/share
+
 # Build log directory:  store with Apt repository
 LOG_DIR=$REPO_BASE_DIR/log
 

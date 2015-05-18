@@ -33,7 +33,7 @@ deb_repo_setup() {
 
 	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
 	run_user mkdir -p $(deb_repo_dir)/conf-${DISTRO}
-	run_user bash -c "'sed < $SCRIPTS_DIR/ppa-distributions.tmpl \\
+	run_user bash -c "'sed < $SHARE_DIR/ppa-distributions.tmpl \\
 	    > $(deb_repo_dir)/conf-${DISTRO}/distributions \\
 	    -e \"s/@DISTRO@/${DISTRO}/g\" \\
 	    -e \"s/@DISTRO_CODENAME@/${DISTRO_CODENAME[$DISTRO]}/g\" \\

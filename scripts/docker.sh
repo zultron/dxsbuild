@@ -49,7 +49,8 @@ docker_setup() {
 
 docker_build() {
     msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
-    run bash -c "docker build $DOCKER_NO_CACHE -t $DOCKER_IMAGE - < Dockerfile"
+    run bash -c "docker build $DOCKER_NO_CACHE -t $DOCKER_IMAGE - \
+	< $SHARE_DIR/Dockerfile"
 }
 
 docker_run() {
