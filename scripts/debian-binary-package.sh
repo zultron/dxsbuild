@@ -47,9 +47,9 @@ ccache_setup() {
     if ! test -d $CCACHE_DIR; then
 	debug "    Creating ccache directory $CCACHE_DIR"
 	run_user mkdir -p $CCACHE_DIR
-	debug "    Zeroing ccache stats"
-	run_user env CCACHE_DIR=$CCACHE_DIR ccache -z
     fi
+    debug "    Zeroing ccache stats"
+    run_user env CCACHE_DIR=$CCACHE_DIR ccache -z
 }
 
 ccache_stats() {
