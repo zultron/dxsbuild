@@ -35,6 +35,12 @@ sbuild_chroot_init() {
 	SCHROOT_PERSONALITY=undefined
     fi
 
+    if $RUN_AS_USER; then
+	SCHROOT_USER_ARG="-u $(docker_user)"
+    else
+	SCHROOT_USER_ARG=""
+    fi
+
     if modes BUILD_PACKAGE && ${PACKAGE_QEMU_NOCHECK[$PACKAGE]} \
 	&& arch_is_emulated $HOST_ARCH
     then
@@ -284,22 +290,10 @@ sbuild_shell() {
     sbuild_chroot_init
     sbuild_install_sbuild_conf
     sbuild_install_config
-    if test -n "${OTHER_ARGS[*]}"; then
-	# Execute command in schroot
-	if $RUN_AS_USER; then
-	    run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
-		"${OTHER_ARGS[@]}"
-	else
-	    run schroot $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
-		"${OTHER_ARGS[@]}"
-	fi
-    else
-	if $RUN_AS_USER; then
-	    run schroot -u $(docker_user) $SCHROOT_DEBUG -c $SBUILD_CHROOT -- \
-		bash -i
-	else
-	    run sbuild-shell $SBUILD_CHROOT
-	fi
-    fi
+
+    # Execute command in schroot
+    run schroot $SCHROOT_USER_ARG $SCHROOT_DEBUG -c $SBUILD_CHROOT \
+	-d /srv -- \
+	"${OTHER_ARGS[@]}"
 }
 
