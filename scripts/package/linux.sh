@@ -26,8 +26,10 @@ PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]+=" ${linux_confdeps[*]}"
 PACKAGE_CONFIGURE_CHROOT_FUNC[$PKG]="configure_linux"
 
 configure_linux() {
-    local GCC_VER=4.9
+    # Set gcc compiler version
+    local GCC_VER=4.8
     case $DISTRO in
+	jessie) GCC_VER=4.8 ;;
 	trusty) GCC_VER=4.8 ;;
 	wheezy) GCC_VER=4.7 ;;
     esac
