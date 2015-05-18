@@ -42,6 +42,10 @@ sbuild_chroot_init() {
 	DEB_BUILD_OPTIONS+=" nocheck"
     fi
 
+    if $TURBO_MODE; then
+	SBUILD_EXTRA_OPTIONS+=" --purge-deps=never --no-apt-update"
+    fi
+
     # sbuild verbosity
     if $DEBUG; then
 	SBUILD_VERBOSE=--verbose
@@ -214,8 +218,8 @@ run_configure_package_chroot_func() {
     else
 	debug "      Installing source package configure deps in schroot:"
 	debug "        ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"
-	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
-	    apt-get update
+	$TURBO_MODE || \
+	    run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- apt-get update
 	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \
 	    apt-get install --no-install-recommends -y \
 	    ${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}
@@ -227,7 +231,8 @@ run_configure_package_chroot_func() {
 
     if test -z "${PACKAGE_CONFIGURE_CHROOT_DEPS[$PACKAGE]}"; then
 	debug "      (No source pkg configure deps to remove)"
-
+    elif $TURBO_MODE; then
+	debug "      (Turbo mode:  not removing source pkg configure deps)"
     else
 	debug "      Removing source package configure deps"
 	run schroot -c $SBUILD_CHROOT $SBUILD_DEBUG -- \

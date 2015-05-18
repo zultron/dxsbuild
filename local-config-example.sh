@@ -30,6 +30,10 @@
 # Run parallel jobs during build (sets `-j n`)
 #PARALLEL_JOBS=4
 
+# Run in 'turbo mode': Don't run `apt-get update` before build or
+# `apt-get purge` after build
+#TURBO_MODE=true
+
 # Use aufs on tmpfs in sbuild
 #SBUILD_USE_AUFS="true"
 

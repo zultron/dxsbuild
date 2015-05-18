@@ -49,6 +49,7 @@ usage() {
     msg "     -f:            Force indep package build when build != host"
     msg "     -o \"opt ...\":  Set extra sbuild options"
     msg "  general options:"
+    msg "     -T:            Turbo mode:  don't apt update/clean chroot"
     msg "     -u UID:        Use user ID UID for non-root operations"
     msg "     -d:            Print verbose debug output"
     msg "     -dd:           Print extra verbose debug output"
@@ -77,6 +78,7 @@ MODES=" "
 DOCKER_UID=${DOCKER_UID:-0}
 FORCE_INDEP=${FORCE_INDEP:-false}
 SOURCE_CLEAN=${SOURCE_CLEAN:-true}
+TURBO_MODE=${TURBO_MODE:-false}
 while getopts sbrCNj:O:a:fo:u:d ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
@@ -93,6 +95,7 @@ while getopts sbrCNj:O:a:fo:u:d ARG; do
 	f) FORCE_INDEP=true ;;
 	o) SBUILD_EXTRA_OPTIONS+=" $OPTARG" ;;
 	# general options
+	T) TURBO_MODE=true ;;
 	u) DOCKER_UID=$OPTARG ;;
 	d) $DEBUG && DDEBUG=true || DEBUG=true ;;
         *) usage
