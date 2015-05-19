@@ -10,6 +10,8 @@ RUN	sed -i /etc/apt/sources.list \
 # - don't install recommended packages
 RUN	echo "APT::Install-Recommends \"0\";\nAPT::Install-Suggests \"0\";" \
 	    > /etc/apt/apt.conf.d/10local
+# - silence apt warnings about ttys, etc.
+ENV	DEBIAN_FRONTEND noninteractive
 # - update package index
 RUN	apt-get update
 # - install utilities
