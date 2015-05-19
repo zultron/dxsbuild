@@ -73,6 +73,12 @@ RUN	apt-get update
 RUN	sed -i /usr/sbin/sbuild-createchroot -e '/set_conf..FOREIGN/ s/0/1/'
 
 ############################
+# Proxy setup
+# (templated in `docker.sh`)
+#ENV	http_proxy http://myproxy:3128
+#ENV	https_proxy http://myproxy:3128
+
+############################
 # Debug output
 ENV	DOCKER_DEBUG true
 

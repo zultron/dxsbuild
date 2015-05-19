@@ -49,8 +49,15 @@ docker_setup() {
 
 docker_build() {
     msg "Building Docker container image '$DOCKER_IMAGE' from 'Dockerfile'"
-    run bash -c "docker build $DOCKER_NO_CACHE -t $DOCKER_IMAGE - \
-	< $SHARE_DIR/Dockerfile"
+    local DOCKER_HTTP_PROXY DOCKER_HTTPS_PROXY
+    if test -n "$HTTP_PROXY"; then
+	DOCKER_HTTP_PROXY="ENV http_proxy $HTTP_PROXY"
+	DOCKER_HTTPS_PROXY="ENV https_proxy $HTTP_PROXY"
+    fi
+    sed $OUTSIDE_SHARE_DIR/Dockerfile \
+	-e "/^#ENV\s*http_proxy/ c $DOCKER_HTTP_PROXY" \
+	-e "/^#ENV\s*https_proxy/ c $DOCKER_HTTPS_PROXY" | \
+	run docker build $DOCKER_NO_CACHE -t $DOCKER_IMAGE -
 }
 
 docker_run() {
