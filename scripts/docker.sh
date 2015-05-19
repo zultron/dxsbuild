@@ -51,12 +51,16 @@ docker_build() {
 docker_run() {
     DOCKER_BIND_MOUNTS="-v `pwd`:/srv"
     DOCKER_BIND_MOUNTS+=" -v $OUTSIDE_SBUILD_CHROOT_DIR:$SBUILD_CHROOT_DIR"
+    if $BUILDBOT_MASTER_ENABLE; then
+	DOCKER_PORTS+=" -p 8010:8010"
+    fi
     if $DOCKER_ALWAYS_ALLOCATE_TTY || test -z "$*"; then
 	msg "Starting interactive shell in Docker container '$DOCKER_IMAGE'"
 	DOCKER_TTY=-t
     fi
     run docker run --privileged -i -e IN_DOCKER=true $DOCKER_TTY --rm=true \
 	$DOCKER_BIND_MOUNTS \
+	$DOCKER_PORTS \
 	$DOCKER_IMAGE "${OTHER_ARGS[@]}"
 }
 

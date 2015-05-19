@@ -10,5 +10,7 @@
 /docker/
 # apt package repository
 /repo/
+# buildbot directory
+/buildbot/
 # local config
 /local-config.sh

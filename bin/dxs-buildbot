@@ -1,0 +1,63 @@
+#!/bin/bash -e
+
+SCRIPTS_DIR="$(readlink -f $(dirname $0)/../scripts)"
+$IN_DOCKER || error "This script must be run in a Docker container"
+
+. $SCRIPTS_DIR/utils.sh
+
+# Init variables
+. $SCRIPTS_DIR/base-config.sh
+
+# Source scripts
+ddebug "Sourcing include scripts"
+for script in buildbot; do
+    ddebug "    Sourcing ${script}.sh"
+    . $SCRIPTS_DIR/${script}.sh
+done
+
+# Source optional config override file
+if test -f $BASE_DIR/local-config.sh; then
+    debug "    Sourcing local config"
+    . $BASE_DIR/local-config.sh
+fi
+
+usage() {
+    test -z "$1" || msg "$1"
+    msg "Usage:"
+    msg "  $0 [-i]"
+    msg "  modes:"
+    msg "     -i:            Initialize buildbot config (non-destructive)"
+    msg "  options to '-i':"
+    msg "  general options:"
+    msg "     -u UID:        Use user ID UID for non-root operations"
+    msg "     -d:            Print verbose debug output"
+    msg "     -dd:           Print extra verbose debug output"
+    msg "  arguments (comma-separated):"
+    exit 1
+}
+
+# Process command line opts
+MODES=" "
+DOCKER_UID=${DOCKER_UID:-0}
+while getopts iu:d ARG; do
+    case $ARG in
+	i) MODES+="BUILDBOT_INIT " ;;
+	# general options
+	u) DOCKER_UID=$OPTARG ;;
+	d) $DEBUG && DDEBUG=true || DEBUG=true ;;
+        *) usage
+    esac
+done
+shift $((OPTIND-1))
+
+modes || usage "No mode(s) specified"
+
+# Debug
+! $DDEBUG || set -x
+
+case "$MODES" in
+    *\ BUILDBOT_INIT\ *)  # -i:  init buildbot config
+	buildbot_setup
+	;;
+
+esac

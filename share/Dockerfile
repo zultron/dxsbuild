@@ -51,6 +51,9 @@ RUN	sed -i  /etc/default/distcc \
 	    -e '$ a #' \
 	    -e '$ a DAEMON_ARGS="--pid-file=/var/run/$NAME.pid \\\
 	          --log-file=/srv/repo/log/$NAME.log --daemon"'
+# - Buildbot
+run	apt-get install -y python-pip python-dev supervisor sudo ssh
+
 # - Debian signing keys
 #     Fixes "W: Cannot check Release signature; keyring file not available
 #                /usr/share/keyrings/debian-archive-keyring.gpg"
@@ -76,9 +79,11 @@ RUN	sed -i /usr/sbin/sbuild-createchroot -e '/set_conf..FOREIGN/ s/0/1/'
 
 ############################
 # Non-root user
-# - create user 'user' with sbuild privs
+# - create user 'user' with sbuild and passwordless sudo privs
 RUN	useradd -m -d /home/user user
 RUN	adduser user sbuild
+RUN	adduser user sudo
+RUN	sed -i /etc/sudoers -e '/^%sudo/ s/ ALL$/ NOPASSWD:ALL/'
 
 ############################
 # Proxy setup
@@ -96,11 +101,37 @@ RUN	! $DOCKER_DEBUG || { echo "Debootstrap apt keys:"; \
 	        list; }
 
 ############################
+# Buildbot install
+#
+# Cribbed from
+# https://github.com/buildbot/buildbot/blob/master/master/contrib/Dockerfile
+#
+# - install Buildbot software
+RUN	pip install buildbot buildbot_slave
+
+# - set supervisord buildbot
+RUN	echo "\
+            \n[program:buildmaster]\
+            \ncommand=twistd --nodaemon --no_save -y buildbot.tac\n\
+            \ndirectory=/srv/buildbot/master\n\
+            \nuser=user\n\
+            \n[program:buildworker]\n\
+            \ncommand=twistd --nodaemon --no_save -y buildbot.tac\n\
+            \ndirectory=/srv/buildbot/slave\n\
+            \nuser=user\n" \
+                > /etc/supervisor/conf.d/buildbot.conf
+
+# Make host port 8010 match container port 8010
+EXPOSE :8010
+
+############################
 # Tell scripts we're inside Docker
 ENV	IN_DOCKER true
 # Fix path to include this directory
-ENV	PATH /srv/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV	PATH /srv/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin
 
 # Start in the dbuild directory
 WORKDIR	/srv
 
+# Run supervisord
+CMD ["/usr/bin/supervisord", "-n"]

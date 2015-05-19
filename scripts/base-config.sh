@@ -108,3 +108,12 @@ DISTCC_LOG_LEVEL="warning"
 # apt repository, or to merge the `dists` and `pool` directories
 DISTRO_SEPARATE_REPO_DIR="false"
 
+####################################
+# Buildbot
+
+BUILDBOT_MASTER_ENABLE="true"
+BUILDBOT_SLAVE_ENABLE="true"
+BUILDBOT_BASE_DIR="$BASE_DIR/buildbot"
+BUILDBOT_MASTER_DIR="$BUILDBOT_BASE_DIR/master"
+BUILDBOT_SLAVE_DIR="$BUILDBOT_BASE_DIR/slave"
+BUILDBOT_LOG_DIR="$BUILDBOT_MASTER_DIR"
