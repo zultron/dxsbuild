@@ -73,6 +73,12 @@ RUN	apt-get update
 RUN	sed -i /usr/sbin/sbuild-createchroot -e '/set_conf..FOREIGN/ s/0/1/'
 
 ############################
+# Non-root user
+# - create user 'user' with sbuild privs
+RUN	useradd -m -d /home/user user
+RUN	adduser user sbuild
+
+############################
 # Proxy setup
 # (templated in `docker.sh`)
 #ENV	http_proxy http://myproxy:3128

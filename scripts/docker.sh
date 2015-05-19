@@ -17,25 +17,13 @@ docker_set_user() {
 	return 0
     fi
 
-    if id -u user >/dev/null 2>&1; then
-	# /etc/passwd already configured; do nothing
-	return 0
+    if test "$(id -u user >/dev/null 2>&1)" = $DOCKER_UID; then
+	debug "      (`user` uid already correct)"
+    else
+	debug "    Setting docker user to $DOCKER_UID"
+	run usermod -u $DOCKER_UID user
+	debug "      'user' passwd entry:  $(getent passwd user)"
     fi
-
-    # Get `sbuild` group ID
-    SBUILD_GID=$(id -g sbuild)
-    test -n "$SBUILD_GID" || \
-	error "Unable to look up group 'sbuild'"
-
-    debug "    Setting docker user to $DOCKER_UID:$SBUILD_GID"
-
-    DOCKER_PASSWD_ENTRY="user:*:$DOCKER_UID:$SBUILD_GID:User:/srv:/bin/bash"
-    debug "      User ID:  $DOCKER_UID"
-    echo "$DOCKER_PASSWD_ENTRY" >> /etc/passwd
-    debug "    Adding user $DOCKER_UID to 'sbuild' group"
-    sed -i /etc/group -e "/^sbuild:/ s/\$/user/"
-    debug "      'user' passwd entry:  $(getent passwd user)"
-    debug "      'sbuild' group entry:  $(getent group sbuild)"
 }
 
 docker_setup() {
