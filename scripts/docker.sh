@@ -17,8 +17,8 @@ docker_set_user() {
 	return 0
     fi
 
-    if test "$(id -u user >/dev/null 2>&1)" = $DOCKER_UID; then
-	debug "      (`user` uid already correct)"
+    if test "$(id -u user 2>/dev/null)" = $DOCKER_UID; then
+	debug '      (`user` uid already correct)'
     else
 	debug "    Setting docker user to $DOCKER_UID"
 	run usermod -u $DOCKER_UID user
