@@ -3,6 +3,7 @@ sbuild_log_glob() {
 }
 
 sbuild_chroot_init() {
+    HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
     # By default, only build arch-indep packages on build arch
     if test $HOST_ARCH = $(arch_default $DISTRO) || $FORCE_INDEP; then
 	BUILD_INDEP="--arch-all"

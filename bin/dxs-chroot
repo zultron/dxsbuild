@@ -78,6 +78,7 @@ ARG_LIST+=(-u $DOCKER_UID)
 ARG_LIST+=("$@")
 
 DISTRO="$1"; shift || true
+template_add_sub DISTRO
 
 declare -a OTHER_ARGS=("$@")
 
@@ -91,7 +92,9 @@ test -n "$DISTRO" || usage "No distro(s) specified"
 
 # Set default arch if needed
 HOST_ARCH=${HOST_ARCH:-$(arch_default $DISTRO)}
+template_add_sub HOST_ARCH
 BUILD_ARCH=$HOST_ARCH
+template_add_sub BUILD_ARCH
 
 case "$MODES" in
     *" BUILD_SBUILD_CHROOT "*)
@@ -99,14 +102,6 @@ case "$MODES" in
 	;;
 
     *" SBUILD_SHELL "*)
-	ARCH_FOUND=false
-	for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
-	    if distro_has_arch $DISTRO $HOST_ARCH; then
-		ARCH_FOUND=true
-		sbuild_shell
-		break
-	    fi
-	done
-	$ARCH_FOUND || usage "Valid arches:  $ARCHES"
+	sbuild_shell
 	;;
 esac

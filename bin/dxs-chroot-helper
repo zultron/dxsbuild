@@ -47,8 +47,11 @@ done
 shift $((OPTIND-1))
 
 DISTRO="${1:?No distro specified}"
+template_add_sub DISTRO
 PACKAGE="${2:?No package specified}"
+template_add_sub PACKAGE
 HOST_ARCH=$(arch_default $DISTRO)
+template_add_sub HOST_ARCH
 
 # Debug
 ! $DDEBUG || set -x

@@ -142,7 +142,6 @@ declare -A TEMPLATE_SUBSTITUTIONS
 template_add_sub() {
     local KEY="$1"
     local VAL="${2:-$(eval echo \$$KEY)}"
-    echo "adding template sub '$KEY'='$VAL'"
     TEMPLATE_SUBSTITUTIONS[$KEY]="$VAL"
 }
 
@@ -157,7 +156,10 @@ render_template() {
 	for var in "${!TEMPLATE_SUBSTITUTIONS[@]}"; do
 	    SED_ARGS+=(-e "s,@${var}@,${TEMPLATE_SUBSTITUTIONS[${var}]},")
 	done
-	sed \
-	    "${SED_ARGS[@]}"
+	if test -z "${SED_ARGS[*]}"; then
+	    cat
+	else
+	    sed "${SED_ARGS[@]}"
+	fi
     fi
 }
