@@ -88,37 +88,24 @@ uncomma() {
     echo ${*//,/ }
 }
 
-foreach_distro() {
-    msg="$1"; shift
-    for DISTRO in $DISTROS; do
-	template_add_sub DISTRO
-	HOST_ARCH=$(arch_default $DISTRO) # Use default arch
-	template_add_sub HOST_ARCH
-	test -z "$msg" || announce "$DISTRO:  $msg"
+foreach_package() {
+    for PACKAGE in $PACKAGES; do
+	template_add_sub PACKAGE
 	"$@"
     done
 }
 
-foreach_distro_arch() {
-    msg="$1"; shift
+foreach_distro() {
     for DISTRO in $DISTROS; do
 	template_add_sub DISTRO
-	for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
-	    template_add_sub HOST_ARCH
-	    if distro_has_arch $DISTRO $HOST_ARCH; then
-		test -z "$msg" || announce "$DISTRO:$HOST_ARCH:  $msg"
-		"$@"
-	    fi
-	done
+	"$@"
     done
 }
 
 foreach_arch() {
-    msg="$1"; shift
     for HOST_ARCH in ${HOST_ARCHES:-$ARCHES}; do
-	template_add_sub HOST_ARCH
 	if distro_has_arch $DISTRO $HOST_ARCH; then
-	    test -z "$msg" || announce "$DISTRO:$HOST_ARCH:  $msg"
+	    template_add_sub HOST_ARCH
 	    "$@"
 	fi
     done

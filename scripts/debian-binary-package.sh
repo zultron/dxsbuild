@@ -59,7 +59,7 @@ ccache_stats() {
 }
 
 binary_package_build() {
-    msg "Building binary package '$PACKAGE'"
+    announce "$DISTRO:$HOST_ARCH:$PACKAGE  Building binary packages"
     binary_package_init
     ccache_setup
     sbuild_build_package

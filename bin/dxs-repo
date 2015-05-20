@@ -81,6 +81,6 @@ modes || usage "No mode(s) specified"
 
 case "$MODES" in
     *\ REPO_LIST\ *)  # -l:  list contents of repos
-	foreach_distro '' deb_repo_list
+	foreach_distro deb_repo_list
 	;;
 esac

@@ -169,7 +169,7 @@ sbuild_install_config() {
 
 sbuild_chroot_setup() {
     local BUILD_ARCH=$(arch_build $DISTRO $HOST_ARCH)
-    msg "Creating sbuild chroot, distro $DISTRO, arch $BUILD_ARCH"
+    announce "$DISTRO:$ARCH  Creating sbuild chroot"
     sbuild_chroot_init
     sbuild_install_config
     sbuild_install_sbuild_conf

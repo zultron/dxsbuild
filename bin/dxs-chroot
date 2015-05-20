@@ -95,7 +95,7 @@ BUILD_ARCH=$HOST_ARCH
 
 case "$MODES" in
     *" BUILD_SBUILD_CHROOT "*)
-	foreach_arch "Creating chroot" sbuild_chroot_setup
+	foreach_arch sbuild_chroot_setup
 	;;
 
     *" SBUILD_SHELL "*)

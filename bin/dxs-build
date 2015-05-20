@@ -128,27 +128,15 @@ case "$MODES" in
 	;;
 
     *\ BUILD_SOURCE_PACKAGE\ *) # -s:  Build source package
-	for PACKAGE in $PACKAGES; do
-	    foreach_distro \
-		"Building source package '$PACKAGE'" \
-		source_package_build
-	done
+	foreach_package foreach_distro source_package_build
 	;;&
 
     *\ BUILD_PACKAGE\ *) # -b:  Build package in sbuild chroot
 	# Build binary packages
-	for PACKAGE in $PACKAGES; do
-	    foreach_distro_arch \
-		"Building binary package '$PACKAGE'" \
-		binary_package_build
-	done
+	foreach_package foreach_distro foreach_arch binary_package_build
 	;;&
 
     *\ BUILD_APT_REPO\ *) # -r:  Build apt package repository
-	for PACKAGE in $PACKAGES; do
-	    foreach_distro \
-		"Reprepro adding package '$PACKAGE'" \
-		deb_repo_build
-	done
+	foreach_package foreach_distro deb_repo_build
 	;;&
 esac

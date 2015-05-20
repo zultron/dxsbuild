@@ -52,7 +52,7 @@ deb_repo_setup() {
 }
 
 deb_repo_build() {
-    msg "Updating Debian Apt package repository"
+    announce "$DISTRO:$PACKAGE  Updating Debian Apt package repository"
     deb_repo_init	# repo config
     deb_repo_setup	# set up repo, if needed
     distro_check_package $DISTRO $PACKAGE
