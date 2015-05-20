@@ -128,7 +128,7 @@ EXPOSE :8010
 # Tell scripts we're inside Docker
 ENV	IN_DOCKER true
 # Fix path to include this directory
-ENV	PATH /srv/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin
+ENV	PATH /srv/bin:/usr/lib/ccache:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin
 
 # Start in the dbuild directory
 WORKDIR	/srv
