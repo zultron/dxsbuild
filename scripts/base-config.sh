@@ -34,6 +34,7 @@ OUTSIDE_BASE_DIR="${OUTSIDE_BASE_DIR:-$(readlink -f $(dirname $0)/..)}"
 OUTSIDE_SCRIPTS_DIR="${OUTSIDE_SCRIPTS_DIR:-$OUTSIDE_BASE_DIR/scripts}"
 OUTSIDE_SHARE_DIR="${OUTSIDE_SHARE_DIR:-$OUTSIDE_BASE_DIR/share}"
 OUTSIDE_SBUILD_CHROOT_DIR="${OUTSIDE_SCRIPTS_DIR:-$OUTSIDE_BASE_DIR/chroots}"
+OUTSIDE_REPO_BASE_DIR="${OUTSIDE_REPO_BASE_DIR:-$OUTSIDE_BASE_DIR/repo}"
 
 ####################################
 # Docker container directory configuration

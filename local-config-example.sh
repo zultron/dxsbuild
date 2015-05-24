@@ -27,6 +27,11 @@
 # Add repo to distro
 #DISTRO_REPOS[jessie]+=" dovetail-automata"
 
+# Build chroots somewhere besides `chroots` directory
+#OUTSIDE_SBUILD_CHROOT_DIR="/mnt/bigdisk/chroots"
+# Build apt package repository somewhere besides `repo` directory
+#OUTSIDE_REPO_BASE_DIR="/home/packages/debian"
+
 # Run parallel jobs during build (sets `-j n`)
 #PARALLEL_JOBS=4
 
