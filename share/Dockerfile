@@ -51,6 +51,8 @@ RUN	sed -i  /etc/default/distcc \
 	    -e '$ a #' \
 	    -e '$ a DAEMON_ARGS="--pid-file=/var/run/$NAME.pid \\\
 	          --log-file=/srv/repo/log/$NAME.log --daemon"'
+# - compression utilities
+RUN	apt-get install -y pxz pbzip2 pigz
 # - Buildbot
 run	apt-get install -y python-pip python-dev supervisor sudo ssh
 

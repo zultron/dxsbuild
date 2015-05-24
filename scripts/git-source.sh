@@ -58,9 +58,9 @@ git_tree_source_tarball() {
     local GIT_COMMIT=$4
     local COMP_CMD
     case $TARBALL in
-	*.gz) COMP_CMD="gzip" ;;
-	*.bz2) COMP_CMD="bzip2" ;;
-	*.xz) COMP_CMD="xz" ;;
+	*.gz) COMP_CMD="pigz ${PARALLEL_JOBS:+-p$PARALLEL_JOBS}" ;;
+	*.bz2) COMP_CMD="pbzip2 ${PARALLEL_JOBS:+-p$PARALLEL_JOBS}" ;;
+	*.xz) COMP_CMD="pxz ${PARALLEL_JOBS:+-T$PARALLEL_JOBS}" ;;
 	*) error "Unknown compression $COMP" ;;
     esac
 
