@@ -66,7 +66,7 @@ run_configure_package_func() {
 # Build source package from source tree
 
 source_package_build_from_tree() {
-    announce "$DISTRO:$PACKAGE  Building source package"
+    msg "Building source package"
     debug "      Debianized source tree: $(source_package_dir)"
     (
 	cd $(source_package_dir)
@@ -89,7 +89,7 @@ source_package_cleanup() {
 ########################################
 # Source package build
 source_package_build() {
-    msg "Building source package '$PACKAGE'"
+    announce "$DISTRO:$PACKAGE  Building source package '$PACKAGE'"
     # Initialize directories
     source_package_setup
 
