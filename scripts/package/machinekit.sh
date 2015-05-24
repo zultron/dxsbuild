@@ -3,6 +3,8 @@ PKG="machinekit"
 # Disable 'posix', 'rt-preempt', 'xenomai', 'xenomai-kernel' or
 # 'rtai-kernel' threads
 MACHINEKIT_DISABLED_THREADS=""
+# Xenomai kthreads removed from 3.0
+MACHINEKIT_DISABLED_THREADS+=" xenomai-kernel"
 
 # Package sources
 PACKAGE_SOURCE_URL[$PKG]="https://github.com/machinekit/machinekit.git"
