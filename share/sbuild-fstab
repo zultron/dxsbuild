@@ -12,3 +12,4 @@
 tmpfs           /dev/shm        tmpfs   defaults        0       0
 # The main script/build directory
 /srv		/srv		none	rw,bind		0	0
+/srv/repo	/srv/repo	none	rw,bind		0	0
