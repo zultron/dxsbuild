@@ -67,6 +67,19 @@ source_tarball_download() {
     fi
 }
 
+source_tarball_changelog() {
+    source_tarball_init
+
+    if is_git_source; then
+	echo "    - Src git:" \
+	    $(git_tree_info \
+	    $(source_git_dir) \
+	    ${PACKAGE_SOURCE_URL[$PACKAGE]})
+    else
+	echo "    - Src tarball: ${PACKAGE_SOURCE_URL[$PACKAGE]}"
+    fi
+}
+
 source_tarball_unpack() {
     if test -z "${PACKAGE_SOURCE_URL[$PACKAGE]}"; then
 	debug "      (No PACKAGE_SOURCE_URL defined; not unpacking)"

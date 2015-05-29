@@ -56,6 +56,15 @@ debianization_init() {
     debug "      Maintainer <email>:  $MAINTAINER <$EMAIL>"
 }
 
+debianization_changelog() {
+    debianization_init
+
+    echo "    - Deb git:" \
+	$(git_tree_info \
+	$(debzn_git_dir) \
+	${PACKAGE_DEBZN_GIT_URL[$PACKAGE]})
+}
+
 debianization_add_changelog() {
     # https://www.debian.org/doc/debian-policy/ch-source.html#s-dpkgchangelog
     msg "    Adding new changelog entry"
@@ -73,8 +82,12 @@ debianization_add_changelog() {
     debug "      Intermediate changelog file: $CHANGELOG"
     (
 	echo "$PACKAGE_CHANGELOG_HEAD"
+	echo
 	echo "  * Rebuilt in mk-debuild"
 	echo "    - See https://github.com/zultron/dxsbuild"
+	source_tarball_changelog
+	debianization_changelog
+	echo
 	echo "$PACKAGE_CHANGELOG_TRAILER"
 	echo
     ) > $CHANGELOG

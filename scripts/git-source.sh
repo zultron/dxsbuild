@@ -24,6 +24,13 @@ git_rev() {
 	rev-parse --short $GIT_BRANCH
 }
 
+git_tree_info() {
+    local GIT_DIR=$1
+    local GIT_URL=$2
+
+    echo $GIT_URL @ $(git --git-dir=$GIT_DIR rev-parse --short HEAD)
+}
+
 git_tree_update() {
     local GIT_DIR=$1
     local GIT_URL=$2
