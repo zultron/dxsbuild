@@ -1,5 +1,6 @@
 sbuild_log_glob() {
-    echo $(build_dir)/${PACKAGE}_*$(package_version_suffix)_${HOST_ARCH}.build
+    echo $(build_dir)/${PACKAGE_NAME[$PACKAGE]}_*$(
+	package_version_suffix)_${HOST_ARCH}.build
 }
 
 sbuild_chroot_init() {
@@ -11,9 +12,11 @@ sbuild_chroot_init() {
 	BUILD_INDEP="--no-arch-all"
     fi
 
-    SBUILD_CHROOT=$DISTRO-$(arch_build $DISTRO $HOST_ARCH)-sbuild
+    SBUILD_CHROOT=${DISTRO_NAME[$DISTRO]}-$(
+	arch_build $DISTRO $HOST_ARCH)-sbuild
     debug "      Sbuild chroot: $SBUILD_CHROOT"
-    CHROOT_DIR=$SBUILD_CHROOT_DIR/$DISTRO-$(arch_build $DISTRO $HOST_ARCH)
+    CHROOT_DIR=$SBUILD_CHROOT_DIR/${DISTRO_NAME[$DISTRO]}-$(
+	arch_build $DISTRO $HOST_ARCH)
     debug "      Sbuild chroot dir: $CHROOT_DIR"
 
     if modes BUILD_SBUILD_CHROOT && $BUILD_SCHROOT_SKIP_PACKAGES; then
@@ -158,7 +161,7 @@ sbuild_install_config() {
     fi
 
     run bash -c "sed $SHARE_DIR/schroot.conf \\
-	-e 's/@DISTRO@/$DISTRO/g' \\
+	-e 's/@DISTRO@/${DISTRO_NAME[$DISTRO]}/g' \\
 	-e 's/@BUILD_ARCH@/$BUILD_ARCH/g' \\
 	-e 's/@SCHROOT_PERSONALITY@/$SCHROOT_PERSONALITY/g' \\
 	-e 's/@SCHROOT_UNION_TYPE@/$SCHROOT_UNION_TYPE/g' \\
@@ -253,7 +256,7 @@ sbuild_build_package() {
     local HOST_ARCH=$(arch_host $DISTRO $HOST_ARCH)
     local DSC_FILE=$(source_package_dsc_glob)
 
-    test -f "$DSC_FILE" || error "No .dsc file '${PACKAGE}_*${DISTRO}*.dsc'"
+    test -f "$DSC_FILE" || error "No .dsc file found"
 
     debug "      Build arch:  $BUILD_ARCH;  Host arch: $HOST_ARCH"
     debug "      Build dir: $(build_dir)"

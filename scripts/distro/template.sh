@@ -2,6 +2,11 @@
 #
 DISTRO="template"
 
+# Use the same chroot as another distro; for e.g. `jessie-bleeding`
+# repos
+#
+#DISTRO_NAME[$DISTRO]="jessie"
+
 # List of packages to build for this distribution
 #
 # Package names come from the file names (less the `.sh` suffix) in

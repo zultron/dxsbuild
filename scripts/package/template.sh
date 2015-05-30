@@ -8,6 +8,7 @@ PKG="mypkg"  # Name of source package
 # These parameters describe the package sources. The only mandatory
 # ones are the tarball url and/or the debianization url.
 
+#PACKAGE_NAME[$PKG]="mypkg"			# when key != name
 PACKAGE_SOURCE_URL[$PKG]="http://www.example.com/mypkg-1.0.tar.gz"
 #PACKAGE_SOURCE_GIT_BRANCH[$PKG]="master"
 #PACKAGE_SOURCE_GIT_COMMIT[$PKG]="deadbeef"

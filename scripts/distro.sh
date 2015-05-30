@@ -1,6 +1,7 @@
 
 # Distros
 declare DISTROS
+declare -A DISTRO_NAME
 declare -A DISTRO_PACKAGES
 declare -A DISTRO_ARCHES
 declare -A DISTRO_REPOS
@@ -23,6 +24,7 @@ distro_read_config() {
     DISTROS+=" $DISTRO"
 
     # set up defaults
+    DISTRO_NAME[$DISTRO]="$DISTRO"
     DISTRO_PACKAGES[$DISTRO]=
     DISTRO_ARCHES[$DISTRO]="$ARCHES"
     DISTRO_REPOS[$DISTRO]=
@@ -236,6 +238,7 @@ distro_pin_packages() {
 distro_debug() {
     for d in $DISTROS; do
 	debug "distro $d:"
+	debug "	name ${DISTRO_NAME[$d]}"
 	debug "	codename ${DISTRO_CODENAME[$d]}"
 	debug "	arches ${DISTRO_ARCHES[$d]}"
 	debug "	repos ${DISTRO_REPOS[$d]}"

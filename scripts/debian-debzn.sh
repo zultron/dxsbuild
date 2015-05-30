@@ -6,8 +6,8 @@ debzn_git_rev() { git_rev $(debzn_git_dir); }
 
 debzn_tarball_glob() { \
     echo $(
-	readlink -e $(build_dir)/${PACKAGE}_*$(package_version_suffix
-	    ).debian.tar.*); }
+	readlink -e $(build_dir)/${PACKAGE_NAME[$PACKAGE]}_*$(
+	    package_version_suffix).debian.tar.*); }
 
 parse_changelog() {
     dpkg-parsechangelog --file $(source_package_dir)/debian/changelog \
@@ -71,7 +71,8 @@ debianization_add_changelog() {
     debianization_init
 
     # Calculate first line of changelog entry
-    PACKAGE_CHANGELOG_HEAD="$(echo "${PACKAGE}" "(${PACKAGE_NEW_VERSION})" \
+    PACKAGE_CHANGELOG_HEAD="$(echo "${PACKAGE_NAME[$PACKAGE]}" \
+	"(${PACKAGE_NEW_VERSION})" \
 	"${PACKAGE_DISTRIBUTION};" "urgency=${PACKAGE_URGENCY}")"
 
     # Calculate trailer line of changelog entry

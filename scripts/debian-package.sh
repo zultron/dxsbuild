@@ -6,6 +6,7 @@
 declare PACKAGES
 
 # Package sources
+declare -A PACKAGE_NAME
 declare -A PACKAGE_SOURCE_URL
 declare -A PACKAGE_SOURCE_GIT_BRANCH
 declare -A PACKAGE_SOURCE_GIT_COMMIT
@@ -41,6 +42,7 @@ package_read_config() {
     PACKAGES+=" $PACKAGE"
 
     # set up defaults
+    PACKAGE_NAME[$PACKAGE]=$PACKAGE
     PACKAGE_SOURCE_URL[$PACKAGE]=
     PACKAGE_SOURCE_GIT_BRANCH[$PACKAGE]=
     PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]=
@@ -95,6 +97,7 @@ package_read_all_configs() {
 package_debug() {
     for p in $PACKAGES; do
 	debug "package $p:"
+	debug "	package name: ${PACKAGE_NAME[$p]}"
 	debug "	source url: ${PACKAGE_SOURCE_URL[$p]}"
 	debug "	source git branch: ${PACKAGE_SOURCE_GIT_BRANCH[$p]}"
 	debug "	source git commit: ${PACKAGE_SOURCE_GIT_COMMIT[$p]}"

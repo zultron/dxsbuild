@@ -60,7 +60,7 @@ deb_repo_build() {
     # add source pkg
     msg "    Removing all packages for '$PACKAGE'"
     ${REPREPRO} \
-	removesrc ${DISTRO} ${PACKAGE}
+	removesrc ${DISTRO} ${PACKAGE_NAME[$PACKAGE]}
 
     local DSC_FILE=$(source_package_dsc_glob)
     debug "    Adding source package '$DSC_FILE'"

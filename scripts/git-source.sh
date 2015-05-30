@@ -65,7 +65,7 @@ git_tree_source_tarball() {
     esac
 
     run_user bash -c "'git --git-dir=$GIT_DIR archive \\
-	--prefix=$PACKAGE/ \\
+	--prefix=${PACKAGE_NAME[$PACKAGE]}/ \\
 	${GIT_COMMIT:-dxsbuild_branch} | \\
 	$COMP_CMD > $TARBALL'"
 }

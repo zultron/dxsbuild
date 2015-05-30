@@ -8,7 +8,8 @@
 . $SCRIPTS_DIR/debian-debzn.sh
 
 source_package_dsc_glob() {
-    echo $(readlink -e $(build_dir)/${PACKAGE}_*$(package_version_suffix).dsc)
+    echo $(readlink -e \
+	$(build_dir)/${PACKAGE_NAME[$PACKAGE]}_*$(package_version_suffix).dsc)
 }
 source_package_dir() { echo $(build_dir)/tree-$DISTRO; }
 
@@ -89,7 +90,8 @@ source_package_cleanup() {
 ########################################
 # Source package build
 source_package_build() {
-    announce "$DISTRO:$PACKAGE  Building source package '$PACKAGE'"
+    announce \
+	"$DISTRO:$PACKAGE  Building source package '${PACKAGE_NAME[$PACKAGE]}'"
     # Initialize directories
     source_package_setup
 

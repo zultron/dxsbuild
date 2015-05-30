@@ -10,7 +10,7 @@ binary_package_glob() {
 
 binary_package_changes_glob() {
     echo $(readlink -e $(build_dir
-	    )/${PACKAGE}_*$(package_version_suffix
+	    )/${PACKAGE_NAME[$PACKAGE]}_*$(package_version_suffix
 	    )_$(arch_build $DISTRO $HOST_ARCH).changes)
 }
 

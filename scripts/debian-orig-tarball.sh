@@ -8,9 +8,10 @@ source_git_rev() { echo "${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]:-$(
 
 source_tarball_init() {
     local VERSION=${PACKAGE_UPSTREAM_VERSION:-vers}
-    local BASENAME=${PACKAGE}_${PACKAGE_UPSTREAM_VERSION}
+    local BASENAME=${PACKAGE_NAME[$PACKAGE]}_${PACKAGE_UPSTREAM_VERSION}
+    local TARBALL_EXT=orig.tar.${PACKAGE_COMP[$PACKAGE]}
 
-    INTERMEDIATE_TARBALL=${PACKAGE}_vers.orig.tar.${PACKAGE_COMP[$PACKAGE]}
+    INTERMEDIATE_TARBALL=${PACKAGE_NAME[$PACKAGE]}_vers.${TARBALL_EXT}
 
     case "${PACKAGE_FORMAT[$PACKAGE]}" in
 	'3.0 (quilt)')
@@ -50,8 +51,9 @@ source_tarball_download() {
 	    ${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}
 	    
     else
+	local TARBALL_EXT=orig.tar.${PACKAGE_COMP[$PACKAGE]}
 	if test ! -f \
-	    $(source_pkg_dir)/${PACKAGE}_vers.orig.tar.${PACKAGE_COMP[$PACKAGE]}
+	    $(source_pkg_dir)/${PACKAGE_NAME[$PACKAGE]}_vers.${TARBALL_EXT}
 	then
 	    msg "    Downloading source tarball"
 	    debug "      Source: ${PACKAGE_SOURCE_URL[$PACKAGE]}"
