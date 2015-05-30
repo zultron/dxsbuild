@@ -12,16 +12,9 @@ is_git_source() {
 
 git_rev() {
     local GIT_DIR=$1
-    local GIT_BRANCH=$2
-    local GIT_COMMIT=$3
-
-    if test -n "$GIT_COMMIT"; then
-	echo $GIT_COMMIT
-	return
-    fi
 
     run_user git --git-dir=$GIT_DIR \
-	rev-parse --short $GIT_BRANCH
+	rev-parse --short dxsbuild_branch
 }
 
 git_tree_info() {

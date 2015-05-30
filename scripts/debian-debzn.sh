@@ -2,8 +2,7 @@
 # Debianization git tree operations
 
 debzn_git_dir() { echo $(build_base_dir)/debzn-git; }
-debzn_git_rev() { $(git_rev "$(debzn_git_dir)" \
-    "${2:-${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}}"); }
+debzn_git_rev() { git_rev $(debzn_git_dir); }
 
 debzn_tarball_glob() { \
     echo $(

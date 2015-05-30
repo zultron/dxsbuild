@@ -3,10 +3,8 @@
 
 source_pkg_dir() { echo $(build_base_dir); }
 source_git_dir() { echo $(build_base_dir)/source-git; }
-source_git_rev() { git_rev "$(source_git_dir)" \
-    "${PACKAGE_DEBZN_GIT_BRANCH[$PACKAGE]:-master}" \
-    "${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]}"; }
-
+source_git_rev() { echo "${PACKAGE_SOURCE_GIT_COMMIT[$PACKAGE]:-$(
+	git_rev $(source_git_dir))}"; }
 
 source_tarball_init() {
     local VERSION=${PACKAGE_UPSTREAM_VERSION:-vers}
