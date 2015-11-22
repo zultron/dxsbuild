@@ -41,6 +41,9 @@ docker_build() {
     if test -n "$HTTP_PROXY"; then
 	DOCKER_HTTP_PROXY="ENV http_proxy $HTTP_PROXY"
 	DOCKER_HTTPS_PROXY="ENV https_proxy $HTTP_PROXY"
+    else
+	DOCKER_HTTP_PROXY="#ENV http_proxy $HTTP_PROXY"
+	DOCKER_HTTPS_PROXY="#ENV https_proxy $HTTP_PROXY"
     fi
     sed $OUTSIDE_SHARE_DIR/Dockerfile \
 	-e "/^#ENV\s*http_proxy/ c $DOCKER_HTTP_PROXY" \
