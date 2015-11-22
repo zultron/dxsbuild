@@ -123,6 +123,7 @@ sbuild_install_keys() {
 
     if ! test -f $GNUPGHOME/sbuild-key.sec; then
 	debug "    Generating new sbuild keys"
+	test -d ~/.gnupg || install -d -m 700 ~/.gnupg
 	run sbuild-update --keygen
 
 	debug "    Saving signing keys from sbuild into $GNUPGHOME"
