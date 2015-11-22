@@ -62,7 +62,7 @@ Except for `dxs-docker`, all commands must be run in Docker.
     # amd64 (default) chroot
     dxs-chroot -i jessie
     # armhf chroot
-    dxs-chroot -ra armhf jessie
+    dxs-chroot -ia armhf jessie
 
 ### Build a package
 
