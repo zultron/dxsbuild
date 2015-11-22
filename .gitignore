@@ -14,3 +14,5 @@
 /buildbot/
 # local config
 /local-config.sh
+# git trees
+/git/
