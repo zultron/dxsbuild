@@ -114,7 +114,7 @@ debug "      Distros: $DISTROS"
 PACKAGES="$(uncomma $2)"
 debug "      Packages: $PACKAGES"
 
-modes || usage "No mode(s) specified"
+modes || MODES=" BUILD_SOURCE_PACKAGE BUILD_PACKAGE BUILD_APT_REPO "
 arch_check $HOST_ARCHES || usage "Valid arches:  $ARCHES"
 test -n "$DISTROS" || usage "No distro(s) specified"
 test -n "$PACKAGES" || usage "No package(s) specified"
