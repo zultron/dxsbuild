@@ -3,7 +3,7 @@ DISTRO="jessie"
 # List of packages to build for this distribution
 #
 # RT kernel packages
-DISTRO_PACKAGES[$DISTRO]="xenomai rtai linux linux-tools linux-latest"
+DISTRO_PACKAGES[$DISTRO]="xenomai linux linux-tools linux-latest"
 # ZeroMQ packages
 DISTRO_PACKAGES[$DISTRO]+=" czmq"
 # Misc

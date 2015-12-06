@@ -3,7 +3,7 @@ VERSION="3.8.13"
 BASEURL="http://www.kernel.org/pub/linux/kernel/v3.0"
 
 # Disable 'xenomai.x86', 'xenomai.beaglebone' or 'rtai.x86' builds
-LINUX_DISABLED_FEATURESETS=""
+LINUX_DISABLED_FEATURESETS="rtai.x86"
 
 # Package sources
 PACKAGE_SOURCE_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
@@ -19,7 +19,7 @@ PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python python-six"
 declare -A linux_confdeps=(
     [xenomai.x86]=xenomai-kernel-source
     [xenomai.beaglebone]=xenomai-kernel-source
-    [rtai.x86]=rtai-source
+    # [rtai.x86]=rtai-source
 )
 for i in ${LINUX_DISABLED_FEATURESETS}; do linux_confdeps[$i]=; done
 PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]+=" ${linux_confdeps[*]}"
