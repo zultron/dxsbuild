@@ -42,5 +42,5 @@ distcc_start() {
     run bash -c "distccd --pid-file=$DISTCC_DIR/distccd.pid \\
 	--log-file=$DISTCC_DIR/distccd.log --daemon \\
 	--allow 127.0.0.1 --listen 127.0.0.1 --nice 10 \\
-	--log-level $DISTCC_LOG_LEVEL"
+	--log-level $DISTCC_LOG_LEVEL" || true
 }
