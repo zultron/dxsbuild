@@ -77,7 +77,7 @@ deb_repo_build() {
 	    # 	$$(if $$(filter-out $$(ARCH),$$(BUILD_INDEP_ARCH)),-A $$(ARCH)) \
 	    # 	remove ${DISTRO} $$(call REPREPRO_PKGS,$(1),$$(ARCH))
 
-    for CHANGES in $(build_dir)/*.changes; do
+    for CHANGES in $(build_dir)/*~1${DISTRO}*.changes; do
 	debug "    Adding changes file '$CHANGES'"
 	${REPREPRO} -C main \
 	    include ${DISTRO} \
