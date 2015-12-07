@@ -8,6 +8,8 @@ PACKAGE_FORMAT[$PKG]='3.0 (native)'
 # Build params
 #     Default 'apt' resolver chokes on linux-support-3.8-1
 PACKAGE_SBUILD_RESOLVER[$PKG]="aptitude"
+#     RCN supplies ARM kernels
+PACKAGE_EXCLUDE_ARCHES[$PKG]="armhf"
 
 # Source package configuration
 PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python debhelper linux-support-3.8-1"

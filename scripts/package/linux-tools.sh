@@ -10,6 +10,8 @@ PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/linux-tools-deb.git"
 #     'apt' resolver chokes on libperl-dev:armhf -> perl:armhf
 #     'aptitude' resolver installs a bunch of amd64-arch pkgs
 PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"
+#     RCN supplies ARM kernels
+PACKAGE_EXCLUDE_ARCHES[$PKG]="armhf"
 
 # Source package configuration
 PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python debhelper"

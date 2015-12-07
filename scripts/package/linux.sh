@@ -12,6 +12,8 @@ PACKAGE_DEBZN_GIT_BRANCH[$PKG]="${VERSION}"
 
 # Build params
 PACKAGE_NATIVE_BUILD_ONLY[$PKG]="true"  # Build-Depends: gcc-4.9
+#     RCN supplies ARM kernels
+PACKAGE_EXCLUDE_ARCHES[$PKG]="armhf"
 
 # Source package configuration
 PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python python-six"
