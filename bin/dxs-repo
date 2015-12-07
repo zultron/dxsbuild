@@ -77,10 +77,8 @@ ARG_LIST+=(-u $DOCKER_UID)
 # Save non-option args before mangling
 ARG_LIST+=("$@")
 
-DISTROS="$(uncomma $1)"; shift || :
-
-test -n "$DISTROS" || usage "No distros specified"
 modes || usage "No mode(s) specified"
+ddebug "MODES = ${MODES}"
 
 # Debug
 ! $DDEBUG || set -x
