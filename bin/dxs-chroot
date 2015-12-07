@@ -91,7 +91,7 @@ test -n "$DISTRO" || usage "No distro(s) specified"
 ! $DDEBUG || set -x
 
 # Set default arch if needed
-HOST_ARCH=${HOST_ARCH:-$(arch_default $DISTRO)}
+HOST_ARCH=$(arch_default)
 template_add_sub HOST_ARCH
 BUILD_ARCH=$HOST_ARCH
 template_add_sub BUILD_ARCH
