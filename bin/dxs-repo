@@ -36,13 +36,17 @@ usage() {
     msg "Usage:"
     msg "  $0 [ option ... ] distro[,distro...]"
     msg "  modes:"
+    msg "     -i:            Init repo"
     msg "     -l:            List packages in repo"
+    msg "     -r [args ...]: Run reprepro with args"
     msg "  general options:"
     msg "     -u UID:        Use user ID UID for non-root operations"
     msg "     -d:            Print verbose debug output"
     msg "     -dd:           Print extra verbose debug output"
     msg "  arguments (comma-separated):"
     msg "     distro[,...]:  Perform for distro(s)"
+    msg "  example reprepro run:"
+    msg "     $0 -r wheezy list wheezy"
     exit 1
 }
 
@@ -52,10 +56,12 @@ declare -a ARG_LIST  # For saving modified command line opts
 test -n "$DOCKER_UID" || DOCKER_UID=0
 MODES=" "
 RUN_AS_USER=false
-while getopts lu:Ud ARG; do
+while getopts ilru:Ud ARG; do
     ARG_LIST+=("-$ARG" ${OPTARG:+"$OPTARG"})
     case $ARG in
+	i) MODES+="REPO_INIT " ;;
 	l) MODES+="REPO_LIST " ;;
+	r) MODES+="REPREPRO_RUN "; break ;;
 	# general options
 	u) DOCKER_UID=$OPTARG ;;
 	U) RUN_AS_USER=true ;;
@@ -71,7 +77,7 @@ ARG_LIST+=(-u $DOCKER_UID)
 # Save non-option args before mangling
 ARG_LIST+=("$@")
 
-DISTROS="$1"; shift || :
+DISTROS="$(uncomma $1)"; shift || :
 
 test -n "$DISTROS" || usage "No distros specified"
 modes || usage "No mode(s) specified"
@@ -80,7 +86,14 @@ modes || usage "No mode(s) specified"
 ! $DDEBUG || set -x
 
 case "$MODES" in
+    *\ REPO_INIT\ *)  # -i:  init repo
+	run_user rm -f ${DISTRIBUTIONS}
+	foreach_distro deb_repo_setup
+	;;
     *\ REPO_LIST\ *)  # -l:  list contents of repos
 	foreach_distro deb_repo_list
+	;;
+    *\ REPREPRO_RUN\ *)  # -r:  run reprepro
+	foreach_distro deb_reprepro_run "$@"
 	;;
 esac

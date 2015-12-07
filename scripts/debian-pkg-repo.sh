@@ -22,19 +22,21 @@ deb_repo_init() {
     debug "      GPG package signing key fingerprint:  $SIGNING_KEY"
 
     REPREPRO="run_user reprepro -VV -b $(deb_repo_dir) \
-        --confdir +b/conf-${DISTRO} --dbdir +b/db-${DISTRO} \
+        --confdir +b/conf --dbdir +b/db \
 	--gnupghome $GNUPGHOME"
 }
 
 deb_repo_setup() {
     msg "Initializing Debian Apt package repository"
-    if test ! -s $(deb_repo_dir)/conf-${DISTRO}/distributions; then
+    local DISTRIBUTIONS=$(deb_repo_dir)/conf/distributions
+    if test ! -s ${DISTRIBUTIONS} || \
+	! grep -q "Codename: \+${DISTRO}$" ${DISTRIBUTIONS}; then
 	deb_repo_init
 
-	debug "    Rendering reprepro configuration from ppa-distributions.tmpl"
-	run_user mkdir -p $(deb_repo_dir)/conf-${DISTRO}
+	debug "    Rendering reprepro configuration for ${DISTRO} from template"
+	run_user mkdir -p $(deb_repo_dir)/conf
 	run_user bash -c "'sed < $SHARE_DIR/ppa-distributions.tmpl \\
-	    > $(deb_repo_dir)/conf-${DISTRO}/distributions \\
+	    >> ${DISTRIBUTIONS} \\
 	    -e \"s/@DISTRO@/${DISTRO}/g\" \\
 	    -e \"s/@DISTRO_CODENAME@/${DISTRO_CODENAME[$DISTRO]}/g\" \\
 	    -e \"s/@DISTRO_ARCHES@/${DISTRO_ARCHES[$DISTRO]}/g\" \\
@@ -90,4 +92,10 @@ deb_repo_list() {
 
     ${REPREPRO} \
 	list ${DISTRO}
+}
+
+deb_reprepro_run() {
+    deb_repo_init
+
+    ${REPREPRO} "$@"
 }
