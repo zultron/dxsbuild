@@ -3,7 +3,7 @@ VERSION="3.8.13"
 BASEURL="http://www.kernel.org/pub/linux/kernel/v3.0"
 
 # Disable 'xenomai.x86', 'xenomai.beaglebone' or 'rtai.x86' builds
-LINUX_DISABLED_FEATURESETS="rtai.x86"
+LINUX_DISABLED_FEATURESETS="xenomai.beaglebone rtai.x86"
 
 # Package sources
 PACKAGE_SOURCE_URL[$PKG]="$BASEURL/linux-${VERSION}.tar.xz"
@@ -20,7 +20,7 @@ PACKAGE_CONFIGURE_CHROOT_DEPS[$PKG]="python python-six"
 # Install Xenomai and RTAI source packages, if applicable
 declare -A linux_confdeps=(
     [xenomai.x86]=xenomai-kernel-source
-    [xenomai.beaglebone]=xenomai-kernel-source
+    # [xenomai.beaglebone]=xenomai-kernel-source
     # [rtai.x86]=rtai-source
 )
 for i in ${LINUX_DISABLED_FEATURESETS}; do linux_confdeps[$i]=; done
@@ -43,6 +43,7 @@ configure_linux() {
     for featureset in $LINUX_DISABLED_FEATURESETS; do
 	debug "    Disabling featureset $featureset"
 	run sed -i debian/config/defines \
+	    -e "/^ \+${featureset}$/ s/^/#/" \
 	    -e "/\[featureset-${featureset}_base\]/,/^\[/ \
 		    s/enabled: true/enabled: false/"
     done
