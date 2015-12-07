@@ -16,3 +16,5 @@
 /local-config.sh
 # git trees
 /git/
+# emacs cruft
+*~
