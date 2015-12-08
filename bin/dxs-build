@@ -59,19 +59,6 @@ usage() {
     exit 1
 }
 
-modes() {
-    test "$MODES" != " " || return 1  # MODES not set:  error
-    test -n "$*" || return 0  # no args && MODE != NONE:  success
-    # Otherwise, all args must match
-    for m in $*; do
-    	case "$MODES" in
-	    " $m ") : ;;
-	    *) return 1 ;;
-	esac
-    done
-    return 0
-}
-
 # Process command line opts
 declare -a ARG_LIST  # For saving modified command line opts
 MODES=" "
