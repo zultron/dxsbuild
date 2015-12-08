@@ -51,6 +51,7 @@ sbuild_chroot_init() {
 	debug "      Skipping tests under qemu"
 	DEB_BUILD_OPTIONS+=" nocheck"
     fi
+    DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS# }"
 
     if $TURBO_MODE; then
 	SBUILD_EXTRA_OPTIONS+=" --purge-deps=never --no-apt-update"
