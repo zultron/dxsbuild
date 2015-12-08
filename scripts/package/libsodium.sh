@@ -1,15 +1,10 @@
 PKG="libsodium"
-VERSION="1.0.0"
+VERSION="0.5.0"
 
 # Package sources
 #
-# 1.0.0 not available from upstream, but used in jessie; use jessie
-# source for smooth upgrade
-#
-#BASE_URL="http://download.libsodium.org/libsodium/releases"
-#PACKAGE_SOURCE_URL[$PKG]="$BASE_URL/libsodium-${VERSION}.tar.gz"
-BASE_URL="http://http.debian.net/debian/pool/main/libs/libsodium"
-PACKAGE_SOURCE_URL[$PKG]="$BASE_URL/libsodium_${VERSION}.orig.tar.gz"
+BASE_URL="http://download.libsodium.org/libsodium/releases/old"
+PACKAGE_SOURCE_URL[$PKG]="$BASE_URL/libsodium-${VERSION}.tar.gz"
 
 PACKAGE_DEBZN_GIT_URL[$PKG]="https://github.com/zultron/libsodium-deb.git"
 
